@@ -15,8 +15,14 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="My LogBook", page_icon="📚", layout="wide")
 
 #----PATH SETTINGS----
-current_dir = Path(_file_).parent if "_file_" in locals() else Path.cwd()
-falco_file = current_dir / "falco.sh"
+current_dir = Path(__file__).parent if "__file__" in locals() else Path.cwd()
+falco1_file = current_dir / "assets" / "falco1.sh"
+falco2_file = current_dir / "assets" / "falco2.sh"
+gzip_file = current_dir / "assets" / "gzip.sh"
+fastp_file = current_dir / "assets" / "fastp.sh"
+genomeestimate_file = current_dir / "assets" / "genome_estimate.py"
+longstitch_file = current_dir / "assets" / "run_longstitch.sh"
+braker3_file = current_dir / "assets" / "braker3_perl_module_installation.sh"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
 # ---- HEADER SECTION ----
@@ -67,17 +73,20 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("fasterq-dump SRR11266556 SRR11266555 SRR11266554 SRR9038729 SRR9038731 SRR9038733 SRR9038730 SRR9038732 SRR9038734 SRR9690969 SRR9690970 SRR9690971 SRR9690972 SRR9690973 SRR9690974",language='bash')
         st.write("✔️zip the two large .fastq files (paired-end sequencing data) for each sample into one .gz file by using the gzip bash script")
         # ----LOAD GZIP BASH SCRIPT----
-        gzip_file = "gzip.sh"  # Replace with your actual bash script filename
+        # Check if the file exists before reading
+        if gzip_file.exists():
+            with open(gzip_file, "rb") as script_file:
+                script_byte = script_file.read()
 
-        with open(gzip_file, "rb") as script_file:
-            script_byte = script_file.read()
-
-        st.download_button(
-            label="Download Gzip Bash Script",
-            data=script_byte,
-            file_name=gzip_file,  # Use the name of your bash script
-            mime="application/x-sh",  # MIME type for shell scripts
-        )
+            # Add download button
+            st.download_button(
+                label="Download Gzip Bash Script",
+                data=script_byte,
+                file_name=gzip_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{gzip_file.name} does not exist.")
 
         st.write("###")
 
@@ -86,17 +95,20 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("conda install -c bioconda falco", language='bash')
         st.write("✔️check the base quality of all the .fastq.gz files one by one by using the falco bash script")
         # ----LOAD FALCO BASH SCRIPT----
-        falco_file = "falco1.sh"  # Replace with your actual bash script filename
+        # Check if the file exists before reading
+        if falco1_file.exists():
+            with open(falco1_file, "rb") as script_file:
+                script_byte = script_file.read()
 
-        with open(falco_file, "rb") as script_file:
-            script_byte = script_file.read()
-
-        st.download_button(
-            label="Download Falco Bash Script",
-            data=script_byte,
-            file_name=falco_file,  # Use the name of your bash script
-            mime="application/x-sh",  # MIME type for shell scripts
-        )
+            # Add download button
+            st.download_button(
+                label="Download Falco Bash Script",
+                data=script_byte,
+                file_name=falco1_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{falco1_file.name} does not exist.")
 
         st.write("###")
 
@@ -106,34 +118,40 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write(
             "✔️remove low quality reads with Phred score < 30, remove short reads with length < 70bp, remove adapters & remove ambiguous bases (N) up to a maximum of 2 by using the fastp bash script")
         # ----LOAD FASTP BASH SCRIPT----
-        fastp_file = "fastp.sh"  # Replace with your actual bash script filename
+        # Check if the file exists before reading
+        if fastp_file.exists():
+            with open(fastp_file, "rb") as script_file:
+                script_byte = script_file.read()
 
-        with open(fastp_file, "rb") as script_file:
-            script_byte = script_file.read()
-
-        st.download_button(
-            label="Download Fastp Bash Script",
-            data=script_byte,
-            file_name=fastp_file,  # Use the name of your bash script
-            mime="application/x-sh",  # MIME type for shell scripts
-        )
+            # Add download button
+            st.download_button(
+                label="Download Fastp Bash Script",
+                data=script_byte,
+                file_name=fastp_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{fastp_file.name} does not exist.")
 
         st.write("###")
 
         st.write("**5. Check the base quality of the 30 trimmed .fastq.gz files once again using falco**")
         st.write("✔️check the base quality of the trimmed files using the bash script")
         # ----LOAD FALCO2 BASH SCRIPT----
-        falco2_file = "falco2.sh"  # Replace with your actual bash script filename
+        # Check if the file exists before reading
+        if falco2_file.exists():
+            with open(falco2_file, "rb") as script_file:
+                script_byte = script_file.read()
 
-        with open(falco2_file, "rb") as script_file:
-            script_byte = script_file.read()
-
-        st.download_button(
-            label="Download Falco Bash Script",
-            data=script_byte,
-            file_name=falco2_file,  # Use the name of your bash script
-            mime="application/x-sh",  # MIME type for shell scripts
-        )
+            # Add download button
+            st.download_button(
+                label="Download Falco Bash Script",
+                data=script_byte,
+                file_name=falco2_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{falco2_file.name} does not exist.")
 
         st.write("###")
 
@@ -178,17 +196,20 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("✔️ estimate haploid genome size of the insect")
         st.code("python3 genome_estimate.py", language="bash") # you can check the version of python using 'python3 --version'
         # ----LOAD  BASH SCRIPT----
-        genomeestimate_file = "genome_estimate.py"  # Replace with your actual bash script filename
+        # Check if the file exists before reading
+        if genomeestimate_file.exists():
+            with open(genomeestimate_file, "rb") as script_file:
+                script_byte = script_file.read()
 
-        with open(genomeestimate_file, "rb") as script_file:
-            script_byte = script_file.read()
-
-        st.download_button(
-            label="Download GenomeEstimate Python Script",
-            data=script_byte,
-            file_name=genomeestimate_file,  # Use the name of your bash script
-            mime="application/x-sh",  # MIME type for shell scripts
-        )
+            # Add download button
+            st.download_button(
+                label="Download Genome Estimate Script",
+                data=script_byte,
+                file_name=genomeestimate_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{falco2_file.name} does not exist.")
 
         st.write("###")
 
@@ -360,17 +381,21 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("✔️if there's need for you to terminate the bash script")
         st.code("pkill -f -9 run_longstitch.sh", language="bash")
         # ----LOAD  BASH SCRIPT----
-        longstitch_file = "run_longstitch.sh"  # Replace with your actual bash script filename
+        # Check if the file exists before reading
+        if longstitch_file.exists():
+            with open(longstitch_file, "rb") as script_file:
+                script_byte = script_file.read()
 
-        with open(longstitch_file, "rb") as script_file:
-            script_byte = script_file.read()
+            # Add download button
+            st.download_button(
+                label="Download Longstitch Script",
+                data=script_byte,
+                file_name=longstitch_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{longstitch_file.name} does not exist.")
 
-        st.download_button(
-            label="Download Longstitch Script",
-            data=script_byte,
-            file_name=longstitch_file,  # Use the name of your bash script
-            mime="application/x-sh",  # MIME type for shell scripts
-        )
         st.markdown("[Visit LongStitch GitHub Page](https://github.com/bcgsc/LongStitch/blob/master/README.md)")
         st.markdown("[Visit tigmint GitHub Page](https://github.com/bcgsc/tigmint/blob/master/README.md)")
         st.markdown("[Visit ntLink GitHub Page](https://github.com/bcgsc/ntLink/blob/master/README.md)")
@@ -453,17 +478,21 @@ conda install -c bioconda perl""", language="bash")
         st.code("docker run --user 1000:1000 --rm -it -v /media/Raid/Wee/WeeYeZhi/output/braker3:/data teambraker/braker3:latest bash", language="bash")
         st.write("✔️double check & make sure all the perl dependencies of braker3 are already installed inside the braker3 docker container (via bash script or via anaconda environment)")
         # ----LOAD  BASH SCRIPT----
-        braker3_perl_module_installation_file = "braker3_perl_module_installation.sh"  # Replace with your actual bash script filename
+        # Check if the file exists before reading
+        if braker3_file.exists():
+            with open(braker3_file, "rb") as script_file:
+                script_byte = script_file.read()
 
-        with open(braker3_perl_module_installation_file, "rb") as script_file:
-            script_byte = script_file.read()
+            # Add download button
+            st.download_button(
+                label="Download Braker3 Perl Module Installation Script",
+                data=script_byte,
+                file_name=braker3_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{braker3_file.name} does not exist.")
 
-        st.download_button(
-            label="Download Braker3 Perl Module Installation Script",
-            data=script_byte,
-            file_name=braker3_perl_module_installation_file,  # Use the name of your bash script
-            mime="application/x-sh",  # MIME type for shell scripts
-        )
         st.code("""
         conda install -c anaconda perl (already pre-instaled inside the braker3 docker container)
         conda install -c anaconda biopython (equivalent to conda/mamba packages: biopython)
