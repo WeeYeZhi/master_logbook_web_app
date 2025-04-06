@@ -541,11 +541,29 @@ conda install -c bioconda perl""", language="bash")
         st.write("✔️test your braker3 installation and validate whether you have correctly set up the braker3 docker container by testing test3.sh (before running braker3)")
         st.code("bash /opt/BRAKER/example/docker-tests/test3.sh", language="bash") # refer to braker3 github documentation
         st.write("✔️ensure all the mandatory softwares and tools have been installed inside the braker3 docker container")
-        mandatory_softwares = ["GeneMark-ETP (already present inside container)", "AUGUSTUS (already present inside container)", "Python3 (already installed by default on Ubuntu)", "Bamtools (already present inside container)", "NCBI BLAST+ or DIAMOND (already present inside container)", "StringTie2 (already present inside container)", "BEDTools (already present inside container)", "GffRead (already present inside container)"]
+        mandatory_softwares = ["GeneMark-ETP (already present inside container)",
+                               "AUGUSTUS (already present inside container)",
+                               "Python3 (already installed by default on Ubuntu)",
+                               "Bamtools (already present inside container)",
+                               "NCBI BLAST+ or DIAMOND (already present inside container)",
+                               "StringTie2 (already present inside container)",
+                               "BEDTools (already present inside container)",
+                               "GffRead (already present inside container)"]
         for mandatory_software in mandatory_softwares:
             st.write(f"- {mandatory_software}")
         st.write("✔️check whether you need to install all the following optional tools of BRAKER3")
-        optional_softwares = ["Samtools (install if you arent sure whether your files are formatted correctly)", "BioPython (already present inside container)", "cdbfasta (already present inside container)", "Spaln (deprecated already, no need to install separately & use it)", "GUSHR", "Tools from UCSC (already present inside container)", "MakeHub (already present inside containerz0", "SRA Toolkit (already present inside container)", "HISAT2 (already present inside container)", "compleasm (need to install manually inside docker container to get the best gene model with highest busco completeness score)", "pandas (install pandas python package manually)", "libc-bin (install libc-bin manually)"]
+        optional_softwares = ["Samtools (install if you arent sure whether your files are formatted correctly)",
+                              "BioPython (already present inside container)",
+                              "cdbfasta (already present inside container)",
+                              "Spaln (deprecated already, no need to install separately & use it)",
+                              "GUSHR",
+                              "Tools from UCSC (already present inside container)",
+                              "MakeHub (already present inside containerz0",
+                              "SRA Toolkit (already present inside container)",
+                              "HISAT2 (already present inside container)",
+                              "compleasm (need to install manually inside docker container to get the best gene model with highest busco completeness score)",
+                              "pandas (install pandas python package manually)",
+                              "libc-bin (install libc-bin manually)"]
         for optional_software in optional_softwares:
             st.write(f"- {optional_software}")
         st.write("✔️execute braker3 in the terminal")
@@ -557,7 +575,7 @@ conda install -c bioconda perl""", language="bash")
         st.write("**Additional note when running BRAKER3 pipeline**")
         st.write("❗Running UTR prediction with the UTR parameter on (--UTR=on) sometimes improves coding sequence prediction accuracy, but not always. If you try this feature, carefully compare results with and without UTR parameters. Please note that we generally assume that bam files were generated with HiSat2 because that is the aligner that would also be executed by BRAKER3 with fastq input. If you want for some reason to generate the bam files with STAR, use the option --outSAMstrandField intronMotif of STAR to produce files that are compatible wiht StringTie in BRAKER3.")
         st.write("❗Decide whether or not you need to specify the use of the flag, --ab_initio, to run & output both the Augustus's external evidence-based/hints-based prediction result & intrinsic/ab-initio (based on raw input sequence) prediction result & then compare whether using external evidences for instance using RNA-seq data & protein data improves the gene prediction accuracy. You can also save & avoid having computational overhead to not running ab_initio")
-        st.write("❗Decide whether or not you need to specify the use of the flag, --makehub --email=weeyz02@gmail.com,  a track data hub for visualizing results with the UCSC Genome Browser will be generated using MakeHub (https://github.com/Gaius-Augustus/MakeHub). But this is optional, you can still validate your BRAKER3 results using other methods to save time & computational resources")
+        st.write("❗Decide whether or not you need to specify the use of the flag, --makehub --email=weeyz02@gmail.com,  a track data hub for visualizing results with the UCSC Genome Browser will be generated using MakeHub (https://github.com/Gaius-Augustus/MakeHub). This visualization step is highly recommended if you wish to pubish your annotated genome in high-quality journals")
         st.write("❗Decide whether or not you need to specify the use of the flag, --skipAllTraining, to perform only AUGUSTUS predictions, using pre-trained, already existing parameters to save a lot of time & computational resources without the need to train the augustus models. This is used when you dont have any RNA-seq data & protein data as external evidences for your species of interest. This can be faster since it avoids the training step, but the predictions might not be as accurate or species-specific as those obtained after custom training.")
         st.write("❗Decide whether or not you need to specify the use of the flag, --busco_lineage, to select the best gene model with the highest BUSCO completeness scores & lowest BUSCO missing scores with the help & implementation of compleasm. If needed, remember to install compleasm within the BRAKER3 docker container manually")
         st.write("❗The config/ directory from AUGUSTUS can be accessed with the variable AUGUSTUS_CONFIG_PATH. BRAKER3 requires this directory to be in a writable location, so if that is not the case, copy this directory to a writable location, e.g.: cp -r /root/mambaforge/envs/braker3/config/ /absolute_path_to_user_writable_directory/ export AUGUSTUS_CONFIG_PATH=/absolute_path_to_user_writable_directory/config Due to license and distribution restrictions, GeneMark-ETP and ProtHint should be additionally installed for BRAKER3 to fully work. These packages can be either installed as part of the BRAKER3 environment, or the PATH variable should be configured to point to them. The GeneMark key should be located in /root/.gm_key and GENEMARK_PATH should include the path to the GeneMark executables gmes_petap.pl or gmetp.pl.")
@@ -569,6 +587,18 @@ conda install -c bioconda perl""", language="bash")
         st.code("braker3 --help", language="bash")
         st.code("braker.pl --help", language="bash")
         st.write("❗Refer to the common problems posted at BRAKER3 GitHub Page (https://github.com/Gaius-Augustus/BRAKER#common-problems) and try to get the solutions if you are encountering any errors while executing the BRAKER3 pipeline")
+        st.write("❗List of output files produced by BRAKER3 pipeline")
+        braker3_outputs = ["braker3.gtf (final set of gene predictions in gtf format that can be further used for downstream analysis, such as RNA-seq analysis, GO enrichment analysis, pathway analysis)",
+                            "braker.codingseq (final gene set with coding sequences in FASTA format)",
+                            "braker.aa (final gene set with protein sequences in FASTA format)",
+                            "braker.gff3 (final set of gene predictions in gff3 format (only produced if the flag --gff3 was specified in the BRAKER3 execution command line) (this annotated genome file produced by BRAKER3 can be further used for downstream analysis, such as visualization of genome annotation or further annotation of genome)",
+                            "AUGUSTUS.gtf (set of genes predicted by AUGUSTUS)",
+                            "GeneMark.gtf (set of genes predicted by GeneMark)",
+                            "hintsfile.gff (the extrinsic evidence data extracted from RNAseq.bam and/or protein data)",
+                            "braker_original (set of genes predicted by BRAKER (TSEBRA merge) before compleasm was used to improve BUSCO completeness)",
+                            "bbc (output folder of best_by_compleasm.py script from TSEBRA that is used to improve BUSCO completeness in the final output of BRAKER)"]
+        for braker3_output in braker3_outputs:
+            st.write(f"- {braker3_output}")
         st.write("---")
         st.markdown("[Visit BRAKER3 GitHub Page](https://github.com/Gaius-Augustus/BRAKER/blob/master/README.md)")
         st.markdown("[Visit BRAKER3 Container](https://hub.docker.com/r/teambraker/braker3)")
@@ -602,6 +632,12 @@ conda install -c bioconda perl""", language="bash")
         st.write("✔️set GeneMark-ETP path")
         st.code("", language="bash")
 
+        st.write("**22. Check the BUSCO completeness score for the protein sequences predicted by BRAKER3 in the form of braker.aa file**")
+        st.code("export NUMEXPR_MAX_THREADS=48", language="bash")
+        st.code("nohup busco -m protein -i /path/to/your/braker.aa -c 48 -l lepidoptera_odb12 -o CPB_raw_hybrid_assembly_busco > CPB_raw_hybrid_assembly_busco_output.log 2>&1 &", language="bash")
+
+        st.write("**23. Compute the QUAST metrics for the genome assembly with the additional braker.gff3 file produced by BRAKER3 to know how well the predicted genes are supported by your genome assembly")
+        st.code("nohup quast.py /path/to/your/assembled_CPB_genome.fa --report-all-metrics --large --eukaryote --threads 48 -o quast_output --gff /path/to/braker.gff3 > quast_output.log 2>&1 &", language="bash")
 # Phase 2: Structure-Based Analysis
 
 if selected == "Phase 2: Structure-Based Analysis":
