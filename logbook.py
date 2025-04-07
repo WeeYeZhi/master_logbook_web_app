@@ -713,8 +713,35 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.write("###")
 
         st.write("**2. Alternatively, align RNA-seq data with genome assembly using HISAT2**")
+        st.write("✔️Create & activate the 'hisat2' conda environment")
+        st.code("""
+        conda create -n hisat2
+        conda activate hisat2""", language="bash")
+        st.write("✔️navigate to the desired working directory and clone the HISAT2's remote repository")
+        st.code("git clone https://github.com/DaehwanKimLab/hisat2.git", language="bash")
+        st.write("✔️install and build hisat2 tools within the conda environment")
+        st.code("""
+        cd hisat2
+        make
+        """, language="bash")
+        st.write("✔️build and create the index for the genome assembly using HISAT2 build")
+        st.code("""
+        hisat2-build # used to build an index for the reference genome assembly so that it can be used later for aligning sequencing reads using HISAT2. This index allows HISAT2 to quickly and efficiently map sequencing reads to the reference genome during the alignment process.
+        genome.fa # specify the path to the genome assembly
+        genome # specify the prefix of the output indexed genome file
+        """, language="bash")
+        st.write("✔️After indexing the genome assembly, align one single paired-end read with the reference genome assembly using HISAT2")
+        st.code("""
+        hisat2 # execute HISAT2 aligner
+        -x genome # specify the prefix of the indexed genome file produced by the previous HISAT2-build pipeline
+        -1 reads_1.fq # specify the forward read of the paired-end read
+        -2 reads_2.fq # specify the reverse read of the paired-end read
+        -S output.sam # specify the output file format for the alignment to save the alignment results in the file, 'output.sam'
+        """, language="bash")
         st.markdown("[Visit HISAT2 GitHub Page](https://github.com/DaehwanKimLab/hisat2?tab=readme-ov-file)")
         st.markdown("[Visit HISAT2 User Manual Page](https://daehwankimlab.github.io/hisat2/manual/)")
+        st.markdown("[Read HISAT2 Publication](https://www.nature.com/articles/s41587-019-0201-4)")
+        st.markdown("[Read HISAT Publication](https://www.nature.com/articles/nmeth.3317)")
 
         st.write("###")
 
