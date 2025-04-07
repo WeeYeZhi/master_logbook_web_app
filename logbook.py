@@ -712,12 +712,27 @@ if selected == "Phase 2: Structure-Based Analysis":
 
         st.write("###")
 
-        st.write("Alternatively, align RNA-seq data with genome assembly using HISAT2")
+        st.write("**2. Alternatively, align RNA-seq data with genome assembly using HISAT2**")
         st.markdown("[Visit HISAT2 GitHub Page](https://github.com/DaehwanKimLab/hisat2?tab=readme-ov-file)")
         st.markdown("[Visit HISAT2 User Manual Page](https://daehwankimlab.github.io/hisat2/manual/)")
 
         st.write("###")
 
+        st.write("**3. After aligning RNA-seq data with the genome assembly, count the total number of mapped reads per gene using featureCounts**")
+        st.code("""
+        featureCounts # execute featureCounts, which is read-counting tool from the Subread package that counts how many aligned reads (from BAM files) fall within annotated genomic features (like genes or exons).
+        -T 40 # specify the number of threads (CPU cores)
+        -p # tell featureCounts that the input BAM files are from paired-end sequencing whereas it counts read pairs as one fragment instead of counting each read separately. (Only specify this if your RNA-seq data is considered paired-end read)
+        -t exon # tell featureCounts to look for 'feature_type = exon' entry in the GTF file, and count the reads overlapping those exon regions only
+        -g gene_name # tell featureCounts to group exons by their parent gene, using the gene_name attribute in the GTF file (all exons with the same gene_name will be grouped together)
+        -a Homo_sapiens.GRCh38.97.gtf # specify the input genome annotation file in the GTF format (produced by previous BRAKER3 pipeline)
+        -o countmatrix.txt S1.bam ... Sn.bam # specify the name of the output file as this output file will contain a table with read counts for each gene across all the RNA-seq samples
+        """, language="bash")
+        st.markdown("[Visit featureCounts User Manual Page](https://rnnh.github.io/bioinfo-notebook/docs/featureCounts.html)")
+        st.markdown("[Visit featureCounts Demonstration Video](https://asciinema.org/a/306584?autoplay=1)")
+        st.markdown("[Read featureCounts Publication](https://academic.oup.com/bioinformatics/article/30/7/923/232889?login=false)")
+
+        st.write("###")
         st.write("Align RNA-Seq data with both STAR2 and HISAT2 and get a list of intersected differentially expressed genes later.") # refer to https://ieeexplore.ieee.org/document/10178793 on how to get the list of intersected genes
         st.write("Count reads per gene with featureCounts to create the count matrix.")
         st.write("Normalize the gene counts (using tools like DESeq2, edgeR, or others).")
@@ -726,6 +741,7 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.write("Read HISAT2 github & user manual documentation")
         st.write("Compare between the 2 alignment bioinformatics softwares")
         st.write("Read featureCounts github & user manual documentation")
+        st.write("Merge the counts and normalize the counts before performing DEG analysis")
         st.write("Read and understand how to perform DEG analysis using R package")
         st.write("Read and understand how to perform pathway and functional enrichment analysis")
         st.write("Try to take a look at this to conduct DEG and pathway analysis")
@@ -792,7 +808,20 @@ if selected == "Additional Notes":
         st.write("6. Delete and clean all the files within the working directory")
         st.code("rm -rf /path/to/your/directory/*", language="bash")
 
+        st.write("###")
+
         st.write("7. Remember to stop running the Docker desktop if you dont use it to save up CPU resources. Double check whether the Docker desktop already stops running in the background. After checking the status, exit by running 'q'.")
         st.code("systemctl --user stop docker-desktop", language="bash")
         st.code("systemctl --user status docker-desktop", language="bash")
         st.code("q", language="bash")
+
+        st.write("###")
+
+        st.write("8. If you want to show/teach others how to code within Ubuntu/Linux terminal")
+        st.code("PS1='$ '", language="bash") # run this command to change how the Linux terminal looks like so that it saves & continues displaying both the previous command lines and results, allowing you to continue coding
+        st.code("#", language="bash") # specify this '#" to add a comment before executing any command line/code
+
+        st.write("###")
+
+        st.write("9. End the Ubuntu/Linux terminal session")
+        st.code("exit", language="bash")
