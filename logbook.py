@@ -23,6 +23,7 @@ fastp_file = current_dir / "assets" / "fastp.sh"
 genomeestimate_file = current_dir / "assets" / "genome_estimate.py"
 longstitch_file = current_dir / "assets" / "run_longstitch.sh"
 braker3_file = current_dir / "assets" / "braker3_perl_module_installation.sh"
+star_file = current_dir / "assets" / "RNAseq_alignment_with_STAR.sh"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
 # ---- HEADER SECTION ----
@@ -406,6 +407,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("**18. Evaluate the completeness of the genome assembly after scaffolding**")
         st.write("✔️create a virtual environment called 'busco' & install BUSCO within the environment")
         st.code("conda create -n busco busco -c bioconda -c conda-forge -c defaults", language="bash")
+        st.write("try to run wget or git clone to get the latest version of busco from official github page")
         st.write("✔️activate the BUSCO environment")
         st.code("conda activate busco", language="bash")
         st.write("✔️determine the lineage file suitable to be used for CPB genome by listing the lineage datasets available in BUSCO first, followed by referring to the NCBI BioProject of CPB (taxonomy) to check its taxonomy")
@@ -580,6 +582,8 @@ conda install -c bioconda perl""", language="bash")
         st.write("❗Decide whether or not you need to specify the use of the flag, --busco_lineage, to select the best gene model with the highest BUSCO completeness scores & lowest BUSCO missing scores with the help & implementation of compleasm. If needed, remember to install compleasm within the BRAKER3 docker container manually")
         st.write("❗The config/ directory from AUGUSTUS can be accessed with the variable AUGUSTUS_CONFIG_PATH. BRAKER3 requires this directory to be in a writable location, so if that is not the case, copy this directory to a writable location, e.g.: cp -r /root/mambaforge/envs/braker3/config/ /absolute_path_to_user_writable_directory/ export AUGUSTUS_CONFIG_PATH=/absolute_path_to_user_writable_directory/config Due to license and distribution restrictions, GeneMark-ETP and ProtHint should be additionally installed for BRAKER3 to fully work. These packages can be either installed as part of the BRAKER3 environment, or the PATH variable should be configured to point to them. The GeneMark key should be located in /root/.gm_key and GENEMARK_PATH should include the path to the GeneMark executables gmes_petap.pl or gmetp.pl.")
         st.write("❗If AUGUSTUS is properly installed and its paths are correctly set in your system's environment variables, you don't need to explicitly specify --AUGUSTUS_BIN_PATH and --AUGUSTUS_SCRIPTS_PATH in the BRAKER command. You can check if AUGUSTUS is properly configured by running:")
+        st.write("❗Decide whether or not you need to align RNA-seq data with the genome assembly to output the .bam file using STAR2 or HISAT2")
+        st.write("❗Remember to cite all the tools and dependencies of BRAKER3 that you used while executing the BRAKER3 pipeline, don't cite BRAKER3 itself only. Refer to the BRAKER3 GitHub documentation to know how to cite the use of BRAKER3 professionally")
         st.write("❗Check whether you have used NCBI BLAST or DIAMOND to remove redundant gene structures by checking the output braker.log file so that you know which tool you need to cite as BRAKER either uses NCBI BLAST or DIAMOND")
         st.code("which augustus", language="bash")
         st.code("echo $AUGUSTUS_CONFIG_PATH", language="bash")
@@ -638,6 +642,7 @@ conda install -c bioconda perl""", language="bash")
 
         st.write("**23. Compute the QUAST metrics for the genome assembly with the additional braker.gff3 file produced by BRAKER3 to know how well the predicted genes are supported by your genome assembly")
         st.code("nohup quast.py /path/to/your/assembled_CPB_genome.fa --report-all-metrics --large --eukaryote --threads 48 -o quast_output --gff /path/to/braker.gff3 > quast_output.log 2>&1 &", language="bash")
+
 # Phase 2: Structure-Based Analysis
 
 if selected == "Phase 2: Structure-Based Analysis":
@@ -645,10 +650,89 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.write("---")
         st.header("Structure-Based Analysis ⚛")
         st.write("###")
+        st.write("**1. Align RNA-seq data with the genome assembly using STAR2**")
+        st.write("✔️Create & activate the 'star' conda environment")
+        st.code("""
+        conda create -n star
+        conda activate star""", language="bash")
+        st.write("✔️navigate to the desired working directory and clone the star's remote repository")
+        st.code("git clone https://github.com/alexdobin/STAR.git", language="bash")
+        st.write("✔️install the necessary compilers (g++ compiler, which is a c++ compiler) and build tools (make) within the conda environment")
+        st.code("conda install -c conda-forge gxx_linux-64 make", language="bash") #
+        st.write("✔️build star from source after cloning the repository")
+        st.code("""
+        cd STAR/source
+        make STAR""", language="bash")
+        st.write("✔️double check whether you have installed STAR successfully by checking its version")
+        st.code("""
+        ls STAR/source/STAR
+        STAR --version
+        STAR --help""", language="bash")
+        st.write("✔️generate the index file of the genome assembly using STAR2")
+        st.code("""
+        STAR # execute STAR aligner
+        --runThreadN 40 # specify the number of threads used for genome indices generation run
+        --runMode genomeGenerate # direct STAR to run genome indices generation job
+        --sjdbGTFfile Homo_sapiens.GRCh38.97.gtf # specify the path to the file with annotated transcripts in the standard GTF format (produced by BRAKER3)
+        --genomeDir GRCh38 # specify the directory to store the output indexed genome file
+        --genomeFastaFiles GRCh38.dna.primary.fa # provide your genome of interest in the form of fasta (.fa) format
+        --sjdbOverhang 99 # specify the length of the genomic sequence on each side of the splice junction that will be used for constructing the splice junction database during the genome indexing step. In this case, 99 is specified if the maximum length of your RNA-seq data is 100. If the maximum length of your RNA-seq data is 150, please specify 149. This is highly recommended for you to specify. The default value is 100.
+        """, language="bash")
+        st.write("✔️align the clean RNA-seq data derived from the NCBI SRA database one by one with the indexed genome assembly")
+        st.code("""
+        STAR # execute STAR aligner
+        --runThreadN 40 # specify the number of threads
+        --genomeDir GRCh38 # specify the directory where the indexed genome file produced by the previous STAR indexing process is located
+        --sjdbGTFfile Homo_sapiens.GRCh38.97.gtf # provide the path to the GTF file for gene annotations (produced by BRAKER3)
+        --readFilesIn /path/to/sample_R1.fastq.gz /path/to/sample_R2.fastq.gz # input FastQ files for paired-end reads
+        --readFilesCommand zcat # specify this flag only if your input RNA-seq reads is compressed. For gzipped files, specify 'readFilesCommand zcat' or 'readFilesCommand gunzip -c'. Whereas, for bzip2-compressed files, specify 'readFilesCommand bunzip2 -c'. Bear in mind that you do not need to specify this flag if your input RNA-seq reads are not compressed.
+        --outSAMtype BAM SortedByCoordinate # set the output type to BAM and sort by coordinates
+        --outSAMunmapped Within # output unmapped reads within the BAM file
+        --outSAMattributes Standard # specify the use of standard attributes to include in the output BAM file
+        --quantMode GeneCounts # enable gene count mode for quantification. This is optional (no need to specify if you are going to use featureCounts to count the total number of mapped reads per gene)
+        --outFileNamePrefix AlignmentSample1 # define the prefix of the output file names to be "AlignmentSample1..."
+        --twopassMode Basic # set the two-pass mode to Basic for alignment (enable STAR to align your input RNA-seq data twice to improve alignment accuracy) (For the most sensitive & novel discovery of splice junctions, it is recommended to run STAR in the 2-pass mode.) 
+        """, language="bash")
+        st.write("✔️Alternatively, perform batch processing by aligning all the clean RNA-seq data derived from the NCBI SRA database at one single time with the indexed genome assembly")
+        # ----LOAD STAR BASH SCRIPT----
+        # Check if the file exists before reading
+        if star_file.exists():
+            with open(star_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download STAR Bash Script",
+                data=script_byte,
+                file_name=star_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        st.markdown("[Visit STAR GitHub Page](https://github.com/alexdobin/STAR?tab=readme-ov-file)")
+        st.markdown("[Visit STAR User Manual Page](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf)")
+
+        st.write("###")
+
+        st.write("Alternatively, align RNA-seq data with genome assembly using HISAT2")
+        st.markdown("[Visit HISAT2 GitHub Page](https://github.com/DaehwanKimLab/hisat2?tab=readme-ov-file)")
+        st.markdown("[Visit HISAT2 User Manual Page](https://daehwankimlab.github.io/hisat2/manual/)")
+
+        st.write("###")
+
+        st.write("Align RNA-Seq data with both STAR2 and HISAT2 and get a list of intersected differentially expressed genes later.") # refer to https://ieeexplore.ieee.org/document/10178793 on how to get the list of intersected genes
+        st.write("Count reads per gene with featureCounts to create the count matrix.")
+        st.write("Normalize the gene counts (using tools like DESeq2, edgeR, or others).")
+        st.write("Perform DEG analysis using statistical tools (e.g., DESeq2).")
+        st.write("Read STAR2 github & user manual documentation")
+        st.write("Read HISAT2 github & user manual documentation")
+        st.write("Compare between the 2 alignment bioinformatics softwares")
+        st.write("Read featureCounts github & user manual documentation")
+        st.write("Read and understand how to perform DEG analysis using R package")
+        st.write("Read and understand how to perform pathway and functional enrichment analysis")
         st.write("Try to take a look at this to conduct DEG and pathway analysis")
         st.markdown("[Integrated DEG and Pathway Analysis](https://bioinformatics.sdstate.edu/idep/)")
         st.markdown("[IDEP GitHub Page](https://github.com/gexijin/idepGolem)")
         st.markdown("[GGGenes R Page](http://Inkd.in/eH3njqt7)") # perform gene annotation as gggenes is an extension of ggplot2
+        st.markdown("[Read this publication to compare between STAR2 and HISAT2](https://ieeexplore.ieee.org/document/10178793)")
 
 
 # Phase 3: Molecular Docking & Dynamics Simulation
