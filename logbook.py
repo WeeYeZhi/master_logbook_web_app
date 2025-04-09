@@ -24,6 +24,7 @@ genomeestimate_file = current_dir / "assets" / "genome_estimate.py"
 longstitch_file = current_dir / "assets" / "run_longstitch.sh"
 braker3_file = current_dir / "assets" / "braker3_perl_module_installation.sh"
 star_file = current_dir / "assets" / "RNAseq_alignment_with_STAR.sh"
+deseq2rmd_file = current_dir / "assets" / "deseq2.Rmd"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
 # ---- HEADER SECTION ----
@@ -742,6 +743,7 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.markdown("[Visit HISAT2 User Manual Page](https://daehwankimlab.github.io/hisat2/manual/)")
         st.markdown("[Read HISAT2 Publication](https://www.nature.com/articles/s41587-019-0201-4)")
         st.markdown("[Read HISAT Publication](https://www.nature.com/articles/nmeth.3317)")
+        st.markdown("[Read this publication to compare between STAR2 and HISAT2](https://ieeexplore.ieee.org/document/10178793)")
 
         st.write("###")
 
@@ -749,9 +751,10 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.code("""
         featureCounts # execute featureCounts, which is read-counting tool from the Subread package that counts how many aligned reads (from BAM files) fall within annotated genomic features (like genes or exons).
         -T 40 # specify the number of threads (CPU cores)
-        -p # tell featureCounts that the input BAM files are from paired-end sequencing whereas it counts read pairs as one fragment instead of counting each read separately. (Only specify this if your RNA-seq data is considered paired-end read)
+        -p # tell featureCounts that the input BAM files are from paired-end sequencing whereas it counts read pairs as one fragment instead of counting each read separately. (Only specify this if your RNA-seq data is considered paired-end read) (If your read is considered single-end, no need to specify this flag)
         -t exon # tell featureCounts to look for 'feature_type = exon' entry in the GTF file, and count the reads overlapping those exon regions only
-        -g gene_name # tell featureCounts to group exons by their parent gene, using the gene_name attribute in the GTF file (all exons with the same gene_name will be grouped together)
+        -g gene_id # tell featureCounts to group exons by their gene id, using the gene_id attribute in the GTF file (all exons with the same gene_id will be grouped together)(check your gtf annotation file & decide whether or not you want to group exons by gene_name or gene_id)
+        -F GTF # tell featureCounts that the provided genome annotation file in .gtf format
         -a Homo_sapiens.GRCh38.97.gtf # specify the input genome annotation file in the GTF format (produced by previous BRAKER3 pipeline)
         -o countmatrix.txt S1.bam ... Sn.bam # specify the name of the output file as this output file will contain a table with read counts for each gene across all the RNA-seq samples
         """, language="bash")
@@ -760,22 +763,73 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.markdown("[Read featureCounts Publication](https://academic.oup.com/bioinformatics/article/30/7/923/232889?login=false)")
 
         st.write("###")
-        st.write("Align RNA-Seq data with both STAR2 and HISAT2 and get a list of intersected differentially expressed genes later.") # refer to https://ieeexplore.ieee.org/document/10178793 on how to get the list of intersected genes
-        st.write("Count reads per gene with featureCounts to create the count matrix.")
-        st.write("Normalize the gene counts (using tools like DESeq2, edgeR, or others).")
-        st.write("Perform DEG analysis using statistical tools (e.g., DESeq2).")
-        st.write("Read STAR2 github & user manual documentation")
-        st.write("Read HISAT2 github & user manual documentation")
-        st.write("Compare between the 2 alignment bioinformatics softwares")
-        st.write("Read featureCounts github & user manual documentation")
-        st.write("Merge the counts and normalize the counts before performing DEG analysis")
-        st.write("Read and understand how to perform DEG analysis using R package")
-        st.write("Read and understand how to perform pathway and functional enrichment analysis")
-        st.write("Try to take a look at this to conduct DEG and pathway analysis")
+
+        st.write("**4. Perform differential expression gene (DEG) analysis using R**")
+        st.write("✔️install BiocManager in RStudio") #BiocManager is the official R package that is used to install Bioconductor packages, manage Bioconductor versions, & handle dependencies correctly between CRAN & Bioconductor
+        st.code("""if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")""", language="r")
+        st.write("✔️install DESeq2, biomaRt, rtracklayer, and GenomicFeatures via BiocManager")
+        st.code("""
+        BiocManager::install("DESeq2") # perform DEG analysis
+        BiocManager::install("biomaRt") # perform gene annotation & ID conversion
+        BiocManager::install("rtracklayer") # work with genomic ranges and annotations (like GTF)
+        BiocManager::install("GenomicFeatures") # work with genomic ranges and annotations (like GTF)
+        """, language="r")
+        st.write("✔️install tidyverse and ggrepel via CRAN")
+        st.code("""
+        install.packages("tidyverse") # manipulate data
+        install.packages("ggrepel") # visualize data
+        """)
+        st.write("✔️load all the installed R libraries into RStudio")
+        st.code("""
+        library(DESeq2)
+        library(biomaRt)
+        library(rtracklayer)
+        library(GenomicFeatures)
+        library(tidyverse)
+        library(dplyr)
+        library(stringr)
+        library(ggplot2)
+        library(ggrepel)
+        """, language="bash")
+        st.write("✔️create a R markdown script in RStudio to run DEG analysis automatically")
+        # ----LOAD DESeq2 R SCRIPT----
+        # Check if the file exists before reading
+        if deseq2rmd_file.exists():
+            with open(deseq2rmd_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download DESeq2 R Script",
+                data=script_byte,
+                file_name=deseq2rmd_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{deseq2rmd_file.name} does not exist.")
+        st.markdown("[Visit DESeq2 Bioconductor Page](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)")
+        st.markdown("[Visit DESeq2 GitHub Page](https://github.com/thelovelab/DESeq2)")
+        st.markdown("[Visit DESeq2 Tutorial Manual 1](https://lashlock.github.io/compbio/R_presentation.html)")
+        st.markdown("[Visit DESeq2 Tutorial Manual 2](https://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#quick-start)")
+        st.markdown("[Read DESeq2 Publication](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8)")
+        st.markdown("[Visit biomaRt Bioconductor Page](https://bioconductor.org/packages/release/bioc/html/biomaRt.html)")
+        st.markdown("[Visit biomaRt GitHub Page](https://github.com/Huber-group-EMBL/biomaRt)")
+        st.markdown("[Visit biomaRtr GitHub Page](https://github.com/ropensci/biomartr)")
+        st.markdown("[Read biomaRt Publication](https://www.nature.com/articles/nprot.2009.97)")
+        st.markdown("[Visit rtracklayer Bioconductor Page](https://bioconductor.org/packages/release/bioc/html/rtracklayer.html)")
+        st.markdown("[Visit rtracklayer GitHub Page](https://github.com/lawremi/rtracklayer)")
+        st.markdown("[Read rtracklayer Publication](https://academic.oup.com/bioinformatics/article/25/14/1841/225816?login=false)")
+        st.markdown("[Visit GenomicFeatures Bioconductor Page](https://bioconductor.org/packages/release/bioc/html/GenomicFeatures.html)")
+        st.markdown("[Visit GenomicFeatures GitHub Page](https://github.com/Bioconductor/GenomicFeatures)")
+        st.markdown("[Read GenomicFeatures Publication](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003118)")
+        st.markdown("[Visit tidyverse Page](https://www.tidyverse.org/packages/)")
+        st.markdown("[Visit tidyverse GitHub Page](https://github.com/tidyverse)")
+        st.markdown("[Read tidyverse Publication](https://joss.theoj.org/papers/10.21105/joss.01686)")
+        st.markdown("[Visit ggrepel Tutorial Manual](https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html)")
+        st.markdown("[Visit ggrepel GitHub Page](https://github.com/slowkow/ggrepel)")
         st.markdown("[Integrated DEG and Pathway Analysis](https://bioinformatics.sdstate.edu/idep/)")
         st.markdown("[IDEP GitHub Page](https://github.com/gexijin/idepGolem)")
-        st.markdown("[GGGenes R Page](http://Inkd.in/eH3njqt7)") # perform gene annotation as gggenes is an extension of ggplot2
-        st.markdown("[Read this publication to compare between STAR2 and HISAT2](https://ieeexplore.ieee.org/document/10178793)")
 
 
 # Phase 3: Molecular Docking & Dynamics Simulation
@@ -852,3 +906,8 @@ if selected == "Additional Notes":
 
         st.write("9. End the Ubuntu/Linux terminal session")
         st.code("exit", language="bash")
+
+        st.write("###")
+
+        st.write("10. Clear the terminal")
+        st.code("clear", language="bash")
