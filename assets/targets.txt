@@ -1,0 +1,10 @@
+sampleID	developmental_stage
+SRR11266554	larva
+SRR9690970	larva
+SRR9690971	larva
+SRR9690972  larva
+SRR11266555	pupa
+SRR11266556	adult
+SRR9690969  adult
+SRR9690973  adult
+SRR9690974  adult

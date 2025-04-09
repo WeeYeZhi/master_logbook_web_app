@@ -1,0 +1,205 @@
+
+Load the Libraries
+```{r}
+library(DESeq2)
+library(biomaRt)
+library(rtracklayer)
+library(GenomicFeatures)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(ggrepel)
+```
+
+Define the conditions
+
+```{r}
+conditionOne <- "larva"
+conditionTwo <- "pupa"
+conditionThree <- "adult"
+```
+
+Read in sample descriptions
+
+```{r}
+targets <- read.table("targets.txt", header=TRUE, sep="\t")
+```
+
+Read in featureCounts for all samples
+```{r}
+rawData <- NULL
+
+for (sampleID in targets$sampleID) {
+    
+    fileContents <- read.table(paste("../input/", sampleID, ".markdup.featurecount", sep=""), sep="\t", header=T)
+    
+    rawData <- cbind(rawData, fileContents[,7])
+    
+}
+```
+
+Add column and row names to the rawData data.frame
+
+```{r}
+colnames(rawData) <- targets$sampleID
+rownames(rawData) <- fileContents$Geneid
+```
+
+Create a DESeq2 design matrix
+
+```{r}
+exptDesign = data.frame(
+
+row.names = colnames(rawData),
+condition = targets$developmental_stage
+
+)
+```
+
+Create a DESeq2 experimental object
+
+```{r}
+exptObject <- DESeqDataSetFromMatrix(
+
+countData = rawData,
+colData = exptDesign,
+design = ~ condition
+
+)
+```
+
+Perform DE analysis using DESeq function
+
+```{r}
+analysisObject = DESeq(exptObject)
+```
+
+Filtering raw data to keep only rows that have at least 18 reads total (because we have 9 samples in total, make sure the gene for each sample has at least 2 reads mapped to it, 9X2=18)
+
+```{r}
+keep <- rowSums(counts(analysisObject)) >= 18 
+analysisObject <- analysisObject[keep,]
+```
+
+## DESEq2 lets you do custom contrasts between levels of a factor (to compare between larvae & pupa, between larva & adult, and between pupa & adult)
+
+Comparing larva vs pupa (Condition 1 vs Condition 2)
+
+```{r}
+res_larva_pupa <- results(analysisObject, contrast=c("condition",conditionOne,conditionTwo))
+```
+
+Comparing larva vs adult (Condition 1 vs Condition 3)
+
+```{r}
+res_larva_adult <- results(analysisObject,
+contrast=c("condition", conditionOne, conditionThree))
+```
+Comparing pupa vs adult (Condition 2 vs Condition 3)
+
+```{r}
+res_pupa_adult <- results(analysisObject,
+contrast=c("condition", conditionTwo, conditionThree))
+```
+
+Ordering our results table by the smallest p value
+
+```{r}
+resOrdered <- res[order(res$pvalue),]
+```
+
+## Find the most upregulated gene per developmental growth stage
+
+Sort the result tables to find the gene with the largest log2FoldChange. Then, intersect top genes from both comparisons to find larva-specific ones
+
+```{r}
+# most upregulated gene in larva vs pupa
+head(res_larva_pupa[order(res_larva_pupa$log2FoldChange, decreasing=TRUE), ])
+```
+```{r}
+# most upregulated gene in larva vs adult
+head(res_larva_adult[order(res_larva_adult$log2FoldChange, decreasing=TRUE), ])
+```
+
+Create column for gene names
+
+```{r}
+resOrdered$gene_id <- rownames(resOrdered)
+```
+
+Reorder the resOrdered object to make the gene_id column as first column
+
+```{r}
+resOrdered1 <- resOrdered[,c(7,1:6)]
+```
+
+Load the GTF file and extract the gene_id, gene_name and transcript_id columns. Merge the gene_name column with the gene_id column. 
+
+```{r}
+gtf_file_hs <- import("../resources/Homo_sapiens.GRCh38.109.gtf")
+gtf_file_hs1 <- mcols(gtf_file_hs)[,c("gene_id","gene_name")]
+resOrdered2 <- data.frame(resOrdered1)
+gtf_file_hs2 <- data.frame(gtf_file_hs1)
+resOrdered3 <- merge(resOrdered2, gtf_file_hs2, by="gene_id", all.x=T, sort=F)
+resOrdered4 <- resOrdered3[,c(1,8,2:7)]
+resOrdered_unique <- unique(resOrdered4)
+```
+
+Summarize using the summary function
+
+```{r}
+summary(res)
+```
+
+How many adjusted p-values were less than 0.05 ?
+
+```{r}
+sum(res$padj < 0.05, na.rm=TRUE)
+```
+
+
+Saving the result file as table
+
+```{r}
+write.table(resOrdered_unique, quote = F, row.names = F, sep="\t", "../output/larva_vs_pupa_vs_adult.txt")
+```
+
+## Creating PCA plot
+
+Generate normalised counts
+
+```{r}
+normalisedCountsAO <- counts(analysisObject, normalized=TRUE)
+tempData = merge(resOrdered, normalisedCountsAO, by="row.names", all=T, sort=F)
+tempData1 <- tempData[which(tempData$padj <= 0.05),]
+tempData2 <- tempData1[,c(1,9:ncol(tempData1))]
+sigNormalisedCounts <- tempData2[,-1]
+rownames(sigNormalisedCounts) <- tempData2[,1]
+```
+
+Create pca object
+
+```{r}
+pca <- prcomp(t(sigNormalisedCounts), center=TRUE, scale=TRUE)
+scores <- data.frame(targets$sampleID, pca$x[,1:2])
+```
+
+Create QC plot
+
+```{r}
+pointSize <- 0.4
+pdf(paste("../output/PCA.pdf", sep=""))
+qplot(x=PC1, y=PC2, label=factor(targets$sampleID), colour=factor(targets$developmental_stage), data = scores, size=I(1.5)) + scale_colour_discrete(name=scores) + geom_text_repel(size=2.5) + theme(plot.title = element_text(size = 5)) + guides(color=guide_legend(title="sample groups"))
+dev.off()
+```
+
+Save normalised counts of significant genes with adj p-value <= 0.05 to a file
+
+```{r}
+sigNormalisedCounts1 <- sigNormalisedCounts
+names <- rownames(sigNormalisedCounts1)
+rownames(sigNormalisedCounts1) <- NULL
+sigNormalisedCounts2 <- cbind(names,sigNormalisedCounts1)
+colnames(sigNormalisedCounts2)[1] = "ensembleGeneID"
+write.table(sigNormalisedCounts2, quote = F, row.names = F, sep = "\t", "../output/hcluster.all.markdup.genecount.sig0.05.txt")
+```
