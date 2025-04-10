@@ -102,10 +102,10 @@ res_pupa_adult <- results(analysisObject,
 contrast=c("condition", conditionTwo, conditionThree))
 ```
 
-Ordering our results table by the smallest p value
+Ordering our results table (larva vs pupa for example) by the smallest p value
 
 ```{r}
-resOrdered <- res[order(res$pvalue),]
+resOrdered <- res_larva_pupa[order(res_larva_pupa$pvalue),]
 ```
 
 ## Find the most upregulated gene per developmental growth stage
@@ -164,42 +164,60 @@ Saving the result file as table
 write.table(resOrdered_unique, quote = F, row.names = F, sep="\t", "../output/larva_vs_pupa_vs_adult.txt")
 ```
 
-## Creating PCA plot
+Creating PCA plot
 
-Generate normalised counts
+## Generate normalised counts with significantly expressed genes (padj<=0.05) where:
+    the normalized counts is stored in the variable called 'sigNormalizedCounts', which allegedly stands for 'significantly expressed normalized counts'.
+    the rows are gene ids
+    the columns are all the counts (numbers) of significantly expressed genes (without any metadata like log2FoldChange, p-values, padj values etc)
+  
+The purpose of generating normalized counts is to account for the differences in the use of gene length and sequencing depth
 
 ```{r}
-normalisedCountsAO <- counts(analysisObject, normalized=TRUE)
-tempData = merge(resOrdered, normalisedCountsAO, by="row.names", all=T, sort=F)
-tempData1 <- tempData[which(tempData$padj <= 0.05),]
-tempData2 <- tempData1[,c(1,9:ncol(tempData1))]
-sigNormalisedCounts <- tempData2[,-1]
-rownames(sigNormalisedCounts) <- tempData2[,1]
+normalisedCountsAO <- counts(analysisObject, normalized=TRUE) # normalize the counts
+tempData = merge(resOrdered, normalisedCountsAO, by="row.names", all=T, sort=F) # combine DEG results with normalized counts
+tempData1 <- tempData[which(tempData$padj <= 0.05),] # filter to retain only statistically significant genes with padj <= 0.05
+tempData2 <- tempData1[,c(1,9:ncol(tempData1))] # filter to keep the first column (probably gene IDs) & keep columns 9 to the last column where the first 8 columns of tempData1 likely consists of metadata (log2FoldChange, p-value, etc)
+sigNormalisedCounts <- tempData2[,-1] # remove the first column of gene IDs to keep only the count data
+rownames(sigNormalisedCounts) <- tempData2[,1] # set the gene IDs as row names, now you have a clean matrix of normalized counts for statistically significant genes only
 ```
 
-Create pca object
+Create PCA object
+
+## Summary of the variables:
+   -normalisedCountsAO: Normalized gene expression values from DESeq2
+   -tempData: Merged table of DE results and normalized counts
+   -tempData1: Subset with significant genes (padj ≤ 0.05)
+   -sigNormalisedCounts: Normalized counts with significantly expressed genes
+   -pca: PCA object from significantly expressed genes
+   -scores: PCA scores (coordinates) + sample ID + developmental stage for drawing PCA plot
 
 ```{r}
-pca <- prcomp(t(sigNormalisedCounts), center=TRUE, scale=TRUE)
-scores <- data.frame(targets$sampleID, pca$x[,1:2])
+pca <- prcomp(t(sigNormalisedCounts), center=TRUE, scale=TRUE) # This creates a pca object containing PCA results, including the coordinates of samples in PC space.The function 'prcomp' performs PCA analysis on a given dataframe/matrix. t(sigNormalisedCounts): Transposes the matrix so that samples are rows and genes are columns — required format for prcomp().center=TRUE: Centers the data (subtracts the mean of each gene).scale=TRUE: Scales the data (divides by the standard deviation). Important because genes can have very different expression ranges.
+
+scores <- data.frame(sampleID=targets$sampleID, developmental_stage=targets$developmental_stage, pca$x[,1:2]) # pca$x: Contains the PCA-transformed coordinates of each sample (rows) along principal components (columns).[,1:2]: Selects only PC1 and PC2 — the first two principal components.data.frame(targets$sampleID, ...): Combines the PCA coordinates with the sample ID column & developmental stage column of the targets.txt file. scores is a ready-to-plot table showing each sample’s position on the PC1-PC2 plane.
 ```
 
-Create QC plot
+Create PCA plot
 
 ```{r}
-pointSize <- 0.4
-pdf(paste("../output/PCA.pdf", sep=""))
-qplot(x=PC1, y=PC2, label=factor(targets$sampleID), colour=factor(targets$developmental_stage), data = scores, size=I(1.5)) + scale_colour_discrete(name=scores) + geom_text_repel(size=2.5) + theme(plot.title = element_text(size = 5)) + guides(color=guide_legend(title="sample groups"))
-dev.off()
+pca_plot <- ggplot(scores, aes(x = PC1, y = PC2, fill = developmental_stage)) + # use the 'scores' dataframe to create the PCA plot & color the points by developmental stage
+  geom_point(shape = 21, size = 3, color = "black") + # add points with black border
+  geom_text_repel(aes(label = sampleID), size = 3) + # label points with sample ID in a non-overlapping & clean fashion
+  theme_bw() + # apply a clean black-and-white background theme for the plot
+  labs(title = "PCA of Normalised Counts", x = "PC1", y = "PC2", fill = "Developmental Stage") + # the labs() function adds plot annotations where it adds title of the plot, label x & y axes, and it adds the title of the legend
+  theme(text = element_text(size = 12), legend.position = "bottom") # the theme() function in ggplot2 package is used to customize the non-data elements of the plot (fonts, spacing, background, legend position, axis lines & more)
+
+ggsave("PCA_plot.pdf", plot = pca_plot, width = 6, height = 5) # In this case, save the PCA plot in .pdf format in the current working directory, same location as the R script. You can also specify the desired output directory to save the plot.
 ```
 
 Save normalised counts of significant genes with adj p-value <= 0.05 to a file
 
 ```{r}
-sigNormalisedCounts1 <- sigNormalisedCounts
-names <- rownames(sigNormalisedCounts1)
-rownames(sigNormalisedCounts1) <- NULL
-sigNormalisedCounts2 <- cbind(names,sigNormalisedCounts1)
-colnames(sigNormalisedCounts2)[1] = "ensembleGeneID"
-write.table(sigNormalisedCounts2, quote = F, row.names = F, sep = "\t", "../output/hcluster.all.markdup.genecount.sig0.05.txt")
+sigNormalisedCounts1 <- sigNormalisedCounts # make a copy of the significant normalized counts 
+names <- rownames(sigNormalisedCounts1) # store gene names (rownames) into a separate variable, called 'names' in this case
+rownames(sigNormalisedCounts1) <- NULL # removes row names from the dataframe
+sigNormalisedCounts2 <- cbind(names,sigNormalisedCounts1) # combine gene names as the first column with sigNormalisedCounts1 in the the new dataframe, 'sigNormalisedCounts2'
+colnames(sigNormalisedCounts2)[1] = "ensembleGeneID" # rename the first column to 'ensembleGeneID'
+write.table(sigNormalisedCounts2, quote = F, row.names = F, sep = "\t", "../output/hcluster.all.markdup.genecount.sig0.05.txt") # write/save the final dataframe to a tab-separated file without quotes or row names
 ```
