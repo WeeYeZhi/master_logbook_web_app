@@ -216,6 +216,14 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
 
         st.write("**11. Check & compare the quality of the raw & processed LKM PacBio read using NanoPlot**")
+        st.write("✔️create and activate the 'nanoplot' conda environment")
+        st.code("""
+                conda create -n nanoplot
+                conda activate nanoplot
+                """, language="bash")
+        st.write("✔️install nanoplot via conda")
+        st.code("conda install -c bioconda nanoplot", language="bash")
+        st.write("✔️run nanoplot to evaluate the quality of the long read")
         st.code("nohup NanoPlot -t 48 --fastq /media/Raid/Wee/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq.gz --info_in_report --plots dot kde --legacy hex -o nanoplot_processed_pacbio_read > nanoplot.log 2>&1 &", language="bash") # check the quality of the raw PacBio read
         st.code("nohup NanoPlot -t 48 --fastq /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/siamaera_output_2.fq --info_in_report --plots dot kde --legacy hex -o nanoplot_processed_pacbio_read > nanoplot.log 2>&1 &", language="bash") # check the quality of the processed PacBio read
         st.markdown("[Visit NanoPlot Github Documentation](https://github.com/wdecoster/NanoPlot?tab=readme-ov-file)")
@@ -224,19 +232,42 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
 
         st.write("12. If the quality of the PacBio read is bad, then proovread 2.14.1 will be used to correct the PacBio read using the short Illumina read")
-        st.code("conda create -n proovread", language="bash") # use the cbr15 INBIOSIS computer (no need to su cbr15)
-        st.code("conda activate proovread", language="bash")
-        st.code("git clone https://github.com/BioInf-Wuerzburg/proovread", language="bash")
-        st.code("cd proovread", language="bash")
-        st.code("make", language="bash")
-        st.code("sudo apt-get install liblog-log4perl-perl", language="bash") # make sure that you install all the required dependencies of proovread for it to run successfully without encountering any errors later
-        st.code("sudo apt-get install libfile-which-perl", language="bash")
-        st.code("./bin/proovread --help", language="bash") # to verify the installation of proovread
-        st.code("nohup ./bin/proovread -t 48 -s /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1/trimmed_Conopomorpha_raw_1.fastq -s /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2/trimmed_Conopomorpha_raw_2.fastq -l /media/Raid/Wee/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq -o corrected_PacBio.fq > proovread.log 2>&1 &", language="bash")
-        st.code("perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --defaults", language="bash") # display all the available command lines (help) of SeqFilter
-        st.code("perl ./bin/siamaera --help", language="bash") # display all the available command lines (help) of siamaera
-        st.code("nohup perl ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 200 --substr proovread/proovread.chim.tsv --out proovread/seqfilter_output.fq > proovread/seqfilter_output.log 2>&1 &", language="bash") # run the SeqFilter step to trim the reads
-        st.code("nohup /usr/bin/env perl ./bin/siamaera < proovread/seqfilter_output.fq > proovread/siamaera_output.fq 2> proovread/siamaera_output.log &") # run the siamaera step (final step of proovread) to further trim the chimeric reads
+        st.write("✔️create and activate the 'proovread' conda environment")
+        st.code("""
+        conda create -n proovread
+        conda activate proovread
+        """,language="bash")
+        st.write("✔️install proovread from its official GitHub remote repository")
+        st.code("""
+        git clone https://github.com/BioInf-Wuerzburg/proovread  # clone the proovread remote repository into your local machine
+        cd proovread # change into the proovread directory
+        make # compile proovread from source
+        """)
+        st.write("✔️install all the required dependencies of proovread")
+        st.code("""
+        sudo apt-get install liblog-log4perl-perl
+        sudo apt-get install libfile-which-perl
+        """, language="bash")
+        st.write("✔️verify the installation of proovread by displaying its help command lines")
+        st.code("./bin/proovread --help", language="bash")
+        st.write("✔️run proovread without running the SeqFilter and siamaera step")
+        st.code("nohup ./bin/proovread -t 48 -s /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1/trimmed_Conopomorpha_raw_1.fastq -s /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2/trimmed_Conopomorpha_raw_2.fastq -l /media/Raid/Wee/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq -o corrected_PacBio.fq > proovread.log 2>&1 &", language="bash") # This step produces the proovread.untrimmed.fq file
+        st.write("✔️evaluate the quality of the 'proovread.untrimmed.fq' file using NanoPlot to decide whether you want to proceed with further reads trimming using SeqFilter & siamaera pipelines") # You dont want to proceed with further reads trimming if you're aware that some chimeric reads but maybe biologically relevant. some short/low-quality reads maybe present, but still biologically meaningful
+        st.code("nohup NanoPlot -t 48 --fastq /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/proovread.untrimmed.fq --info_in_report --plots dot kde --legacy hex -o nanoplot_processed_pacbio_read > nanoplot.log 2>&1 &", language="bash") # check the quality of the raw PacBio read
+        st.write("✔️display all the SeqFilter's help command lines")
+        st.code("perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --defaults", language="bash")
+        st.write("✔️display all the siamaera's help command lines")
+        st.code("perl ./bin/siamaera --help", language="bash")
+        st.write("✔️run SeqFilter process to trim the PacBio read")
+        st.code("""
+        nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 500 --phred-offset 33 --trim-win 12,5 --substr proovread/proovread.chim.tsv --out proovread/first_proovread_trial/seqfilter_output.fq > proovread/seqfilter_output.log 2>&1 & # This step takes the 'proovread.untrimmed.fq' file as input and outputs the 'seqfilter_output.fq' file # First trial using '--phred-offset 33', '--trim-win 12,5', '--min-length 500' (very stringent proovread parameters, which results in loss of many reads despite tremendous increase in read quality)
+        nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 200 --substr proovread/proovread.chim.tsv --out proovread/seqfilter_output.fq > proovread/second_proovread_trial/seqfilter_output.log 2>&1 & # Second trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 200', '--substr proovread/proovread.chim.tsv' (percentage of read loss reduces significantly, but read quality reduces compared to original)
+        nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 200 --out proovread/seqfilter_output.fq > proovread/third_proovread_trial/seqfilter_output.log 2>&1 & # Third trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 200', 'without --substr proovread/proovread.chim.tsv'
+        nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 100 --substr proovread/proovread.chim.tsv --out proovread/fourth_proovread_trial/seqfilter_output.fq > proovread/seqfilter_output.log 2>&1 & # Fourth trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 100', '--substr proovread/proovread/chim.tsv'
+        nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 100 --out proovread/seqfilter_output.fq > proovread/fifth_proovread_trial/seqfilter_output.log 2>&1 & # Fifth trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 100', 'without --substr proovread/proovread/chim.tsv'
+        """, language="bash")
+        st.write("✔️run siamaera process to trim the PacBio read even further to remove the chimeric reads")
+        st.code("nohup /usr/bin/env perl ./bin/siamaera < proovread/seqfilter_output.fq > proovread/siamaera_output.fq 2> proovread/siamaera_output.log &") # This step takes 'seqfilter_output.fq' as input and outputs 'siamaera_output.fq' file
         st.markdown("[Visit proovread GitHub Page](https://github.com/BioInf-Wuerzburg/proovread/blob/master/README.org)")
         st.markdown("[Visit proovread GitHub Poster](https://github.com/BioInf-Wuerzburg/proovread/blob/master/media/proovread-poster.pdf)")
         st.markdown("[Visit proovread Publication](https://doi.org/10.1093/bioinformatics/btu392)")
@@ -779,7 +810,19 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.code("""
         install.packages("tidyverse") # manipulate data
         install.packages("ggrepel") # visualize data
-        """)
+        """, language="r")
+        st.write("✔️verify the installation of R packages by checking and recording its package version")
+        st.code("""
+        packageVersion("DESeq2")
+        packageVersion("biomaRt")
+        packageVersion("rtracklayer")
+        packageVersion("GenomicFeatures")
+        packageVersion("tidyverse")
+        packageVersion("dplyr")
+        packageVersion("stringr")
+        packageVersion("ggplot2")
+        packageVersion("ggrepel")
+        """, language="r")
         st.write("✔️load all the installed R libraries into RStudio")
         st.code("""
         library(DESeq2)
@@ -791,7 +834,7 @@ if selected == "Phase 2: Structure-Based Analysis":
         library(stringr)
         library(ggplot2)
         library(ggrepel)
-        """, language="bash")
+        """, language="r")
         st.write("✔️create a R markdown script in RStudio to run DEG analysis automatically")
         # ----LOAD DESeq2 R SCRIPT----
         # Check if the file exists before reading
@@ -808,6 +851,11 @@ if selected == "Phase 2: Structure-Based Analysis":
             )
         else:
             st.error(f"{deseq2rmd_file.name} does not exist.")
+        st.write("✔️create heatmap plot and perform hierarchical clustering analysis using Morpheus (if you dont want to code)")
+        st.markdown("[Visit Morpheus Broad Webpage](https://software.broadinstitute.org/morpheus/)")
+
+        st.write("###")
+
         st.markdown("[Visit DESeq2 Bioconductor Page](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)")
         st.markdown("[Visit DESeq2 GitHub Page](https://github.com/thelovelab/DESeq2)")
         st.markdown("[Visit DESeq2 Tutorial Manual 1](https://lashlock.github.io/compbio/R_presentation.html)")
@@ -911,3 +959,19 @@ if selected == "Additional Notes":
 
         st.write("10. Clear the terminal")
         st.code("clear", language="bash")
+
+        st.write("###")
+
+        st.write("11. To check how to cite R and R packages in RStudio")
+        st.code("citation()", language="r")
+
+        st.write("###")
+
+        st.write("12. To run code in RStudio, you can use the keyboard shortcut 'Ctrl + Enter' to run the code instead of manually clicking the 'run' button")
+
+        st.write("###")
+
+        st.write("13. If you want to display all of the available bioconductor packages offered in RStudio")
+        st.code("BiocManager::available()", language="r")
+
+        st.write("###")
