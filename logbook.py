@@ -260,11 +260,13 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("perl ./bin/siamaera --help", language="bash")
         st.write("✔️run SeqFilter process to trim the PacBio read")
         st.code("""
-        nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 500 --phred-offset 33 --trim-win 12,5 --substr proovread/proovread.chim.tsv --out proovread/first_proovread_trial/seqfilter_output.fq > proovread/seqfilter_output.log 2>&1 & # This step takes the 'proovread.untrimmed.fq' file as input and outputs the 'seqfilter_output.fq' file # First trial using '--phred-offset 33', '--trim-win 12,5', '--min-length 500' (very stringent proovread parameters, which results in loss of many reads despite tremendous increase in read quality)
-        nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 200 --substr proovread/proovread.chim.tsv --out proovread/seqfilter_output.fq > proovread/second_proovread_trial/seqfilter_output.log 2>&1 & # Second trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 200', '--substr proovread/proovread.chim.tsv' (percentage of read loss reduces significantly, but read quality reduces compared to original)
-        nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 200 --out proovread/seqfilter_output.fq > proovread/third_proovread_trial/seqfilter_output.log 2>&1 & # Third trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 200', 'without --substr proovread/proovread.chim.tsv'
-        nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 100 --substr proovread/proovread.chim.tsv --out proovread/fourth_proovread_trial/seqfilter_output.fq > proovread/seqfilter_output.log 2>&1 & # Fourth trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 100', '--substr proovread/proovread/chim.tsv'
-        nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 100 --out proovread/seqfilter_output.fq > proovread/fifth_proovread_trial/seqfilter_output.log 2>&1 & # Fifth trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 100', 'without --substr proovread/proovread/chim.tsv'
+                nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 500 --phred-offset 33 --trim-win 12,5 --substr proovread/proovread.chim.tsv --out proovread/first_proovread_trial/seqfilter_output.fq > proovread/seqfilter_output.log 2>&1 & # This step takes the 'proovread.untrimmed.fq' file as input and outputs the 'seqfilter_output.fq' file # First trial using '--phred-offset 33', '--trim-win 12,5', '--min-length 500' (very stringent proovread parameters, which results in loss of many reads despite tremendous increase in read quality)
+                nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 200 --substr proovread/proovread.chim.tsv --out proovread/second_proovread_trial/seqfilter_output.fq > proovread/second_proovread_trial/seqfilter_output.log 2>&1 & # Second trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 200', '--substr proovread/proovread.chim.tsv' (percentage of read loss reduces significantly, but read quality reduces compared to original)
+                nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 200 --out proovread/third_proovread_trial/seqfilter_output.fq > proovread/third_proovread_trial/seqfilter_output.log 2>&1 & # Third trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 200', 'without --substr proovread/proovread.chim.tsv'
+                nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 100 --substr proovread/proovread.chim.tsv --out proovread/fourth_proovread_trial/seqfilter_output.fq > proovread/fourth_proovread_trial/seqfilter_output.log 2>&1 & # Fourth trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 100', '--substr proovread/proovread/chim.tsv'
+                nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 100 --out proovread/fifth_proovread_trial/seqfilter_output.fq > proovread/fifth_proovread_trial/seqfilter_output.log 2>&1 & # Fifth trial using 'default --phred-offset (autodetect)', 'default --trim-win 10,0', '--min-length 100', 'without --substr proovread/proovread/chim.tsv'
+                nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 100 --trim-win 8,3 --out proovread/sixth_proovread_trial/seqfilter_output.fq > proovread/sixth_proovread_trial/seqfilter_output.log 2>&1 & # Sixth trial using 'default --phred-offset (autodetect)', '--trim-win 8,3', '--min-length 100', 'without --substr proovread/proovread/chim.tsv'
+                nohup perl -I /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/lib ./bin/SeqFilter --in proovread/proovread.untrimmed.fq --min-length 100 --trim-win 5,2 --out proovread/seventh_proovread_trial/seqfilter_output.fq > proovread/seventh_proovread_trial/seqfilter_output.log 2>&1 & # Seventh trial using 'default --phred-offset (autodetect)', '--trim-win 5,2', '--min-length 100', 'without --substr proovread/proovread/chim.tsv'
         """, language="bash")
         st.write("✔️run siamaera process to trim the PacBio read even further to remove the chimeric reads")
         st.code("nohup /usr/bin/env perl ./bin/siamaera < proovread/seqfilter_output.fq > proovread/siamaera_output.fq 2> proovread/siamaera_output.log &") # This step takes 'seqfilter_output.fq' as input and outputs 'siamaera_output.fq' file
@@ -275,53 +277,58 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.markdown("[Visit BLASR Publication](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-13-238)")
         st.markdown("[Visit SHRiMP Publication](https://doi.org/10.1371/journal.pcbi.1000386)")
 
+        st.write("---")
+        st.write("❗During proovread correction process, quality score reassignment may happen.")
+        st.write("---")
+
 
         st.write("###")
 
         st.write("**13. Perform genome assembly to construct a complete reference genome of CPB using SPAdes (assemble short reads and long reads together)**")
-        st.write("✔️create a virtual environment called SPAdes")
-        st.code("conda create -n SPAdes", language="bash")
-        st.write("✔️activate the SPAdes environment")
-        st.code("conda activate SPAdes", language="bash")
+        st.write("✔️create and activate a virtual environment called SPAdes")
+        st.code("""
+        conda create -n SPAdes
+        conda activate SPAdes
+        """, language="bash")
         st.write("✔️install SPAdes within Linux terminal")
-        st.code("wget https://github.com/ablab/spades/releases/download/v4.0.0/SPAdes-4.0.0-Linux.tar.gz", language="bash")
-        st.code("tar -xzf SPAdes-4.0.0-Linux.tar.gz", language="bash")
-        st.code("cd SPAdes-4.0.0-Linux/bin/", language="bash")
-
-        # Alternatively, you can install spades using the sudo apt command
-
+        st.code("""
+        wget https://github.com/ablab/spades/releases/download/v4.0.0/SPAdes-4.0.0-Linux.tar.gz
+        tar -xzf SPAdes-4.0.0-Linux.tar.gz
+        cd SPAdes-4.0.0-Linux/bin/
+        """, language="bash")
+        st.write("✔️Alternatively, you can install spades using the sudo apt command")
         st.code("sudo apt -y install spades", language="bash")
         st.write("✔️test whether you've installed SPAdes successfully")
         st.code("spades.py --version", language="bash")
         st.write("✔️display the list of command options of SPAdes")
         st.code("spades.py -h", language="bash")
-        st.write("✔️rename the .fna file to .fasta file")
-        st.code("mv GCA_012932125.1_ASM1293212v1_genomic.fna GCA_012932125.1_ASM1293212v1_genomic.fasta", language="bash")
-        st.write("✔️run SPAdes to perform genome assembly of CPB step by step")
-        st.write("Run the error correction step to generate the corrected reads")
-        st.code("nohup spades.py --only-error-correction --pe1-1 /home/cbr16/Documents/WeeYeZhi/resources_from_NCBI/all_R1.fastq.gz --pe1-2 /home/cbr16/Documents/WeeYeZhi/resources_from_NCBI/all_R2.fastq.gz --pe2-1 /home/cbr16/Documents/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1/trimmed_Conopomorpha_raw_1.fastq.gz --pe2-2 /home/cbr16/Documents/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2/trimmed_Conopomorpha_raw_2.fastq.gz --pacbio /home/cbr16/Documents/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq.gz -o /home/cbr16/Documents/WeeYeZhi/output/SPAdesresults/SPAdes_CPB_genome/error_correction --threads 8 > /home/cbr16/Documents/WeeYeZhi/output/SPAdesresults/SPAdes_CPB_genome/error_correction/error_correction.log 2>&1 &", language="bash")
-        st.write("Next, use the corrected reads to proceed with the assembly")
-        st.code("nohup spades.py --only-assembler --pe1-1 /home/cbr16/Documents/WeeYeZhi/output/SPAdesresults/error_correction/corrected/all_R1.fastq.00.0_0.cor.fastq.gz --pe1-2 /home/cbr16/Documents/WeeYeZhi/output/SPAdesresults/error_correction/corrected/all_R2.fastq.00.0_0.cor.fastq.gz --pe2-1 /home/cbr16/Documents/WeeYeZhi/output/SPAdesresults/error_correction/corrected/trimmed_Conopomorpha_raw_1.fastq.00.0_0.cor.fastq.gz --pe2-2 /home/cbr16/Documents/WeeYeZhi/output/SPAdesresults/error_correction/corrected/trimmed_Conopomorpha_raw_2.fastq.00.0_0.cor.fastq.gz --pacbio /home/cbr16/Documents/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq.gz --trusted-contigs /home/cbr16/Documents/WeeYeZhi/resources_from_LKM/hybrid_genome_assembly_of_CPB/CPB_insect_draft_assembly.v4.fa -o /home/cbr16/Documents/WeeYeZhi/output/SPAdesresults/assembly_output --threads 8 > /home/cbr16/Documents/WeeYeZhi/output/SPAdesresults/assembly_output.log 2>&1 &", language="bash")
-        st.write("Run the mismatch correction step")
-        st.code("nohup spades.py --only-mismatch-correction -o /home/cbr16/Documents/WeeYeZhi/output/SPAdesresults/assembly_output --threads 8 > /home/cbr16/Documents/WeeYeZhi/output/SPAdesresults/mismatch_correction.log 2>&1 &", language="bash")
-        st.write("Alternatively, if you have a strong HPC, you can directly run the code below to perform genome assembly all at once")
-        st.write("set your working directory as /home/cbr16/Documents/WeeYeZhi/ and run SPAdes in this working directory")
-        st.code("nohup spades.py --pe1-1 /media/Raid/Wee/WeeYeZhi/concatenated_processed_RNA_seq/all_R1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/concatenated_processed_RNA_seq/all_R2.fastq.gz --pe2-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1/trimmed_Conopomorpha_raw_1.fastq.gz --pe2-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2/trimmed_Conopomorpha_raw_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq.gz --trusted-contigs /media/Raid/Wee/WeeYeZhi/resources_from_LKM/hybrid_genome_assembly_of_CPB/CPB_insect_draft_assembly.v4.fa -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_CPB_genome/assembly_output --threads 48 --careful > /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_CPB_genome/assembly_output/output.log 2>&1 &", language="bash")
+        st.write("Run 3 iterations of the SPAdes pipeline with read error correction mode enabled, with assembling mode enabled, with careful mode enabled (run full SPAdes pipeline)" )
+        st.code("""
+                nohup spades.py --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/fifth_proovread_trial/seqfilter_output.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k213355 --threads 16 --memory 500 --careful -k 21,33,55 &
+                nohup spades.py --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/fifth_proovread_trial/seqfilter_output.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k21335577 --threads 16 --memory 500 --careful -k 21,33,55,77 &
+                nohup spades.py --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/fifth_proovread_trial/seqfilter_output.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k127 --threads 16 --memory 500 --careful -k 127 &
+        """, language="bash")
+        st.write("Run 3 iterations of the SPAdes pipeline with read error correction mode disabled, with assembling mode enabled, with careful mode enabled (see how much read error correction step affects assembly) (to avoid trimming away too many biologically meaningful reads since you've pre-processed the Illumina read with fastp & PacBio read with proovread previously)")
+        st.code("""
+                nohup spades.py --only-assembler --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/fifth_proovread_trial/seqfilter_output.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k213355 --threads 16 --memory 500 --careful -k 21,33,55 &
+                nohup spades.py --only-assembler --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/fifth_proovread_trial/seqfilter_output.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k21335577 --threads 16 --memory 500 --careful -k 21,33,55,77 &
+                nohup spades.py --only-assembler --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/fifth_proovread_trial/seqfilter_output.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k127 --threads 16 --memory 500 --careful -k 127 &
+                """, language="bash")
+        st.write("Run 3 iterations of the SPAdes pipeline with read error correction mode disabled, with only assembling mode enabled, with careful mode disabled (see how fast and raw SPAdes performs")
+        st.code("""
+                nohup spades.py --only-assembler --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/fifth_proovread_trial/seqfilter_output.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k213355 --threads 16 --memory 500 -k 21,33,55 &
+                nohup spades.py --only-assembler --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/fifth_proovread_trial/seqfilter_output.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k21335577 --threads 16 --memory 500 -k 21,33,55,77 &
+                nohup spades.py --only-assembler --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/fifth_proovread_trial/seqfilter_output.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k127 --threads 16 --memory 500 -k 127 &
+                """, language="bash")
+        st.write("❗Just in case if spades crashes due to insufficient memory, you can resume the spades run by restarting the run from the last checkpoint/stage")
+        st.code("nohup spades.py -t 16 --memory 500 --restart-from last -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_raw_hybrid_genome_assembly_k213355 > spades_continue.log 2>&1 &", language="bash")
         st.markdown("[Visit SPAdes GitHub Page](https://github.com/ablab/spades/blob/v4.0.0/README.md)")
         st.markdown("[Visit SPAdes Assembly Toolkit](https://ablab.github.io/spades/)")
         st.markdown("[Read SPAdes De Novo Assembler Publication](https://doi.org/10.1002/cpbi.102)")
         st.markdown("[Read HybridSPAdes Publication](https://doi.org/10.1093/bioinformatics/btv688)")
+        st.markdown("[Read comparison between MaSuRCA, SPAdes and Unicycler hybrid assembly approaches & performance](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-020-07041-8)")
 
         st.write("---")
-
-        st.write("Run 3 iterations of the SPAdes pipeline with varying k-mer sizes, resulting in three different assembly versions 'v1.0', 'v1.1' and 'v1.2' (make 3 different assembly folders for 'v1.0', 'v1.1' and 'v1.2'")
-        st.code("nohup spades.py --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq.gz -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k213355_1 --threads 32 --memory 400 --careful -k 21,33,55 &", language="bash")
-        st.code("nohup spades.py --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/siamaera_output_2.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k21335577 --threads 32 --memory 400 --careful -k 21,33,55,77 &", language="bash")
-        st.code("nohup spades.py --pe1-1 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz --pe1-2 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz --pacbio /media/Raid/Wee/WeeYeZhi/processed_pacbio/proovread/proovread/siamaera_output_2.fq -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k127 --threads 32 --memory 400 --careful -k 127 &", language="bash")
-        st.write("❗Just in case if spades crashes due to insufficient memory, you can resume the spades run by restarting the run from the last checkpoint/stage")
-        st.code("nohup spades.py -t 32 --memory 450 --restart-from last -o /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_raw_hybrid_genome_assembly_k213355 > spades_continue.log 2>&1 &", language="bash")
-        st.write("---")
-
         st.write("**Additional note**")
         st.write("❗SPAdes is a versatile toolkit designed for assembly and analysis of sequencing data. SPAdes is primarily developed for Illumina sequencing data, but can be used for IonTorrent as well. Most of SPAdes pipelines support hybrid mode, i.e. allow using long reads (PacBio and Oxford Nanopore) as a supplementary data.")
         st.write("❗Only files with extension .fq, .fastq, .bam, .fa, .fasta, .fq.gz, .fastq.gz, .bam.gz, .fa.gz, .fasta.gz are supported by SPAdes")
@@ -329,7 +336,11 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**14. Index the genome assembly by using bwa-mem2**")
+        st.write("14. Compare the hybrid genome assembly produced by SPAdes with the gold standard reference genome (if there is any).**")
+
+        st.write("###")
+
+        st.write("**15. Index the genome assembly by using bwa-mem2**")
         st.write("✔️create a virtual environment called bwa-mem2")
         st.code("conda create -n bwa-mem2", language="bash")
         st.write("✔️activate the bwa-mem2 environment")
@@ -345,7 +356,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         # Continue working in the same 'bwa-mem2' environment
 
-        st.write("**15. Correct the genome assembly provided by LKM using short reads**")
+        st.write("**16. Correct the genome assembly provided by LKM using short reads**")
         st.write("✔️align short genomic reads with the genome assembly using bwa-mem2 to produce a SAM file")
         st.code("nohup bwa-mem2 mem -t 48 /media/Raid/Wee/WeeYeZhi/resources_from_LKM/hybrid_genome_assembly_of_CPB/CPB_insect_draft_assembly.v4.fa /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1/trimmed_Conopomorpha_raw_1.fastq /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2/trimmed_Conopomorpha_raw_2.fastq > CPB_raw_hybrid_assembly_output.sam 2> CPB_raw_hybrid_assembly_output_sam.log &", language="bash")
         st.write("✔️install samtools within the 'samtools' conda environment")
@@ -375,7 +386,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**16. Align long read with the genome assembly to output the alignment statistics later (Optional) (No need to run this before running Longstitch as Longstitch already incorporated the minimap2 pipeline)**")
+        st.write("**17. Align long read with the genome assembly to output the alignment statistics later (Optional) (No need to run this before running Longstitch as Longstitch already incorporated the minimap2 pipeline)**")
         st.write("✔️create a new environment named as 'minimap2' and activate it")
         st.code("conda create -n minimap2", language="bash")
         st.code("conda activate minimap2", language="bash")
@@ -391,7 +402,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**17. Correct the genome assembly provided by LKM further using long read**")
+        st.write("**18. Correct the genome assembly provided by LKM further using long read**")
         st.write("✔️create a new environment named as 'longstitch' with a compatible version of Python to install longstitch")
         st.code("conda create -n longstitch", language="bash")
         st.code("conda install -c bioconda longstitch", language="bash")
@@ -436,7 +447,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**18. Evaluate the completeness of the genome assembly after scaffolding**")
+        st.write("**19. Evaluate the completeness of the genome assembly after scaffolding**")
         st.write("✔️create a virtual environment called 'busco' & install BUSCO within the environment")
         st.code("conda create -n busco busco -c bioconda -c conda-forge -c defaults", language="bash")
         st.write("try to run wget or git clone to get the latest version of busco from official github page")
@@ -457,7 +468,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**19. Evaluate the quality of the genome assembly after scaffolding**")
+        st.write("**20. Evaluate the quality of the genome assembly after scaffolding**")
         st.write("✔️create a virtual environment called 'quast'")
         st.code("conda create -n quast", language="bash")
         st.write("✔️activate the 'quast' environment")
@@ -473,7 +484,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**20. Perform softmasking for the repeat regions of the genome assembly using RepeatMasker before running BRAKER3**")
+        st.write("**21. Perform softmasking for the repeat regions of the genome assembly using RepeatMasker before running BRAKER3**")
         st.write("✔️install RepeatMasker via bioconda")
         st.code("conda install -c bioconda repeatmasker", language="bash") # this should install the other required dependencies like perl & dfam database
         st.write("✔️display the help menu of Repeatmasker to make sure you have installed it correctly")
@@ -492,7 +503,7 @@ conda install -c bioconda perl""", language="bash")
 
         st.write("###")
 
-        st.write("**21. Predict the list of coding genes and proteins of the CPB genome using BRAKER3**")
+        st.write("**22. Predict the list of coding genes and proteins of the CPB genome using BRAKER3**")
         st.write("✔️switch to a non-root user")
         st.code("su cbr15", language="bash")
         st.write("✔️after switching, get your user ID & group ID")
@@ -668,7 +679,7 @@ conda install -c bioconda perl""", language="bash")
         st.write("✔️set GeneMark-ETP path")
         st.code("", language="bash")
 
-        st.write("**22. Check the BUSCO completeness score for the protein sequences predicted by BRAKER3 in the form of braker.aa file**")
+        st.write("**23. Check the BUSCO completeness score for the protein sequences predicted by BRAKER3 in the form of braker.aa file**")
         st.code("export NUMEXPR_MAX_THREADS=48", language="bash")
         st.code("nohup busco -m protein -i /path/to/your/braker.aa -c 48 -l lepidoptera_odb12 -o CPB_raw_hybrid_assembly_busco > CPB_raw_hybrid_assembly_busco_output.log 2>&1 &", language="bash")
 
@@ -879,6 +890,14 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.markdown("[Integrated DEG and Pathway Analysis](https://bioinformatics.sdstate.edu/idep/)")
         st.markdown("[IDEP GitHub Page](https://github.com/gexijin/idepGolem)")
 
+        st.write("---")
+        st.write("❗Bear in mind that the p-adjusted values provided by the DEG results will help to verify whether the particular gene is really differentially expressed or it's just a false positive result")
+        st.write("❗Decide whether or not you need to accept null hypothesis or reject null hypothesis/accept alternative hypothesis after interpreting the DEG results")
+        st.write("❗If there is a significance difference in the gene expression level between the two developmental stages where p-value < 0.05 (at 95% statistical significance level), then null hypothesis is rejected/ alternative hypothesis is accepted")
+        st.write("❗If there is no significance difference in the gene expression level between the two developmental stages where p-value > 0.05 (at 95% statistical significance level), then null hypothesis is accepted/ alternative hypothesis is rejected")
+        st.write("❗You can compare between the DEG results at p-value=0.05 and p-value=0.01 (most stringent gene filtering) and get the intersected results")
+        st.write("❗Run these 3 analysis, 'drawing PCA plot', 'inspecting size factor', 'drawing dispersion plot' to double check the quality of the RNA-seq data")
+        st.write("---")
 
 # Phase 3: Molecular Docking & Dynamics Simulation
 
@@ -975,3 +994,6 @@ if selected == "Additional Notes":
         st.code("BiocManager::available()", language="r")
 
         st.write("###")
+
+        st.write("14. Use the str() function to examine the structure of the file that you have stored in the variable") # examine how many rows of observations, how many columns of variables, examine whether it is a dataframe, list, vector, matrix being stored in the variable, examine the data type in RStudio
+        st.code("str('meta')") # assume that the name of the variable used to store the sample metadata.csv file is meta
