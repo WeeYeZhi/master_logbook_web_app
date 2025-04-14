@@ -145,10 +145,20 @@ resOrdered4 <- resOrdered3[,c(1,8,2:7)]
 resOrdered_unique <- unique(resOrdered4)
 ```
 
-Summarize using the summary function
+Summarize the DEG results using the summary function
 
 ```{r}
+res <- results(analysisObject)
 summary(res)
+```
+
+To display all the genes with p-values less than 0.05
+
+```{r}
+res0.05 <- results(analysisObject, alpha = 0.05)
+res0.05.df <- as.data.frame(res0.05) # convert to dataframe
+str(res0.05.df)
+summary(res0.05.df)
 ```
 
 How many adjusted p-values were less than 0.05 ?
@@ -157,11 +167,30 @@ How many adjusted p-values were less than 0.05 ?
 sum(res$padj < 0.05, na.rm=TRUE)
 ```
 
+To display all the genes with p-values less than 0.01
+
+```{r}
+res0.01 <- results(analysisObject, alpha = 0.01)
+res0.01.df <- as.data.frame(res0.01) 
+str(res0.01.df)
+summary(res0.01.df)
+```
+
+How many adjusted p-values were less than 0.01 ?
+
+```{r}
+sum(res$padj < 0.01, na.rm=TRUE)
+```
 
 Saving the result file as table
 
 ```{r}
 write.table(resOrdered_unique, quote = F, row.names = F, sep="\t", "../output/larva_vs_pupa_vs_adult.txt")
+```
+Alternatively, you can also save the result file in .csv format
+
+```{r}
+write.csv(resOrdered_unique, "../output/larva_vs_pupa_vs_adult.csv")
 ```
 
 Creating PCA plot
