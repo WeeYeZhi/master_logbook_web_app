@@ -81,6 +81,98 @@ keep <- rowSums(counts(analysisObject)) >= 18
 analysisObject <- analysisObject[keep,]
 ```
 
+## Check the quality of the DEG results by drawing PCA plot, estimating size factors, drawing dispersion plot & building MA plot
+
+1. Create PCA plot for all the genes (plotting PCA using all genes gives an unbiased view of global expression patterns and sample clustering,)(include as main figure for publication)
+
+```{r}
+vsd <- vst(analysisObject, blind = FALSE)
+plotPCA(vsd, intgroup = "developmental_stage")
+```
+
+Create PCA plot to include only significantly expressed genes (where padj<0.05)(plotting PCA by using only DEGs highlights variation driven by statistically significant genes but introduces selection bias.)(include as supplementary figure for publication)
+
+```{r}
+# Filter results to only include significant genes (padj < 0.05)
+res0.05 <- results(analysisObject, alpha = 0.05)
+res0.05.df <- as.data.frame(res0.05)
+
+# Subset the significant genes based on padj < 0.05
+significant_genes <- rownames(res0.05.df[res0.05.df$padj < 0.05, ])
+
+# Get the normalized counts for significant genes
+vsd <- vst(analysisObject, blind = FALSE)
+vsd_significant <- vsd[significant_genes, ] # Subset the vsd object to include only significant genes
+
+# Plot PCA for only significant genes
+plotPCA(vsd_significant, intgroup = "developmental_stage")
+```
+
+2. Estimate size factors to investigate whether there is any systematic bias in the sequencing data & check for the presence of genes that are less deeply sequenced
+
+```{r}
+sizeFactors(analysisObject)
+```
+
+3. Estimate dispersion of data by drawing dispersion plot
+
+```{r}
+plotDispEsts(analysisObject)
+```
+
+4. building mean average (MA) plot
+
+```{r}
+plotMA(res0.05)
+```
+
+Select the top 10 differentially expressed genes
+
+```{r}
+library(dplyr)
+best_genes <- res0.05.df %>%
+  arrange(padj) %>%
+  head(10)
+write.csv(best_genes, "best_genes.csv")
+```
+
+Summarize the DEG results using the summary function
+
+```{r}
+res <- results(analysisObject)
+summary(res)
+```
+
+To display all the genes with p-values less than 0.05
+
+```{r}
+res0.05 <- results(analysisObject, alpha = 0.05)
+res0.05.df <- as.data.frame(res0.05) # convert to dataframe
+str(res0.05.df)
+summary(res0.05.df)
+```
+
+How many adjusted p-values were less than 0.05 ?
+
+```{r}
+sum(res$padj < 0.05, na.rm=TRUE)
+```
+
+To display all the genes with p-values less than 0.01
+
+```{r}
+res0.01 <- results(analysisObject, alpha = 0.01)
+res0.01.df <- as.data.frame(res0.01) 
+str(res0.01.df)
+summary(res0.01.df)
+```
+
+How many adjusted p-values were less than 0.01 ?
+
+```{r}
+sum(res$padj < 0.01, na.rm=TRUE)
+```
+
 ## DESEq2 lets you do custom contrasts between levels of a factor (to compare between larvae & pupa, between larva & adult, and between pupa & adult)
 
 Comparing larva vs pupa (Condition 1 vs Condition 2)
@@ -145,43 +237,6 @@ resOrdered4 <- resOrdered3[,c(1,8,2:7)]
 resOrdered_unique <- unique(resOrdered4)
 ```
 
-Summarize the DEG results using the summary function
-
-```{r}
-res <- results(analysisObject)
-summary(res)
-```
-
-To display all the genes with p-values less than 0.05
-
-```{r}
-res0.05 <- results(analysisObject, alpha = 0.05)
-res0.05.df <- as.data.frame(res0.05) # convert to dataframe
-str(res0.05.df)
-summary(res0.05.df)
-```
-
-How many adjusted p-values were less than 0.05 ?
-
-```{r}
-sum(res$padj < 0.05, na.rm=TRUE)
-```
-
-To display all the genes with p-values less than 0.01
-
-```{r}
-res0.01 <- results(analysisObject, alpha = 0.01)
-res0.01.df <- as.data.frame(res0.01) 
-str(res0.01.df)
-summary(res0.01.df)
-```
-
-How many adjusted p-values were less than 0.01 ?
-
-```{r}
-sum(res$padj < 0.01, na.rm=TRUE)
-```
-
 Saving the result file as table
 
 ```{r}
@@ -193,60 +248,23 @@ Alternatively, you can also save the result file in .csv format
 write.csv(resOrdered_unique, "../output/larva_vs_pupa_vs_adult.csv")
 ```
 
-Creating PCA plot
-
-## Generate normalised counts with significantly expressed genes (padj<=0.05) where:
-    the normalized counts is stored in the variable called 'sigNormalizedCounts', which allegedly stands for 'significantly expressed normalized counts'.
-    the rows are gene ids
-    the columns are all the counts (numbers) of significantly expressed genes (without any metadata like log2FoldChange, p-values, padj values etc)
-  
-The purpose of generating normalized counts is to account for the differences in the use of gene length and sequencing depth
+Build volcano plot
 
 ```{r}
-normalisedCountsAO <- counts(analysisObject, normalized=TRUE) # normalize the counts
-tempData = merge(resOrdered, normalisedCountsAO, by="row.names", all=T, sort=F) # combine DEG results with normalized counts
-tempData1 <- tempData[which(tempData$padj <= 0.05),] # filter to retain only statistically significant genes with padj <= 0.05
-tempData2 <- tempData1[,c(1,9:ncol(tempData1))] # filter to keep the first column (probably gene IDs) & keep columns 9 to the last column where the first 8 columns of tempData1 likely consists of metadata (log2FoldChange, p-value, etc)
-sigNormalisedCounts <- tempData2[,-1] # remove the first column of gene IDs to keep only the count data
-rownames(sigNormalisedCounts) <- tempData2[,1] # set the gene IDs as row names, now you have a clean matrix of normalized counts for statistically significant genes only
+vol <- res0.05.df %>%
+  filter(!is.na(padj))
+library(ggplot2)
+ggplot(vol, aes(x = log2FoldChange,  y = -log10(padj)), color = padj<0.05 & abs(log2FoldChange)>1) + 
+  geom_point() +
+  geom_text(data = best_genes, aes(label = ensembleGeneID)) +
+  geom_text_repel(aes(label = ensembleGeneID), size = 3)
 ```
-
-Create PCA object
-
-## Summary of the variables:
-   -normalisedCountsAO: Normalized gene expression values from DESeq2
-   -tempData: Merged table of DE results and normalized counts
-   -tempData1: Subset with significant genes (padj ≤ 0.05)
-   -sigNormalisedCounts: Normalized counts with significantly expressed genes
-   -pca: PCA object from significantly expressed genes
-   -scores: PCA scores (coordinates) + sample ID + developmental stage for drawing PCA plot
+Build heatmap 
 
 ```{r}
-pca <- prcomp(t(sigNormalisedCounts), center=TRUE, scale=TRUE) # This creates a pca object containing PCA results, including the coordinates of samples in PC space.The function 'prcomp' performs PCA analysis on a given dataframe/matrix. t(sigNormalisedCounts): Transposes the matrix so that samples are rows and genes are columns — required format for prcomp().center=TRUE: Centers the data (subtracts the mean of each gene).scale=TRUE: Scales the data (divides by the standard deviation). Important because genes can have very different expression ranges.
-
-scores <- data.frame(sampleID=targets$sampleID, developmental_stage=targets$developmental_stage, pca$x[,1:2]) # pca$x: Contains the PCA-transformed coordinates of each sample (rows) along principal components (columns).[,1:2]: Selects only PC1 and PC2 — the first two principal components.data.frame(targets$sampleID, ...): Combines the PCA coordinates with the sample ID column & developmental stage column of the targets.txt file. scores is a ready-to-plot table showing each sample’s position on the PC1-PC2 plane.
 ```
 
-Create PCA plot
 
-```{r}
-pca_plot <- ggplot(scores, aes(x = PC1, y = PC2, fill = developmental_stage)) + # use the 'scores' dataframe to create the PCA plot & color the points by developmental stage
-  geom_point(shape = 21, size = 3, color = "black") + # add points with black border
-  geom_text_repel(aes(label = sampleID), size = 3) + # label points with sample ID in a non-overlapping & clean fashion
-  theme_bw() + # apply a clean black-and-white background theme for the plot
-  labs(title = "PCA of Normalised Counts", x = "PC1", y = "PC2", fill = "Developmental Stage") + # the labs() function adds plot annotations where it adds title of the plot, label x & y axes, and it adds the title of the legend
-  theme(text = element_text(size = 12), legend.position = "bottom") # the theme() function in ggplot2 package is used to customize the non-data elements of the plot (fonts, spacing, background, legend position, axis lines & more)
 
-ggsave("PCA_plot.pdf", plot = pca_plot, width = 6, height = 5) # In this case, save the PCA plot in .pdf format in the current working directory, same location as the R script. You can also specify the desired output directory to save the plot.
-```
 
-Save normalised counts of significant genes with adj p-value <= 0.05 to a file
 
-```{r}
-sigNormalisedCounts1 <- sigNormalisedCounts # make a copy of the significant normalized counts 
-names <- rownames(sigNormalisedCounts1) # store gene names (rownames) into a separate variable, called 'names' in this case
-rownames(sigNormalisedCounts1) <- NULL # removes row names from the dataframe
-sigNormalisedCounts2 <- cbind(names,sigNormalisedCounts1) # combine gene names as the first column with sigNormalisedCounts1 in the the new dataframe, 'sigNormalisedCounts2'
-colnames(sigNormalisedCounts2)[1] = "ensembleGeneID" # rename the first column to 'ensembleGeneID'
-write.table(sigNormalisedCounts2, quote = F, row.names = F, sep = "\t", "../output/hcluster.all.markdup.genecount.sig0.05.txt") # write/save the final dataframe to a tab-separated file without quotes or row names
-```
