@@ -25,6 +25,7 @@ longstitch_file = current_dir / "assets" / "run_longstitch.sh"
 braker3_file = current_dir / "assets" / "braker3_perl_module_installation.sh"
 star_file = current_dir / "assets" / "RNAseq_alignment_with_STAR.sh"
 deseq2rmd_file = current_dir / "assets" / "deseq2.Rmd"
+masurca_file = current_dir / "assets" / "MaSuRCA_config.txt"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
 # ---- HEADER SECTION ----
@@ -335,6 +336,53 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("---")
 
         st.write("###")
+        st.write("---")
+
+        st.write("**Alternatively, use another hybrid assembler called MaSuRCA**")
+        st.write("✔️create and activate the 'masurca' conda environment")
+        st.code("""
+                conda create -n masurca
+                conda activate masurca
+                """, language="bash")
+        st.write("✔️install MaSuRCA from its official GitHub remote repository")
+        st.code("""
+                wget https://github.com/alekseyzimin/masurca/releases/download/4.1.2/MaSuRCA-4.1.2.tgz # download the latest distribution from the github release page https://github.com/alekseyzimin/masurca/releases.
+                tar -xvzf MaSuRCA-4.1.2.tgz # unpack the MaSuRCA archive with latest 4.1.2 version
+                cd MaSuRCA-4.1.2 # change into the MaSuRCA-4.1.2 directory
+                ./install.sh # run the script to configure and build all the necessary components of MaSuRCA
+                """, language="bash")
+        st.write("✔️write a configuration file that states the type of data you have and the parameters you want to use for MaSuRCA to run")
+        # ----LOAD  BASH SCRIPT----
+        # Check if the file exists before reading
+        if masurca_file.exists():
+            with open(masurca_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download MaSuRCA Configuration File",
+                data=script_byte,
+                file_name=masurca_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{masurca_file.name} does not exist.")
+        st.write("✔️generate the 'assemble.sh' script after finish writing the configuration.txt file")
+        st.code("""
+            /path_to_MaSuRCA/MaSuRCA-4.1.2/bin/masurca MaSuRCA_config.txt # this step will generate the 'assemble.sh' script based on the input config file for you to run MaSuRCA
+            """,language="bash")
+        st.write("✔️make the 'assemble.sh' script executable and run it to perform hybrid genome assembly using MaSuRCA pipeline")
+        st.code("""
+        chmod +x assemble.sh # make the script executable
+        bash assemble.sh # run the script to initiate MaSuRCA
+        """, language="bash")
+        st.write("Expect to find the final assembly output file in the directories: CA/10-gapclose or CA/9-terminator")
+        st.markdown("[Visit MaSuRCA GitHub Page](https://github.com/alekseyzimin/masurca)")
+        st.markdown("[Read how MaSuRCA is used to perform hybrid genome assembly (Illumina & PacBio) for Melipona bicolor](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-024-10075-x?utm_source=chatgpt.com)")
+        st.markdown("[Read how MaSuRCA is used to perform hybrid genome assembly (Illumina & Oxford Nanopore) for Drepana arcuata](https://pmc.ncbi.nlm.nih.gov/articles/PMC7704289/?utm_source=chatgpt.com)")
+
+        st.write("---")
+        st.write("###")
 
         st.write("14. Compare the hybrid genome assembly produced by SPAdes with the gold standard reference genome (if there is any).**")
 
@@ -458,7 +506,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("busco --list-datasets | grep -i lepidoptera_odb12", language="bash")
         st.write("✔️run BUSCO to evaluate the completeness of the improved CPB genome")
         st.code("export NUMEXPR_MAX_THREADS=48", language="bash")
-        st.code("nohup busco -m genome -i /media/Raid/Wee/WeeYeZhi/resources_from_LKM/hybrid_genome_assembly_of_CPB/CPB_insect_draft_assembly.v4.fa -c 48 -l lepidoptera_odb12 -o CPB_raw_hybrid_assembly_busco > CPB_raw_hybrid_assembly_busco_output.log 2>&1 &", language="bash")
+        st.code("nohup busco -m genome -i /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k213355/scaffolds.fasta -c 48 -l lepidoptera_odb12 -o CPB_hybrid_assembly_busco_k213355 > CPB_hybrid_assembly_busco_k213355_output.log 2>&1 &", language="bash")
         st.markdown("[Visit BUSCO User Guide Page](https://busco.ezlab.org/busco_userguide.html)")
 
         st.write("###")
@@ -897,6 +945,8 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.write("❗If there is no significance difference in the gene expression level between the two developmental stages where p-value > 0.05 (at 95% statistical significance level), then null hypothesis is accepted/ alternative hypothesis is rejected")
         st.write("❗You can compare between the DEG results at p-value=0.05 and p-value=0.01 (most stringent gene filtering) and get the intersected results")
         st.write("❗Run these 3 analysis, 'drawing PCA plot', 'inspecting size factor', 'drawing dispersion plot' to double check the quality of the RNA-seq data")
+        st.write("❗PCA is your QC/overview tool; heatmaps and volcanoes are for showing off the real DEGs.")
+        st.write("❗PCA is typically performed on the expression data (counts or normalized counts) as shown in the 'analysisObject' dataframe, not on the results of differential gene expression as shown in the 'resOrdered_unique'.")
         st.write("---")
 
 # Phase 3: Molecular Docking & Dynamics Simulation
@@ -920,8 +970,8 @@ if selected == "Additional Notes":
         st.header("Additional Note ❗")
         st.write("###")
         st.write("1. Kill the process")
-        st.code("pkill -9 -f spades",language="bash")  # kill all 'spades' related processes without the need to specify the ID of the process
-        st.code("kill -9 103839", language="bash")  # kill the main spades process with the process ID, '103839'
+        st.code("pkill -9 -f spades",language="bash")  # kill all 'spades' related processes without the need to specify the ID of the process # This is very dangerous to run as it might kill dwservice if the service happens to reference to the spades process in the launch command
+        st.code("kill -9 103839", language="bash")  # kill the main spades process with the process ID, '103839'. This is the safest command to kill the running bioinformatics process
 
         st.write("###")
 
@@ -997,3 +1047,15 @@ if selected == "Additional Notes":
 
         st.write("14. Use the str() function to examine the structure of the file that you have stored in the variable") # examine how many rows of observations, how many columns of variables, examine whether it is a dataframe, list, vector, matrix being stored in the variable, examine the data type in RStudio
         st.code("str('meta')") # assume that the name of the variable used to store the sample metadata.csv file is meta
+
+        st.write("###")
+
+        st.write("15. To remove all the files within a single directory (by staying within the same directory)")
+        st.code("rm *", language="bash")
+
+        st.write("###")
+
+        st.write("16. To remove all the subdirectories and files within a single directory (by staying within the same directory")
+        st.code("rm -r *", language="bash")
+
+        st.write("###")
