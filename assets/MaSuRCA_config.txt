@@ -1,0 +1,14 @@
+DATA
+PE = pe 101 15.15 /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1.fastq.gz /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2.fastq.gz
+PACBIO = /media/Raid/Wee/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq.gz
+END
+
+PARAMETERS
+GRAPH_KMER_SIZE = auto
+USE_LINKING_MATES = 0 
+NUM_THREADS = 16
+JF_SIZE = 5604500000
+USE_GRID = 0
+CA_PARAMETERS = cgwErrorRate=0.15
+SOAP_ASSEMBLY = 0
+END
