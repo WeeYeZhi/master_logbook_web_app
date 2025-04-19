@@ -26,6 +26,7 @@ braker3_file = current_dir / "assets" / "braker3_perl_module_installation.sh"
 star_file = current_dir / "assets" / "RNAseq_alignment_with_STAR.sh"
 deseq2rmd_file = current_dir / "assets" / "deseq2.Rmd"
 masurca_file = current_dir / "assets" / "MaSuRCA_config.txt"
+gromacs_file = current_dir / "assets" / "Gromacs_codes.txt"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
 # ---- HEADER SECTION ----
@@ -349,8 +350,13 @@ if selected == "Phase 1: Sequence-Based Analysis":
                 wget https://github.com/alekseyzimin/masurca/releases/download/4.1.2/MaSuRCA-4.1.2.tgz # download the latest distribution from the github release page https://github.com/alekseyzimin/masurca/releases.
                 tar -xvzf MaSuRCA-4.1.2.tgz # unpack the MaSuRCA archive with latest 4.1.2 version
                 cd MaSuRCA-4.1.2 # change into the MaSuRCA-4.1.2 directory
-                ./install.sh # run the script to configure and build all the necessary components of MaSuRCA
+                bash install.sh # run the script to configure and build all the necessary components of MaSuRCA
                 """, language="bash")
+        st.write("✔️verify the installation of MaSuRCA")
+        st.code("""
+        /bin/masurca --help
+        /bin/masurca --version
+        """, language="bash")
         st.write("✔️write a configuration file that states the type of data you have and the parameters you want to use for MaSuRCA to run")
         # ----LOAD  BASH SCRIPT----
         # Check if the file exists before reading
@@ -369,15 +375,20 @@ if selected == "Phase 1: Sequence-Based Analysis":
             st.error(f"{masurca_file.name} does not exist.")
         st.write("✔️generate the 'assemble.sh' script after finish writing the configuration.txt file")
         st.code("""
-            /path_to_MaSuRCA/MaSuRCA-4.1.2/bin/masurca MaSuRCA_config.txt # this step will generate the 'assemble.sh' script based on the input config file for you to run MaSuRCA
+            /bin/masurca MaSuRCA_config.txt # this step will generate the 'assemble.sh' script based on the input config file for you to run MaSuRCA
             """,language="bash")
         st.write("✔️make the 'assemble.sh' script executable and run it to perform hybrid genome assembly using MaSuRCA pipeline")
         st.code("""
         chmod +x assemble.sh # make the script executable
-        bash assemble.sh # run the script to initiate MaSuRCA
+        nohup bash assemble.sh > masurca_hybrid_assembly.log 2>&1 & # run the script in the background to initiate MaSuRCA
+        """, language="bash")
+        st.write("✔️Alternatively, you can have a quick run by using the command below without creating config.txt and assembly script")
+        st.code("""
+        masurca -i /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1.fastq.gz,/media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2.fastq.gz -r /media/Raid/Wee/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq.gz -t 16 # This will run hybrid assembly with CABOG contigger and default settings. This is suitable for small assembly projects.
         """, language="bash")
         st.write("Expect to find the final assembly output file in the directories: CA/10-gapclose or CA/9-terminator")
         st.markdown("[Visit MaSuRCA GitHub Page](https://github.com/alekseyzimin/masurca)")
+        st.markdown("[Read how other bioinformaticians ran MaSuRCA](https://bioinformaticsworkbook.org/dataAnalysis/GenomeAssembly/Assemblers/MaSuRCA.html#gsc.tab=0)")
         st.markdown("[Read how MaSuRCA is used to perform hybrid genome assembly (Illumina & PacBio) for Melipona bicolor](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-024-10075-x?utm_source=chatgpt.com)")
         st.markdown("[Read how MaSuRCA is used to perform hybrid genome assembly (Illumina & Oxford Nanopore) for Drepana arcuata](https://pmc.ncbi.nlm.nih.gov/articles/PMC7704289/?utm_source=chatgpt.com)")
 
@@ -958,6 +969,21 @@ if selected == "Phase 3: Molecular Docking & Dynamics Simulation":
         st.write("###")
         st.write("You can use logMD to visualize the trajectory of your protein-ligand complex easily (logMD functions the same as VMD)")
         st.write("generative AI drug design method, DrugHive")
+        # ----LOAD GROMACS CODE----
+        # Check if the file exists before reading
+        if gromacs_file.exists():
+            with open(gromacs_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Gromacs Code",
+                data=script_byte,
+                file_name=gromacs_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{gromacs_file.name} does not exist.")
         st.markdown("[Visit the logmd GitHub Page](https://github.com/log-md/logmd)")
         st.markdown("[Try logmd here](https://colab.research.google.com/drive/12adhXXF1MQIzh_vEwKX9r_iF6jV-CNHE#scrollTo=N2_uubn_2qGM)")
         st.markdown("[Try logmd here](https://rcsb.ai/logmd/3d090180)")
@@ -1057,5 +1083,13 @@ if selected == "Additional Notes":
 
         st.write("16. To remove all the subdirectories and files within a single directory (by staying within the same directory")
         st.code("rm -r *", language="bash")
+
+        st.write("###")
+
+        st.write("17. To decompress a file (.gz) without deleting the original file")
+        st.code("""
+        gunzip -k filename.gz # decompress a single file only one at a time
+        gunzip -k *.gz # decompress all the gzipped files with .gz extensions within the working directory all at once
+        """, language="bash")
 
         st.write("###")
