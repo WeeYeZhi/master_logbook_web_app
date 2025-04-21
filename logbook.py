@@ -395,6 +395,33 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("---")
         st.write("###")
 
+        st.write("Alternatively, you can perform PacBio HiFi-only assembly using HiFiASM")
+        st.write("✔️create and activate the 'hifiasm' conda environment")
+        st.code("""
+                     conda create -n hifiasm
+                     conda activate hifiasm
+                     """, language="bash")
+        st.write("✔️navigate to the 'HiFiASM_results' direcrtory and install HiFiASM from its official GitHub remote repository")
+        st.code("""
+        git clone https://github.com/chhylp123/hifiasm
+        cd hifiasm && make
+        """, language="bash")
+        st.write("verify the installation of HiFiASM")
+        st.code("""
+        hiafiasm -h
+        hiafiasm --version
+        """, language="bash")
+        st.write("✔️run HiFiASM pipeline to perform PacBio HiFi-only assembly")
+        st.code("""
+        ./hifiasm -o [prefix] -t [nThreads] [options] input1.fq [input2.fq [...]]
+        nohup ./hifiasm -o HiFiASM_output -t 48 PacBio.fq.gz > hifiasm.log 2>&1 & # set 'HiFiASM_output' as the prefix name of the output files 
+        """)
+        st.markdown("[Visit HiFiASM GitHub Page](https://github.com/chhylp123/hifiasm)")
+        st.markdown("[Visit HiFiASM Tutorial Page](https://hifiasm.readthedocs.io/en/latest/index.html)")
+
+        st.write("###")
+        st.write("---")
+
         st.write("14. Compare the hybrid genome assembly produced by SPAdes with the gold standard reference genome (if there is any).**")
 
         st.write("###")
@@ -1086,10 +1113,18 @@ if selected == "Additional Notes":
 
         st.write("###")
 
-        st.write("17. To decompress a file (.gz) without deleting the original file")
+        st.write("17. To decompress a file (.gz)")
         st.code("""
-        gunzip -k filename.gz # decompress a single file only one at a time
-        gunzip -k *.gz # decompress all the gzipped files with .gz extensions within the working directory all at once
+        gunzip filename.gz # decompress a single file without keeping the original gzipped file
+        gunzip -k filename.gz # decompress a single file only one at a time while keeping the original gzipped file
+        gunzip -k *.gz # decompress all the gzipped files with .gz extensions within the working directory all at once while keeping the original gzipped file
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("18. To check whether a program crashes/suddenly get killed, when you suspect a hardware/memory issue, when you debug weird behaviour in WSL or Linux")
+        st.code("""
+        dmesg | tail -n 20 # display the last 20 lines of kernel messages to view boot process details, device connection events, memory errors, processes being killed due to OOM conditions
         """, language="bash")
 
         st.write("###")
