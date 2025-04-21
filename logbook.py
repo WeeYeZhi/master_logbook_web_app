@@ -418,6 +418,58 @@ if selected == "Phase 1: Sequence-Based Analysis":
         """)
         st.markdown("[Visit HiFiASM GitHub Page](https://github.com/chhylp123/hifiasm)")
         st.markdown("[Visit HiFiASM Tutorial Page](https://hifiasm.readthedocs.io/en/latest/index.html)")
+        st.markdown("[Read HiFiASM Publication](https://www.nature.com/articles/s41592-020-01056-5)")
+
+        st.write("###")
+        st.write("---")
+
+        st.write("Alternatively, you can perform PacBio HiFi-only assembly using Verkko")
+        st.write("✔️create and activate the 'verkko' conda environment")
+        st.code("""
+                          conda create -n verkko
+                          conda activate verkko
+                          """, language="bash")
+        st.write("✔️navigate to the 'Verkko_results' direcrtory and install Verkko from its official GitHub remote repository")
+        st.code("conda install -c conda-forge -c bioconda -c defaults verkko")
+        st.write("✔️verify the installation of verkko")
+        st.code("""
+        verkko # display all the help parameters of verkko
+        curl -L https://obj.umiacs.umd.edu/sergek/shared/ecoli_hifi_subset24x.fastq.gz -o hifi.fastq.gz # download a compressed PacBio HiFi file of E. coli from internet & save it as 'hifi.fastq.gz'
+        curl -L https://obj.umiacs.umd.edu/sergek/shared/ecoli_ont_subset50x.fastq.gz -o ont.fastq.gz # download a compressed Oxford Nanopore file of E. coli from internet & save it as 'ont.fastq.gz'
+        verkko -d asm --hifi ./hifi.fastq.gz --nano ./ont.fastq.gz # run the test to confirm verkko is installed correctly and running smoothly 
+        """, language="bash")
+        st.write("✔️run Verkko pipeline to perform PacBio HiFi-only assembly")
+        st.code("verkko -d verkko_output --hifi PacBio.fq.gz --threads 48", language="bash")
+        st.markdown("[Visit Verkko GitHub Page](https://github.com/marbl/verkko)")
+        st.markdown("[Read Verkko Publication](https://www.nature.com/articles/s41587-023-01662-6)")
+
+        st.write("###")
+        st.write("---")
+
+        st.write("Alternatively, you can perform PacBio HiFi-only assembly using Flye")
+        st.write("✔️create and activate the 'Flye' conda environment")
+        st.code("""
+                                 conda create -n flye
+                                 conda activate flye
+                                 """, language="bash")
+        st.write("✔️navigate to the 'Flye_results' direcrtory and install Flye from its official GitHub remote repository")
+        st.code("""
+        git clone https://github.com/fenderglass/Flye
+        cd Flye
+        make
+        """, language="bash")
+        st.write("✔️verify the installation of Flye")
+        st.code("""
+        python bin/flye # display all the Flye's help parameters
+        python bin/flye/tests/test_toy.py # run Flye pipeline on test dataset to ensure it's installed correctly
+        """, language="bash")
+        st.write("✔️run Flye pipeline to perform PacBio HiFi-only assembly")
+        st.code("""
+        python bin/flye --pacbio-hifi PacBio.fq.gz -o output_directory -t 48 # call and run the flye script located inside the bin directory using python
+        """, language="python")
+        st.markdown("[Visit Flye GitHub Page](https://github.com/mikolmogorov/Flye?tab=readme-ov-file)")
+        st.markdown("[Vist Flye Usage Parameters](https://github.com/mikolmogorov/Flye/blob/flye/docs/USAGE.md)")
+        st.markdown("[Read Flye Publication](https://www.nature.com/articles/s41587-019-0072-8)")
 
         st.write("###")
         st.write("---")
@@ -1047,7 +1099,9 @@ if selected == "Additional Notes":
         st.write("###")
 
         st.write("4. To remove a conda environment that has been previously created")
-        st.code("conda env remove --name name_of_created_environment", language="bash")
+        st.code("""
+        conda env remove --name name_of_created_environment # or conda env remove -n name_of_created_environment
+        """, language="bash")
 
         st.write("###")
 
