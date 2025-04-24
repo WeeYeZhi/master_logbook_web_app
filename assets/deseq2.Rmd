@@ -1,5 +1,7 @@
+# Perform DEG analysis
 
 Load the Libraries
+
 ```{r}
 library(DESeq2)
 library(biomaRt)
@@ -26,6 +28,7 @@ targets <- read.table("targets.txt", header=TRUE, sep="\t")
 ```
 
 Read in featureCounts for all samples
+
 ```{r}
 rawData <- NULL
 
@@ -81,16 +84,16 @@ keep <- rowSums(counts(analysisObject)) >= 18
 analysisObject <- analysisObject[keep,]
 ```
 
-## Check the quality of the DEG results by drawing PCA plot, estimating size factors, drawing dispersion plot & building MA plot
+# Check the quality of the DEG results by drawing PCA plot, estimating size factors, drawing dispersion plot & building MA plot
 
-1. Create PCA plot for all the genes (plotting PCA using all genes gives an unbiased view of global expression patterns and sample clustering,)(include as main figure for publication)
+1.  Create PCA plot for all the genes (plotting PCA using all genes gives an unbiased view of global expression patterns and sample clustering,)(include as main figure for publication)
 
 ```{r}
 vsd <- vst(analysisObject, blind = FALSE)
 plotPCA(vsd, intgroup = "developmental_stage")
 ```
 
-Create PCA plot to include only significantly expressed genes (where padj<0.05)(plotting PCA by using only DEGs highlights variation driven by statistically significant genes but introduces selection bias.)(include as supplementary figure for publication)
+Create PCA plot to include only significantly expressed genes (where padj\<0.05)(plotting PCA by using only DEGs highlights variation driven by statistically significant genes but introduces selection bias.)(include as supplementary figure for publication)
 
 ```{r}
 # Filter results to only include significant genes (padj < 0.05)
@@ -108,19 +111,19 @@ vsd_significant <- vsd[significant_genes, ] # Subset the vsd object to include o
 plotPCA(vsd_significant, intgroup = "developmental_stage")
 ```
 
-2. Estimate size factors to investigate whether there is any systematic bias in the sequencing data & check for the presence of genes that are less deeply sequenced
+2.  Estimate size factors to investigate whether there is any systematic bias in the sequencing data & check for the presence of genes that are less deeply sequenced
 
 ```{r}
 sizeFactors(analysisObject)
 ```
 
-3. Estimate dispersion of data by drawing dispersion plot
+3.  Estimate dispersion of data by drawing dispersion plot
 
 ```{r}
 plotDispEsts(analysisObject)
 ```
 
-4. building mean average (MA) plot
+4.  building mean average (MA) plot
 
 ```{r}
 plotMA(res0.05)
@@ -187,6 +190,7 @@ Comparing larva vs adult (Condition 1 vs Condition 3)
 res_larva_adult <- results(analysisObject,
 contrast=c("condition", conditionOne, conditionThree))
 ```
+
 Comparing pupa vs adult (Condition 2 vs Condition 3)
 
 ```{r}
@@ -208,6 +212,7 @@ Sort the result tables to find the gene with the largest log2FoldChange. Then, i
 # most upregulated gene in larva vs pupa
 head(res_larva_pupa[order(res_larva_pupa$log2FoldChange, decreasing=TRUE), ])
 ```
+
 ```{r}
 # most upregulated gene in larva vs adult
 head(res_larva_adult[order(res_larva_adult$log2FoldChange, decreasing=TRUE), ])
@@ -225,7 +230,7 @@ Reorder the resOrdered object to make the gene_id column as first column
 resOrdered1 <- resOrdered[,c(7,1:6)]
 ```
 
-Load the GTF file and extract the gene_id, gene_name and transcript_id columns. Merge the gene_name column with the gene_id column. 
+Load the GTF file and extract the gene_id, gene_name and transcript_id columns. Merge the gene_name column with the gene_id column.
 
 ```{r}
 gtf_file_hs <- import("../resources/Homo_sapiens.GRCh38.109.gtf")
@@ -242,6 +247,7 @@ Saving the result file as table
 ```{r}
 write.table(resOrdered_unique, quote = F, row.names = F, sep="\t", "../output/larva_vs_pupa_vs_adult.txt")
 ```
+
 Alternatively, you can also save the result file in .csv format
 
 ```{r}
@@ -259,12 +265,50 @@ ggplot(vol, aes(x = log2FoldChange,  y = -log10(padj)), color = padj<0.05 & abs(
   geom_text(data = best_genes, aes(label = ensembleGeneID)) +
   geom_text_repel(aes(label = ensembleGeneID), size = 3)
 ```
-Build heatmap 
+
+Build heatmap
+
+Read ComplexHeatmap book at <https://jokergoo.github.io/ComplexHeatmap-reference/book/>
+
+Get ComplexHeatmap Rmarkdown script at <https://github.com/brandonyph/ComplexHeatmap_Walkthrough>
 
 ```{r}
+# Step 1: Select top 50 most significant DEGs
+top50_genes <- head(rownames(res0.05.df[order(res0.05.df$padj),]), 50)
+
+# Step 2: Extract normalized expression for those DEGs
+vsd_mat <- assay(vsd)[top50_genes, ]
+
+# Step 3: Scale each gene (row-wise z-score)
+vsd_mat_scaled <- t(scale(t(vsd_mat)))  # Rows: genes; Columns: samples
+
+# Step 4: Prepare column annotation for developmental stages
+# Ensure sample order in targets matches the columns in vsd_mat
+targets <- targets[match(colnames(vsd_mat_scaled), targets$sampleID), ]
+
+# Create annotation
+col_ha <- HeatmapAnnotation(
+  stage = targets$developmental_stage,
+  col = list(stage = c(
+    larva = "#1f77b4",  # blue
+    pupa = "#ff7f0e",   # orange
+    adult = "#2ca02c"   # green
+  )),
+  annotation_legend_param = list(stage = list(title = "Developmental Stage"))
+)
+
+# Step 5: Generate the heatmap
+Heatmap(vsd_mat_scaled,
+        name = "z-score",
+        top_annotation = col_ha,
+        show_row_names = TRUE,
+        show_column_names = TRUE,
+        cluster_rows = TRUE,
+        cluster_columns = TRUE,
+        column_split = targets$developmental_stage, # Split columns by larva, pupa, adult
+        row_names_gp = gpar(fontsize = 6),
+        column_names_gp = gpar(fontsize = 8),
+        col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red"))
+)
+
 ```
-
-
-
-
-
