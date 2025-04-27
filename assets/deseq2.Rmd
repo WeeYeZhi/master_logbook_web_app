@@ -254,7 +254,7 @@ Alternatively, you can also save the result file in .csv format
 write.csv(resOrdered_unique, "../output/larva_vs_pupa_vs_adult.csv")
 ```
 
-Build volcano plot
+# Build volcano plot
 
 ```{r}
 vol <- res0.05.df %>%
@@ -266,7 +266,7 @@ ggplot(vol, aes(x = log2FoldChange,  y = -log10(padj)), color = padj<0.05 & abs(
   geom_text_repel(aes(label = ensembleGeneID), size = 3)
 ```
 
-Build heatmap
+# Build heatmap
 
 Read ComplexHeatmap book at <https://jokergoo.github.io/ComplexHeatmap-reference/book/>
 
@@ -310,5 +310,89 @@ Heatmap(vsd_mat_scaled,
         column_names_gp = gpar(fontsize = 8),
         col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red"))
 )
+
+```
+
+# Perform orthology-based functional annotation of novel *C. cramerella* genome sequence using eggNOG-mapper
+
+This is done in Linux (refer back to logbook.py)
+
+# Perform annotation mapping files (Extract GO and KEGG terms)
+
+```{r}
+
+library(tidyverse)
+
+# Read the eggNOG annotation file (remove header lines starting with "#")
+eggnog <- read_tsv("cramerella_annot.emapper.annotations", comment = "#", col_names = TRUE)
+
+# Preview columns
+glimpse(eggnog)
+
+# Extract GO annotations
+go_map <- eggnog %>%
+  filter(!is.na(GOs)) %>%
+  select(query_name, GOs) %>%
+  separate_rows(GOs, sep = ",") %>%
+  rename(GeneID = query_name, GO_ID = GOs)
+
+# Extract KEGG KO terms
+kegg_map <- eggnog %>%
+  filter(!is.na(KEGG_ko)) %>%
+  select(query_name, KEGG_ko) %>%
+  separate_rows(KEGG_ko, sep = ",") %>%
+  rename(GeneID = query_name, KEGG_ID = KEGG_ko)
+
+```
+
+# Load DEG gene list
+
+```{r}
+
+# List of significant DEGs (based on adjusted p-value)
+sig_genes <- res_annotated %>%
+  filter(padj < 0.05) %>%
+  pull(ensembl_gene_id) %>%
+  unique()
+
+```
+
+# Perform gene set enrichment analysis (GSEA), which includes GO enrichment and KEGG enrichment respectively by using clusterProfiler::enricher()
+
+# GO enrichment
+
+```{r}
+
+library(clusterProfiler)
+
+ego <- enricher(gene = sig_genes,
+                TERM2GENE = go_map,
+                pvalueCutoff = 0.05,
+                pAdjustMethod = "BH")
+
+dotplot(ego, showCategory = 20, font.size = 10)
+
+```
+
+# KEGG enrichment
+
+```{r}
+
+ekegg <- enricher(gene = sig_genes,
+                  TERM2GENE = kegg_map,
+                  pvalueCutoff = 0.05,
+                  pAdjustMethod = "BH")
+
+dotplot(ekegg, showCategory = 20, font.size = 10)
+
+```
+
+# Save the previously extracted GO and KEGG annotation files
+
+```{r}
+
+# Save GO mapping and KEGG mapping
+write.csv(go_map, "GO_mapping.csv", row.names = FALSE)
+write.csv(kegg_map, "KEGG_mapping.csv", row.names = FALSE)
 
 ```
