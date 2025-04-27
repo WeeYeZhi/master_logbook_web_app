@@ -1039,6 +1039,29 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.write("❗PCA is typically performed on the expression data (counts or normalized counts) as shown in the 'analysisObject' dataframe, not on the results of differential gene expression as shown in the 'resOrdered_unique'.")
         st.write("---")
 
+        st.write("**5. Install eggNOG-mapper to perform functional annotation (orthology-based functional annotation) of novel genome sequence of C. cramerella**")
+        st.write("✔️create & activate the 'eggnogmapper' conda environment")
+        st.code("""
+               conda create -n eggnogmapper
+               conda activate eggnogmapper
+        """, language="bash")
+        st.write("✔️install eggnog-mapper")
+        st.code("conda install -c bioconda eggnog-mapper", language="bash")
+        st.write("✔️install the eggnog database by running the below python script")
+        st.code("download_eggnog_data.py", language="bash")
+        st.write("✔️verify the installation of eggNOG-mapper")
+        st.code("""
+        emapper.py --version # emapper.py is the main command to invoke and run eggNOG-mapper
+        emapper.py --help
+        """, language="bash")
+        st.write("✔️run eggNOG-mapper")
+        st.code("""
+        emapper.py -i braker.proteins.faa -o cramerella_annot --itype proteins --cpu 16 -m diamond # specify 'braker.proteins.faa' as input (datatype=protein), set the prefix of all the output files to be 'cramerella_annot', specify the mode to use DIAMOND to perform fast sequence alignment (if you dont specify -m, its also ok as eggNOG-mapper will use DIAMOND to perform sequene alignment by default)
+        """, language="bash")
+        st.markdown("[Visit eggNOG-mapper GitHub Page](https://github.com/eggnogdb/eggnog-mapper/wiki/eggNOG-mapper-v2.0.0-v2.0.1)")
+        st.markdown("[Read eggNOG-mapper Publication](https://academic.oup.com/mbe/article/34/8/2115/3782716?login=false)")
+        st.markdown("[Read latest eggNOG-mapper Publication](https://pubmed.ncbi.nlm.nih.gov/30418610/)")
+
 # Phase 3: Molecular Docking & Dynamics Simulation
 
 if selected == "Phase 3: Molecular Docking & Dynamics Simulation":
