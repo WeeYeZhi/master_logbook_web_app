@@ -44,7 +44,7 @@ with st.container():
 with st.sidebar:
     selected = option_menu(
         menu_title="Methodology",
-        options=["Phase 1: Sequence-Based Analysis", "Phase 2: Structure-Based Analysis", "Phase 3: Molecular Docking & Dynamics Simulation", "Additional Notes"],
+        options=["Phase 1: Sequence-Based Analysis", "Phase 2: Reference-Based Transcriptomics Analysis", "Phase 3: Structure-Based Analysis", "Phase 4: Molecular Docking & Dynamics Simulation", "Additional Notes"],
     )
 
 #----CONTENT SECTION----
@@ -339,6 +339,24 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
         st.write("---")
 
+        st.write("**Determine the library insert size of the Illumina paired-end read using bbmerge (contained within the BBMap package**)")
+        st.write("✔️create and activate the 'bbmap' conda environment")
+        st.code("""
+                conda create -n bbmap
+                conda activate bbmap
+        """, language="bash")
+        st.write("✔️install bbmap via conda within the environment")
+        st.code("conda install bioconda::bbmap", language="bash")
+        st.write("✔️run bbmerge.sh to output the insert size statistics of the Illumina paired-end read")
+        st.code("nohup bbmerge.sh in1=/media/raid/Wee/WeeYeZhi/resources_from_LKM/raw_illumina_read/Conopomorpha_raw_1.fastq in2=/media/raid/Wee/WeeYeZhi/resources_from_LKM/raw_illumina_read/Conopomorpha_raw_2.fastq ihist=ihist.txt > bbmerge.log 2>&1 &")
+        st.markdown("[Read bbmerge Publication](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0185056)")
+        st.markdown("[Read bbmap Publication](https://escholarship.org/uc/item/1h3515gn)")
+        st.markdown("[Visit bbmap conda installation page](https://anaconda.org/bioconda/bbmap)")
+        st.markdown("[Visit bbmap GitHub Page](https://github.com/BioInfoTools/BBMap/tree/master)")
+        st.markdown("[Visit bbmerge GitHub Page User Manual](https://github.com/BioInfoTools/BBMap/blob/master/sh/bbmerge.sh)")
+
+        st.write("###")
+
         st.write("**Alternatively, use another hybrid assembler called MaSuRCA**")
         st.write("✔️create and activate the 'masurca' conda environment")
         st.code("""
@@ -352,10 +370,16 @@ if selected == "Phase 1: Sequence-Based Analysis":
                 cd MaSuRCA-4.1.2 # change into the MaSuRCA-4.1.2 directory
                 bash install.sh # run the script to configure and build all the necessary components of MaSuRCA
                 """, language="bash")
-        st.write("✔️verify the installation of MaSuRCA")
+        st.write("✔️verify the installation of MaSuRCA installed via GitHub official source code package")
         st.code("""
-        /bin/masurca --help
-        /bin/masurca --version
+                MaSuRCA-4.1.2/bin/masurca --help
+                MaSuRCA-4.1.2/bin/masurca --version
+                """, language="bash")
+        st.write("✔️Alternatively, you can install MaSuRCA via conda")
+        st.code("conda install -c bioconda masurca")
+        st.write("✔️verify the installation of MaSuRCA installed via conda")
+        st.code("""
+        which masurca # running this command will return "home/cbr15/anaconda3/envs/masurca/bin/masurca", where you can use this 'filepath to masurca' to generate the assemble.sh and run MaSuRCA later
         """, language="bash")
         st.write("✔️write a configuration file that states the type of data you have and the parameters you want to use for MaSuRCA to run")
         # ----LOAD  BASH SCRIPT----
@@ -586,11 +610,10 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
 
         st.write("**19. Evaluate the completeness of the genome assembly after scaffolding**")
-        st.write("✔️create a virtual environment called 'busco' & install BUSCO within the environment")
-        st.code("conda create -n busco busco -c bioconda -c conda-forge -c defaults", language="bash")
-        st.write("try to run wget or git clone to get the latest version of busco from official github page")
+        st.write("✔️create a virtual environment called 'busco_env' & install BUSCO within the environment")
+        st.code("conda create -n busco_env", language="bash")
         st.write("✔️activate the BUSCO environment")
-        st.code("conda activate busco", language="bash")
+        st.code("conda activate busco_env", language="bash")
         st.write("✔️determine the lineage file suitable to be used for CPB genome by listing the lineage datasets available in BUSCO first, followed by referring to the NCBI BioProject of CPB (taxonomy) to check its taxonomy")
         st.code("busco --list-datasets", language="bash")
         st.code("busco --list-datasets | grep -i lepidoptera_odb12", language="bash")
@@ -598,6 +621,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("export NUMEXPR_MAX_THREADS=48", language="bash")
         st.code("nohup busco -m genome -i /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k213355/scaffolds.fasta -c 48 -l lepidoptera_odb12 -o CPB_hybrid_assembly_busco_k213355 > CPB_hybrid_assembly_busco_k213355_output.log 2>&1 &", language="bash")
         st.markdown("[Visit BUSCO User Guide Page](https://busco.ezlab.org/busco_userguide.html)")
+        st.markdown("[Visit BUSCO Official Installation Page](https://anaconda.org/bioconda/busco)")
 
         st.write("###")
 
@@ -824,12 +848,12 @@ conda install -c bioconda perl""", language="bash")
         st.write("**23. Compute the QUAST metrics for the genome assembly with the additional braker.gff3 file produced by BRAKER3 to know how well the predicted genes are supported by your genome assembly")
         st.code("nohup quast.py /path/to/your/assembled_CPB_genome.fa --report-all-metrics --large --eukaryote --threads 48 -o quast_output --gff /path/to/braker.gff3 > quast_output.log 2>&1 &", language="bash")
 
-# Phase 2: Structure-Based Analysis
+# Phase 2: Reference-Based Transcriptomics Analysis
 
-if selected == "Phase 2: Structure-Based Analysis":
+if selected == "Phase 2: Reference-Based Transcriptomics Analysis":
     with st.container():
         st.write("---")
-        st.header("Structure-Based Analysis ⚛")
+        st.header("Reference-Based Transcriptomics Analysis 🪢")
         st.write("###")
         st.write("**1. Align RNA-seq data with the genome assembly using STAR2**")
         st.write("✔️Create & activate the 'star' conda environment")
@@ -1062,9 +1086,18 @@ if selected == "Phase 2: Structure-Based Analysis":
         st.markdown("[Read eggNOG-mapper Publication](https://academic.oup.com/mbe/article/34/8/2115/3782716?login=false)")
         st.markdown("[Read latest eggNOG-mapper Publication](https://pubmed.ncbi.nlm.nih.gov/30418610/)")
 
-# Phase 3: Molecular Docking & Dynamics Simulation
+# Phase 3: Structure-Based Analysis
+if selected == "Phase 3: Structure-Based Analysis":
+    with st.container():
+        st.write("---")
+        st.header("Structure-Based Analysis 🧱")
+        st.write("###")
+        st.write("Use both AlphaFold3 & ColabFold server to model the selected 3D developmental protein structures and superimpose the two structures with UCSF ChimeraX & compare their quality metrics in the form of table. To ensure compliance with AlphaFold3 server terms and usage, only use the results of AlphaFold3 server for structural analysis and structural comparison. Use ColabFold server for docking later")
 
-if selected == "Phase 3: Molecular Docking & Dynamics Simulation":
+
+# Phase 4: Molecular Docking & Dynamics Simulation
+
+if selected == "Phase 4: Molecular Docking & Dynamics Simulation":
     with st.container():
         st.write("---")
         st.header("Molecular Docking & Dynamics Simulation 🖥️🧪")
