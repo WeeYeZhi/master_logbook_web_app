@@ -140,6 +140,18 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
 
         st.write("**5. Check the base quality of the 30 trimmed .fastq.gz files once again using falco**")
+        st.write("✔️create and activate the 'falco' conda environment")
+        st.code("""
+                      conda create -n falco
+                      conda activate falco
+                      """, language="bash")
+        st.write("✔️install falco via conda")
+        st.code("conda install bioconda::falco", language="bash")
+        st.write("verify the installation of falco")
+        st.code("""
+                falco --version
+                falco --help
+                """, language="bash")
         st.write("✔️check the base quality of the trimmed files using the bash script")
         # ----LOAD FALCO2 BASH SCRIPT----
         # Check if the file exists before reading
@@ -179,6 +191,21 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
 
         st.write("**9. Alternatively, you can also trim the two short Illumina .fastq files using Cutadapt**")
+        st.write("✔️create and activate the 'cutadapt' conda environment")
+        st.code("""
+              conda create -n cutadapt
+              conda activate cutadapt
+              """, language="bash")
+        st.write("✔️install cutadapt via conda")
+        st.code("conda install bioconda::cutadapt", language="bash")
+        st.write("verify the installation of cutadapt")
+        st.code("""
+        cutadapt --version
+        cutadapt --help
+        """, language="bash")
+        st.write("run cutadapt to remove the adapter sequence only from raw forward read as only raw forward read contains adapter sequences/overrepresented sequences")
+        st.code("nohup cutadapt -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACACAGTGATCTCGTATGC -o trimmedadapter_Conopomorpha_raw_R1.fastq -p trimmedadapter_Conopomorpha_raw_R2.fastq /media/raid/Wee/WeeYeZhi/resources_from_LKM/raw_illumina_read/Conopomorpha_raw_1.fastq /media/raid/Wee/WeeYeZhi/resources_from_LKM/raw_illumina_read/Conopomorpha_raw_2.fastq > cutadapt.log 2>&1 &", language="bash") # only removes the adapter sequences from the R1 forward read before inputting this into the masurca pipeline
+        st.write("run cutadapt to trim the raw Illumina paired end reads")
         st.code("nohup cutadapt -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACACAGTGATCTCGTATGC -q 20,20 -m 70 --max-n 2 -j 48 --poly-a --no-indels --trim-n --report full -o trimmed_Conopomorpha_1.fastq.gz -p trimmed_Conopomorpha_2.fastq.gz /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1.fastq.gz /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2.fastq.gz > cutadapt.log 2>&1 &", language="bash")
         st.code("nohup cutadapt -a GATCGGAAGAGCACACGTCTGAACTCCAGTCACACAGTGATCTCGTATGC -q 20,20 -m 150 --max-n 2 -j 48 --poly-a --no-indels --trim-n --report full -o trimmed_Conopomorpha_1.fastq.gz -p trimmed_Conopomorpha_2.fastq.gz /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1.fastq.gz /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2.fastq.gz > cutadapt.log 2>&1 &", language="bash")
 
@@ -285,6 +312,8 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
 
         st.write("###")
+
+        # Perform genome assembly
 
         st.write("**13. Perform genome assembly to construct a complete reference genome of CPB using SPAdes (assemble short reads and long reads together)**")
         st.write("✔️create and activate a virtual environment called SPAdes")
@@ -406,15 +435,36 @@ if selected == "Phase 1: Sequence-Based Analysis":
         chmod +x assemble.sh # make the script executable
         nohup bash assemble.sh > masurca_hybrid_assembly.log 2>&1 & # run the script in the background to initiate MaSuRCA
         """, language="bash")
-        st.write("✔️Alternatively, you can have a quick run by using the command below without creating config.txt and assembly script")
-        st.code("""
-        masurca -i /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1.fastq.gz,/media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2.fastq.gz -r /media/Raid/Wee/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq.gz -t 16 # This will run hybrid assembly with CABOG contigger and default settings. This is suitable for small assembly projects.
-        """, language="bash")
+        st.write("you can add CLOSE_GAPS=1 into the MaSuRCA_config.txt & run masurca again to see whether the busco results improve")
         st.write("Expect to find the final assembly output file in the directories: CA/10-gapclose or CA/9-terminator")
         st.markdown("[Visit MaSuRCA GitHub Page](https://github.com/alekseyzimin/masurca)")
         st.markdown("[Read how other bioinformaticians ran MaSuRCA](https://bioinformaticsworkbook.org/dataAnalysis/GenomeAssembly/Assemblers/MaSuRCA.html#gsc.tab=0)")
         st.markdown("[Read how MaSuRCA is used to perform hybrid genome assembly (Illumina & PacBio) for Melipona bicolor](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-024-10075-x?utm_source=chatgpt.com)")
         st.markdown("[Read how MaSuRCA is used to perform hybrid genome assembly (Illumina & Oxford Nanopore) for Drepana arcuata](https://pmc.ncbi.nlm.nih.gov/articles/PMC7704289/?utm_source=chatgpt.com)")
+
+        st.write("---")
+        st.write("###")
+
+        st.write("**13. Perform PacBio CLR-only assembly via HiCanu**")
+        st.write("✔️create and activate a virtual environment called hicanu")
+        st.code("""
+               conda create -n hicanu
+               conda activate hicanu
+               """, language="bash")
+        st.write("✔️install HiCanu via conda")
+        st.code("conda install bioconda::canu", language="bash")
+        st.write("✔️verify the installation of canu")
+        st.code("""
+        canu --version
+        canu --help
+        """, language="bash")
+        st.write("✔️run HiCanu to perform PacBio CLR-only assembly")
+        st.code("canu -p CPB -d hicanu_results genomeSize=560.45m useGrid=false maxThreads=16 maxMemory=500 saveReads=true -pacbio /media/Raid/Wee/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq", language="bash")
+        st.markdown("[Visit HiCanu Conda Installation Page](https://anaconda.org/bioconda/canu)")
+        st.markdown("[Visit HiCanu User Manual Page](https://canu.readthedocs.io/en/latest/quick-start.html)")
+        st.markdown("[Visit HiCanu GitHub Page](https://github.com/marbl/canu?tab=readme-ov-file)")
+        st.markdown("[Read Canu Publication](https://genome.cshlp.org/content/27/5/722)")
+        st.markdown("[Read HiCanu Publication](https://www.biorxiv.org/content/10.1101/2020.03.14.992248v3)")
 
         st.write("---")
         st.write("###")
@@ -470,7 +520,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
         st.write("---")
 
-        st.write("Alternatively, you can perform PacBio HiFi-only assembly using Flye")
+        st.write("Alternatively, you can perform PacBio HiFi-only assembly or PacBio CLR-only assembly using Flye")
         st.write("✔️create and activate the 'Flye' conda environment")
         st.code("""
                                  conda create -n flye
@@ -487,9 +537,10 @@ if selected == "Phase 1: Sequence-Based Analysis":
         python bin/flye # display all the Flye's help parameters
         python bin/flye/tests/test_toy.py # run Flye pipeline on test dataset to ensure it's installed correctly
         """, language="bash")
-        st.write("✔️run Flye pipeline to perform PacBio HiFi-only assembly")
+        st.write("✔️run Flye pipeline")
         st.code("""
-        python bin/flye --pacbio-hifi PacBio.fq.gz -o output_directory -t 48 # call and run the flye script located inside the bin directory using python
+        flye --pacbio-hifi PacBio.fq.gz -g 560m -o output_directory -t 48 # run PacBio HiFi only asssembly, but failed due to very high overlap divergence (~13.4%). Flye was unable to find sufficient overlaps between your input HiFi reads, which is critical for assembly. Flye assumes HiFi reads have <1% divergence, as they are supposed to be highly accurate. This proves that your PacBio read is not considered PacBio HiFi, but instead it is PacBio CLR
+        flye --pacbio-raw PacBio.fq.gz -g 560m -o output_directory -t 48 # run PacBio CLR only assembly
         """, language="python")
         st.markdown("[Visit Flye GitHub Page](https://github.com/mikolmogorov/Flye?tab=readme-ov-file)")
         st.markdown("[Vist Flye Usage Parameters](https://github.com/mikolmogorov/Flye/blob/flye/docs/USAGE.md)")
@@ -1131,8 +1182,9 @@ if selected == "Additional Notes":
         st.header("Additional Note ❗")
         st.write("###")
         st.write("1. Kill the process")
-        st.code("pkill -9 -f spades",language="bash")  # kill all 'spades' related processes without the need to specify the ID of the process # This is very dangerous to run as it might kill dwservice if the service happens to reference to the spades process in the launch command
-        st.code("kill -9 103839", language="bash")  # kill the main spades process with the process ID, '103839'. This is the safest command to kill the running bioinformatics process
+        st.code("kill 103839 100000", language="bash") # This is the safest kill approach to kill processes running in the background. After running this command, you have to wait for 1-2 minutes. Only then, you try to run "ps aux | grep process_name" to check whether the process has been successfully terminated
+        st.code("pkill -9 -f spades",language="bash")  # force kill all 'spades' related processes without the need to specify the ID of the process # This is very dangerous to run as it might kill dwservice if the service happens to reference to the spades process in the launch command
+        st.code("kill -9 103839", language="bash")  # force kill the main spades process with the process ID, '103839'. This is the safest command to kill the running bioinformatics process
 
         st.write("###")
 
