@@ -27,6 +27,8 @@ star_file = current_dir / "assets" / "RNAseq_alignment_with_STAR.sh"
 deseq2rmd_file = current_dir / "assets" / "deseq2.Rmd"
 masurca_file = current_dir / "assets" / "MaSuRCA_config.txt"
 gromacs_file = current_dir / "assets" / "Gromacs_codes.txt"
+raconGPU_file = current_dir / "assets" / "polishing_with_RaconGPU_4_rounds.sh"
+raconCPU_file = current_dir / "assets" / "polishing_with_RaconCPU_4_rounds.sh"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
 # ---- HEADER SECTION ----
@@ -541,10 +543,120 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("""
         flye --pacbio-hifi PacBio.fq.gz -g 560m -o output_directory -t 48 # run PacBio HiFi only asssembly, but failed due to very high overlap divergence (~13.4%). Flye was unable to find sufficient overlaps between your input HiFi reads, which is critical for assembly. Flye assumes HiFi reads have <1% divergence, as they are supposed to be highly accurate. This proves that your PacBio read is not considered PacBio HiFi, but instead it is PacBio CLR
         flye --pacbio-raw PacBio.fq.gz -g 560m -o output_directory -t 48 # run PacBio CLR only assembly
+        flye --meta --pacbio-raw PacBio.fq.gz -g 560m -o output_directory -t 48 # run PacBio CLR only assembly by enabling metagenome assembly mode (for mixed microbial communities).
         """, language="python")
         st.markdown("[Visit Flye GitHub Page](https://github.com/mikolmogorov/Flye?tab=readme-ov-file)")
         st.markdown("[Vist Flye Usage Parameters](https://github.com/mikolmogorov/Flye/blob/flye/docs/USAGE.md)")
         st.markdown("[Read Flye Publication](https://www.nature.com/articles/s41587-019-0072-8)")
+
+        st.write("###")
+        st.write("---")
+
+        # Polishing
+
+        st.write("Perform long-read polishing via Racon-CPU")
+        st.write("✔️create and activate the 'racon' conda environment")
+        st.code("""
+        conda create -n racon
+        conda activate racon
+        """, language="bash")
+        st.write("✔️install minimap2 & racon via conda")
+        st.code("""
+        conda install bioconda::minimap2
+        conda install bioconda::racon
+        """, language="bash")
+        st.write("✔️verify the installation of minimap2 & racon")
+        st.code("""
+        minimap2 --version
+        racon --version
+        """, language="bash")
+        st.write("✔️Align the long PacBio read with the masurca hybrid assembly with minimap2 and polish the assembly via 4 rounds of racon")
+        st.code("""
+        minimap2 -x -t 16 map-pb assembly.fasta PacBio.fq > long_read_alignment_round1.paf
+        racon -t 16 PacBio.fq long_read_alignment_round1.paf assembly.fasta > polished1.fasta
+        """, language="bash")
+        st.code("""
+        minimap2 -x -t 16 map-pb polished1.fasta PacBio.fq > long_read_alignment_round2.paf
+        racon -t 16 PacBio.fq long_read_alignment_round2.paf polished1.fasta > polished2.fasta
+        """, language="bash")
+        st.code("""
+        minimap2 -x -t 16 map-pb polished2.fasta PacBio.fq > long_read_alignment_round3.paf
+        racon -t 16 PacBio.fq long_read_alignment_round3.paf polished2.fasta > polished3.fasta
+        """, language="bash")
+        st.code("""
+        minimap2 -x -t 16 map-pb polished3.fasta PacBio.fq > long_read_alignment_round4.paf
+        racon -t 16 PacBio.fq long_read_alignment_round4.paf polished3.fasta > polished4.fasta
+        """, language="bash")
+        st.write("✔️write a script to automate 4 rounds of long-read polishing process with Racon")
+        st.code("""
+        dos2unix polishing_with_RaconCPU_4_rounds.sh # install dos2unix via conda and convert the script to Unix style
+        chmod +x polishing_with_RaconCPU_4_rounds.sh # make the script executable
+        nohup bash polishing_with_RaconCPU_4_rounds.sh > polishing_with_RaconCPU_4_rounds_output.log 2>&1 & # run the script
+        """, language="bash")
+        # ----LOAD  BASH SCRIPT----
+        # Check if the file exists before reading
+        if raconCPU_file.exists():
+            with open(raconCPU_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Racon-CPU file to automate 4 polishing rounds",
+                data=script_byte,
+                file_name=raconCPU_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{raconCPU_file.name} does not exist.")
+
+        st.write("###")
+        st.write("---")
+
+        st.write("Perform long-read polishing with Racon-GPU")
+        st.write("✔️create and activate the 'racon-gpu' conda environment")
+        st.code("""
+        conda create -n racon-gpu
+        conda activate racon-gpu
+        """, language="bash")
+        st.write("✔️install minimap2 via conda")
+        st.code("conda install bioconda::minimap2", language="bash")
+        st.write("✔️verify the installation of minimap2")
+        st.code("minimap2 --version", language="bash")
+        st.write("✔️verify whether NVIDIA GPU has been installed inside the remote HPC workstation")
+        st.code("""
+        lspci | grep NVIDIA # check if NVIDIA hardware is installed
+        nvidia-smi # queries the NVIDIA driver to display GPU status, memory usage, temperature etc
+        """, language="bash")
+        st.write("✔️install Racon-GPU by building/compiling it from source")
+        st.code("""
+        git clone --recursive https://github.com/clara-parabricks/racon-gpu.git
+        cd racon-gpu
+        mkdir build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=Release -Dracon_enable_cuda=ON ..
+        make -j16 # compile from source by using 16 threads to speed up the compilation process
+        """, language="bash")
+        st.write("✔️write a script to automate 4 rounds of long-read polishing process with Racon")
+        st.code("""
+        dos2unix polishing_with_RaconGPU_4_rounds.sh # install dos2unix via conda and convert the script to Unix style
+        chmod +x polishing_with_RaconGPU_4_rounds.sh # make the script executable
+        nohup bash polishing_with_RaconGPU_4_rounds.sh > polishing_with_RaconGPU_4_rounds_output.log 2>&1 & # run the script
+        """, language="bash")
+        # ----LOAD  BASH SCRIPT----
+        # Check if the file exists before reading
+        if raconGPU_file.exists():
+            with open(raconGPU_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Racon-GPU file to automate 4 polishing rounds",
+                data=script_byte,
+                file_name=raconGPU_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{raconGPU_file.name} does not exist.")
 
         st.write("###")
         st.write("---")
