@@ -658,9 +658,19 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
         st.write("---")
 
+        st.write("Perform short-read polishing with POLCA to correct base-level errors")
+        st.write("✔️activate the 'masurca' conda environment")
+        st.code("conda activate masurca", language="bash")
+        st.write("✔️find the location of the POLCA script (polca.sh)")
+        st.code("which polca.sh", language="bash")
+        st.write("run POLCA to perform short-read polishing")
+        st.code("nohup polca.sh -a /media/raid/Wee/WeeYeZhi/output/racon-CPU_results/racon_polishing_masurca_assembly_with_proovreadcorrected_pacbio/racon_polishing_4/polished4.fasta -r '/media/raid/Wee/WeeYeZhi/resources_from_LKM/processed_illumina_read/trimmed_Conopomorpha_1.fastq /media/raid/Wee/WeeYeZhi/resources_from_LKM/processed_illumina_read/trimmed_Conopomorpha_2.fastq' -t 16 -m 500G > polca_output.log 2>&1 &", language="bash")
+        st.markdown("[Visit POLCA GitHub Page](https://github.com/alekseyzimin/masurca)")
+        st.markdown("[Read POLCA Publication](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007981)")
         st.write("14. Compare the hybrid genome assembly produced by SPAdes with the gold standard reference genome (if there is any).**")
 
         st.write("###")
+        st.write("---")
 
         st.write("**15. Index the genome assembly by using bwa-mem2**")
         st.write("✔️create a virtual environment called bwa-mem2")
