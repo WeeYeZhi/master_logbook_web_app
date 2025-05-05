@@ -29,6 +29,7 @@ masurca_file = current_dir / "assets" / "MaSuRCA_config.txt"
 gromacs_file = current_dir / "assets" / "Gromacs_codes.txt"
 raconGPU_file = current_dir / "assets" / "polishing_with_RaconGPU_4_rounds.sh"
 raconCPU_file = current_dir / "assets" / "polishing_with_RaconCPU_4_rounds.sh"
+busco_plot_file = current_dir / "assets" / "busco_figure.R"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
 # ---- HEADER SECTION ----
@@ -528,16 +529,12 @@ if selected == "Phase 1: Sequence-Based Analysis":
                                  conda create -n flye
                                  conda activate flye
                                  """, language="bash")
-        st.write("✔️navigate to the 'Flye_results' direcrtory and install Flye from its official GitHub remote repository")
-        st.code("""
-        git clone https://github.com/fenderglass/Flye
-        cd Flye
-        make
-        """, language="bash")
+        st.write("✔️install Flye via conda")
+        st.code("conda install bioconda::flye", language="bash")
         st.write("✔️verify the installation of Flye")
         st.code("""
-        python bin/flye # display all the Flye's help parameters
-        python bin/flye/tests/test_toy.py # run Flye pipeline on test dataset to ensure it's installed correctly
+        flye --version
+        flye --help
         """, language="bash")
         st.write("✔️run Flye pipeline")
         st.code("""
@@ -774,15 +771,41 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("**19. Evaluate the completeness of the genome assembly after scaffolding**")
         st.write("✔️create a virtual environment called 'busco_env' & install BUSCO within the environment")
-        st.code("conda create -n busco_env", language="bash")
-        st.write("✔️activate the BUSCO environment")
-        st.code("conda activate busco_env", language="bash")
+        st.code("""
+        conda create -n busco_env
+        conda activate busco_env
+        """, language="bash")
+        st.write("✔️install BUSCO via conda")
+        st.code("conda install bioconda::busco", language="bash")
         st.write("✔️determine the lineage file suitable to be used for CPB genome by listing the lineage datasets available in BUSCO first, followed by referring to the NCBI BioProject of CPB (taxonomy) to check its taxonomy")
         st.code("busco --list-datasets", language="bash")
         st.code("busco --list-datasets | grep -i lepidoptera_odb12", language="bash")
         st.write("✔️run BUSCO to evaluate the completeness of the improved CPB genome")
-        st.code("export NUMEXPR_MAX_THREADS=48", language="bash")
         st.code("nohup busco -m genome -i /media/Raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_hybrid_genome_assembly_k213355/scaffolds.fasta -c 48 -l lepidoptera_odb12 -o CPB_hybrid_assembly_busco_k213355 > CPB_hybrid_assembly_busco_k213355_output.log 2>&1 &", language="bash")
+        st.write("✔️draw BUSCO plot for comparison using python script (built inside the busco conda package))")
+        st.code("""
+        which busco # to find the location of BUSCO executable 
+        find /home/your_user/miniconda3/envs/busco_env/ -name generate_plot.py # find the location of the generate_plot.py file to output its filepath
+        head -n 5 /home/cbr15/anaconda3/envs/busco_env/bin/generate_plot.py # display the first 5 lines to see whether there is a shebang line, "#!/usr/bin/env python3" at the first line of the file. If have, then no need to specify the flag, "python3" while running the command to draw the BUSCO plot
+        nohup /home/cbr15/anaconda3/envs/busco_env/bin/generate_plot.py -wd /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_summaries -rt specific --no_r > busco_plot_output.log 2>&1 & # output only the R code to be run inside the RStudio later to draw the BUSCO plot # no need to specify the flag, "python3" if the file has the shebang line
+        nohup python3 /home/cbr15/anaconda3/envs/busco_env/bin/generate_plot.py -wd /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_summaries -rt specific --no_r > busco_plot_output.log 2>&1 & # output only the R code to be run inside the RStudio later to draw the BUSCO plot # need to specify the flag, "python3" if the file doesn't have the shebang line
+        """, language="bash")
+        st.write("✔️generate the BUSCO plot within RStudio")
+        # ----LOAD  BASH SCRIPT----
+        # Check if the file exists before reading
+        if busco_plot_file.exists():
+            with open(busco_plot_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download BUSCO plot R Code",
+                data=script_byte,
+                file_name=busco_plot_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{busco_plot_file.name} does not exist.")
         st.markdown("[Visit BUSCO User Guide Page](https://busco.ezlab.org/busco_userguide.html)")
         st.markdown("[Visit BUSCO Official Installation Page](https://anaconda.org/bioconda/busco)")
 
