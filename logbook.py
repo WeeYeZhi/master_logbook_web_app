@@ -29,6 +29,7 @@ masurca_file = current_dir / "assets" / "MaSuRCA_config.txt"
 gromacs_file = current_dir / "assets" / "Gromacs_codes.txt"
 raconGPU_file = current_dir / "assets" / "polishing_with_RaconGPU_4_rounds.sh"
 raconCPU_file = current_dir / "assets" / "polishing_with_RaconCPU_4_rounds.sh"
+falcon_stats_file = current_dir / "assets" / "countFasta.pl"
 busco_plot_file = current_dir / "assets" / "busco_figure.R"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
@@ -59,17 +60,17 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("---")
         st.header("Sequence-Based Analysis 🧬")
         st.write("###")
-        st.write("**1. code as the substituted cbr15 user (avoid working in the root as it will damage the OS)**")
+        st.write("**0. code as the substituted cbr15 user (avoid working in the root as it will damage the OS)**")
         st.write("✔️ change from the root user to the cbr15 user")
         st.code("su cbr15", language="bash")
-        st.code("cd ~", language="bash")
-        st.code("export CONDA_PREFIX='/media/Raid/Home/anaconda3'", language="bash")
-        st.code("export PATH='/media/Raid/Home/anaconda3/bin:$PATH'", language="bash")
-        st.code("conda activate base", language="bash") # after activating the base environment, you can begin to create the other envs and install the required bioinformatics tools
+        st.code("cd ../../../", language="bash")
+        st.code("""
+        pwd # Make sure the output returns "/". After that, you can try cd into your desired directory safely and then create & activate the conda environment safely
+        """, language="bash")
 
         st.write('###')
 
-        st.write("**2. Download the raw sequencing data of CPB from NCBI SRA database**")
+        st.write("**1. Download the raw sequencing data of CPB from NCBI SRA database**")
         st.write("✔️install the sra-toolkit within the NGSWee environment")
         st.code("sudo apt -y install sra-toolkit", language='bash')
         st.write("✔️prefetch all the 15 .sra files by using the prefetch tool available in the sra-toolkit")
@@ -95,6 +96,52 @@ if selected == "Phase 1: Sequence-Based Analysis":
         else:
             st.error(f"{gzip_file.name} does not exist.")
 
+        st.write("###")
+
+        st.write("**2. Perform QC check to try merging both the raw forward and reverse read of Illumina paired-end read together via FLASH")
+        st.write("✔️create a 'flash' conda environment, activate it, and install flash via conda")
+        st.code("conda install bioconda::flash", language="bash")
+        st.write("✔️verify the installation of flash")
+        st.code("""
+        flash -h
+        which flash
+        """, language="bash")
+        st.write("✔️run flash to merge both the raw forward and reverse of Illumina paired-end read together with default values")
+        st.code("""
+        nohup flash -t 16 /media/raid/Wee/WeeYeZhi/resources_from_LKM/raw_illumina_read/Conopomorpha_raw_1.fastq /media/raid/Wee/WeeYeZhi/resources_from_LKM/raw_illumina_read/Conopomorpha_raw_2.fastq > flash_raw_default_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run flash to merge both the trimmed forward and reverse of Illumina paired-end read together (only trimmed off adapter sequences via cutadapt) with default values")
+        st.code("""
+        nohup flash -t 16 /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_1.fastq /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_2.fastq > flash_trimmed_default_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run flash to merge both the trimmed forward and reverse of Illumina paired-end read together (only trimmed off adapter sequences via cutadapt) with --max-overlap being set as 150")
+        st.code("""
+        nohup flash -t 16 -M 150 /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_1.fastq /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_2.fastq > flash_trimmed_default_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run flash to merge both the trimmed forward and reverse of Illumina paired-end read together (only trimmed off adapter sequences via cutadapt) with --max-overlap being set as 150 and --max-mismatch-density being set as 0.30 to increase the percent combined to the maximum")
+        st.code("""
+        nohup flash -t 16 -M 150 -x 0.30 /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_1.fastq /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_2.fastq > flash_trimmed_default_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run flash to merge both the trimmed forward and reverse of Illumina paired-end read together (only trimmed off adapter sequences via cutadapt) with --max-overlap being set as 150 and --max-mismatch-density being set as 0.35 to increase the percent combined to the maximum")
+        st.code("""
+        nohup flash -t 16 -M 150 -x 0.35 /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_1.fastq /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_2.fastq > flash_trimmed_default_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run flash to merge both the trimmed forward and reverse of Illumina paired-end read together (only trimmed off adapter sequences via cutadapt) with --max-overlap being set as 190 to increase the percent combined to the maximum")
+        st.code("""
+        nohup flash -t 16 -M 190 /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_1.fastq /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_2.fastq > flash_trimmed_default_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run flash to merge both the trimmed forward and reverse of Illumina paired-end read together (only trimmed off adapter sequences via cutadapt) with --max-overlap being set as 190 and --max-mismatch-density being set as 0.30 to increase the percent combined to the maximum")
+        st.code("""
+        nohup flash -t 16 -M 190 -x 0.30 /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_1.fastq /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_2.fastq > flash_trimmed_default_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run flash to merge both the trimmed forward and reverse of Illumina paired-end read together (only trimmed off adapter sequences via cutadapt) with --max-overlap being set as 190 and --max-mismatch-density being set as 0.35 to increase the percent combined to the maximum")
+        st.code("""
+        nohup flash -t 16 -M 190 -x 0.35 /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_1.fastq /media/raid/Wee/WeeYeZhi/output/cutadapt_results/trimmedadapter_Conopomorpha_raw_2.fastq > flash_trimmed_default_output.log 2>&1 &
+        """, language="bash")
+        st.markdown("[Visit FLASH Conda Installation Page](https://anaconda.org/bioconda/flash)")
+        st.markdown("[Visit FLASH GitHub Page](https://github.com/ebiggers/flash)")
+        st.markdown("[Visit FLASH GitHub User Manual Page](https://github.com/genome-vendor/FLASH/blob/master/MANUAL)")
+        st.markdown("[Read FLASH Publication](https://academic.oup.com/bioinformatics/article/27/21/2957/217265)")
         st.write("###")
 
         st.write("**3. Check the base quality of the 30 raw fastq files by using Falco**")
@@ -318,6 +365,24 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         # Perform genome assembly
 
+        st.write("Perform Illumina-only assembly to assemble the raw forward and reverse Illumina paired end read via SPAdes together")
+        st.write("✔️create a 'SPAdes' conda environment, activate the conda environment, and install SPAdes via conda")
+        st.code("""
+        conda create -n SPAdes
+        conda activate SPAdes
+        conda install bioconda::spades
+        """, language="bash")
+        st.write("✔️verify the installation of SPAdes")
+        st.code("""
+        which spades.py
+        spades.py -h
+        """, language="bash")
+        st.write("✔️run SPAdes to assemble both the raw forward and reverse Illumina paired end read together")
+        st.code("nohup spades.py --threads 16 --memory 500 --pe1-1 /media/raid/Wee/WeeYeZhi/resources_from_LKM/raw_illumina_read/Conopomorpha_raw_1.fastq --pe1-2 /media/raid/Wee/WeeYeZhi/resources_from_LKM/raw_illumina_read/Conopomorpha_raw_2.fastq -o SPAdes_raw_Illumina_only_assembly_full_mode > spades_raw_Illumina_only_assembly_output.log 2>&1 &", language="bash")
+        st.write("✔️run SPAdes to assemble both the merged read and unmerged Illumina paired end read together")
+        st.code("nohup spades.py --threads 16 --memory 500 --pe1-1 --pe1-2 --pe1-m -o > spades_raw_merged_Illumina_only_assembly_output.log 2>&1 &", language="bash")
+
+
         st.write("**13. Perform genome assembly to construct a complete reference genome of CPB using SPAdes (assemble short reads and long reads together)**")
         st.write("✔️create and activate a virtual environment called SPAdes")
         st.code("""
@@ -448,6 +513,73 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("---")
         st.write("###")
 
+        st.write("Perform PacBio CLR-only assembly via FALCON")
+        st.write("✔️create the 'falcon' conda environment and activate it")
+        st.code("""
+        conda create -n falcon
+        conda activate falcon
+        """, language="bash")
+        st.write("✔️install pb-assembly via conda")
+        st.code("conda install bioconda::pb-assembly", language="bash")
+        st.write("✔️create the 'seqtk' conda environment and activate it")
+        st.code("""
+        conda create -n seqtk
+        conda activate seqtk
+        """, language="bash")
+        st.write("✔️install seqtk via conda")
+        st.code("conda install bioconda::seqtk", language="bash")
+        st.write("✔️convert the raw PacBio read from FASTQ format (.fq) to FASTA format (.fasta) via seqtk")
+        st.code("  seqtk seq -a in.fq.gz > out.fa", language="bash")
+        st.write("✔️perform PacBio-CLR only assembly via FALCON")
+        st.code("""
+        fc_run --version # check and report the version of falcon-kit and pypeflow that you're using to run FALCON assembly
+        fc_run fc_run_dipteran.cfg # run the FALCON assembler using the configuration script to error-correct PacBio-CLR read first, followed by constructing initial primary contigs and associated contigs (alternative haplotypes/repeats)
+        """, language="bash")
+        st.write("✔️Summarize and output the statistics of the primary assembly and alternative assembly")
+        st.code("""
+        ./countFasta.pl p_ctg.fa > p_ctg.stats # summarize the statistics of the primary assembly
+        ./countFasta.pl a_ctg.fa > a_ctg.stats # summarize the statistics of the alternative assembly
+        """, language="bash")
+        # ----LOAD  BASH SCRIPT----
+        # Check if the file exists before reading
+        if falcon_stats_file.exists():
+            with open(falcon_stats_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download countFasta.pl File",
+                data=script_byte,
+                file_name=falcon_stats_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{falcon_stats_file.name} does not exist.")
+
+        st.write("✔️Perform haplotype phasing and polishing (unzip and polish) via FALCON-Unzip")
+        st.code("""
+        fc_unzip.py fc_unzip.cfg # runs FALCON-Unzip, a separate post-assembly pipeline used only if you want to produce a haplotype-resolved (phased) assembly. It performs phasing where it separates heterozygous regions into haplotypes using raw reads aligned to the primary assembly. Then, it performs haplotype-aware polishing. In other words, this command unzips and polishes using the configuration script.  Run this after fc_run completes, and only if you want diploid-aware assembly (usually for eukaryotes with heterozygosity).
+        """, language="bash")
+        st.markdown("[Visit seqtk GitHub Page](https://github.com/lh3/seqtk)")
+        st.markdown("[Download SMRT Link](https://www.pacb.com/support/software-downloads/)")
+        st.markdown("[Visit pb-assembly GitHub Page](https://github.com/PacificBiosciences/pb-assembly)")
+        st.markdown("[Visit pb-assembly Conda Installation Page](https://anaconda.org/bioconda/pb-assembly)")
+        st.markdown("[Read how to write FALCON configuration script](https://github.com/PacificBiosciences/FALCON/wiki/Configuration)")
+        st.markdown("[Download available FALCON configuration script](https://pb-falcon.readthedocs.io/en/latest/parameters.html#configuration)")
+        st.markdown("[Read how other people set up the FALCON configuration script to run FALCON assembly on Drosophila genome](https://github.com/PacificBiosciences/FALCON/wiki/Configuration)")
+        st.markdown("[Read how to write FALCON Unzip configuration script](https://github.com/PacificBiosciences/FALCON-integrate/wiki/Configuring-Unzip)")
+        st.markdown("[Read this publication to understand how a researcher merge a FALCON and a Canu assembly to get the best hybrid assembly on insect](https://www.nature.com/articles/s41598-020-67373-z)")
+        st.markdown("[Visit PB-BIOCONDA Conda Installation Page]()")
+        st.markdown("[Visit PB-BIOCONDA GitHub Page](https://github.com/PacificBiosciences/pbbioconda)")
+        st.markdown("[Visit FALCON Conda Installation GitHub Page](https://github.com/PacificBiosciences/pbbioconda)")
+        st.markdown("[Visit FALCON Conda Installation Page](https://anaconda.org/bioconda/pb-falcon)")
+        st.markdown("[Visit FALCON GitHub Page](https://github.com/PacificBiosciences/FALCON/wiki/Manual)")
+        st.markdown("[Visit FALCON GitHub Page 2](https://github.com/PacificBiosciences/pb-assembly)")
+        st.markdown("[Visit FALCON User Manual Page](https://pb-falcon.readthedocs.io/en/latest/)")
+        st.markdown("[Read FALCON Publication](https://pmc.ncbi.nlm.nih.gov/articles/PMC5503144/)")
+
+        st.write("###")
+
         st.write("**13. Perform PacBio CLR-only assembly via HiCanu**")
         st.write("✔️create and activate a virtual environment called hicanu")
         st.code("""
@@ -461,8 +593,19 @@ if selected == "Phase 1: Sequence-Based Analysis":
         canu --version
         canu --help
         """, language="bash")
-        st.write("✔️run HiCanu to perform PacBio CLR-only assembly")
-        st.code("canu -p CPB -d hicanu_results genomeSize=560.45m useGrid=false maxThreads=16 maxMemory=500 saveReads=true -pacbio /media/Raid/Wee/WeeYeZhi/resources_from_LKM/pacbio_long_read/PacBio.fq", language="bash")
+        st.write("✔️run HiCanu to perform PacBio CLR-only (full pipeline to include read error correction, trimming and assembly)")
+        st.write("running full pipeline HiCanu with minReadLength=100")
+        st.code("nohup canu -p CPB -d hicanu_results genomeSize=560.45m correctedErrorRate=0.120 corMaxEvidenceErate=0.3 corOutCoverage=200 corMinCoverage=0 corMhapSensitivity=high useGrid=false minReadLength=100 minOverlapLength=100 stopOnLowCoverage=1 minInputCoverage=5 maxThreads=16 maxMemory=500 saveReads=true -pacbio-raw PacBio.fq.gz > hicanu_trimming_assembly_output.log 2>&1 &", language="bash")
+        st.write("running full-pipeline HiCanu with minReadLength=300")
+        st.code("nohup canu -p CPB -d hicanu_results genomeSize=560.45m correctedErrorRate=0.105 corOutCoverage=100 corMinCoverage=0 corMhapSensitivity=high useGrid=false minReadLength=300 minOverlapLength=300 stopOnLowCoverage=1 minInputCoverage=5 maxThreads=16 maxMemory=500 saveReads=true -pacbio-raw PacBio.fq.gz > hicanu_trimming_assembly_output.log 2>&1 &", language="bash")
+        st.write("running full-pipeline HiCanu with minReadLength=400")
+        st.write("running full-pipeline HiCanu with minReadLength=500")
+        st.write("✔️run HiCanu to perform PacBio CLR-only_trimming_assembly without read error correction")
+        st.code("nohup canu -trim -p CPB -d hicanu_results genomeSize=560.45m useGrid=false minReadLength=100 minOverlapLength=100 maxThreads=16 maxMemory=500 saveReads=true -pacbio -corrected seqfilter_output.fq (fourth proovread trial) > hicanu_trimming_assembly_output.log 2>&1 &", language="bash")
+        st.write("run HiCanu to perform PacBio CLR-only_assembly")
+        st.code("nohup canu -p CPB -d hicanu_results genomeSize=560.45m useGrid=false minReadLength=100 minOverlapLength=100 maxThreads=16 maxMemory=500 saveReads=true -pacbio -corrected -untrimmed seqfilter_output.fq (fourth proovread trial) > hicanu_trimming_assembly_output.log 2>&1 &", language="bash")
+        st.write("✔️run HiCanu to perform PacBio CLR-only assembly to generate haplotype-specific reads")
+        st.code("nohup canu -p CPB -d hicanu_results genomeSize=560.45m useGrid=false -haplotype minReadLength=1000 maxThreads=16 maxMemory=500 saveReads=true -pacbio-raw PacBio.fq.gz > hicanu_trimming_assembly_output.log 2>&1 &", language="bash")
         st.markdown("[Visit HiCanu Conda Installation Page](https://anaconda.org/bioconda/canu)")
         st.markdown("[Visit HiCanu User Manual Page](https://canu.readthedocs.io/en/latest/quick-start.html)")
         st.markdown("[Visit HiCanu GitHub Page](https://github.com/marbl/canu?tab=readme-ov-file)")
@@ -605,6 +748,11 @@ if selected == "Phase 1: Sequence-Based Analysis":
             )
         else:
             st.error(f"{raconCPU_file.name} does not exist.")
+        st.markdown("[Visit minimap2 GitHub Page](https://github.com/lh3/minimap2?tab=readme-ov-file)")
+        st.markdown("[Visit minimap2 User Manual Page](https://lh3.github.io/minimap2/minimap2.html)")
+        st.markdown("[Visit Racon GitHub Page](https://github.com/isovic/racon)")
+        st.markdown("[Visit Racon User Manual Page](https://denbi-nanopore-training-course.readthedocs.io/en/latest/polishing/medaka/Racon_1.html)")
+        st.markdown("[Read Racon Publication](https://pmc.ncbi.nlm.nih.gov/articles/PMC5411768/)")
 
         st.write("###")
         st.write("---")
@@ -654,6 +802,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
             )
         else:
             st.error(f"{raconGPU_file.name} does not exist.")
+        st.markdown("[Visit Racon-GPU GitHub Page](https://github.com/NVIDIA-Genomics-Research/racon-gpu)")
 
         st.write("###")
         st.write("---")
@@ -861,7 +1010,56 @@ conda install -c bioconda perl""", language="bash")
 
         st.write("###")
 
-        st.write("**22. Predict the list of coding genes and proteins of the CPB genome using BRAKER3**")
+        st.write("**22. Align the best CPB genome assembly with the LKM hybrid assembly using MUMmer4 to detect SNPs, indels, insertions, deletions**")
+        st.write("✔️create a 'mummer4' conda environment, activate the conda environment, & install mummer4 via conda")
+        st.code("""
+        conda create -n mummer4
+        conda activate mummer4
+        conda install bioconda::mummer4
+        """, language="bash")
+        st.write("✔️verify the installation of mummer4")
+        st.code("""
+        which nucmer
+        which dnadiff
+        which mummerplot
+        """, language="bash")
+        st.write("✔️Align the LKM hybrid genome assembly (as reference) with the best genome assembly with the highest BUSCO score obtained (as query) using nucmer")
+        st.code("nohup nucmer -p hybrid_align -t 16 /media/raid/Wee/WeeYeZhi/resources_from_LKM/hybrid_genome_assembly_of_CPB/CPB_insect_draft_assembly.v4.fa /media/raid/Wee/WeeYeZhi/output/MaSuRCA_results/MaSuRCA_CABOG_raw_assembly_latestmodifiedPE_gapclosing_trimmedadapter_results/CA.mr.67.17.15.0.02/primary.genome.scf.fasta > genome_assembly_alignment_output.log 2>&1 &", language="bash")
+        st.write("✔️Compare the two different assemblies of the same organism using dnadiff (output report alignment statistics, SNPs, breakpoints & evaluate the sequence and structural similarity of two highly similar sequence sets)")
+        st.code("""
+        nohup dnadiff -p hybrid_align -d hybrid_align.delta > dnadiff_output.log 2>&1 & # the hybrid_align.delta file is previously produced by the nucmer pipeline
+        """, language="bash")
+        st.write("✔️Generate gnuplot scripts and data collections for plotting the results of assembly alignment with the gnuplot utility")
+        st.code("nohup mummerplot -p hybrid_align --postscript --large --layout /media/raid/Wee/WeeYeZhi/output/mummer4_results/nucmer_results/hybrid_align.delta > mummerplot_output.log 2>&1 &", language="bash")
+        st.write("✔️Convert the postscript file to pdf file using ps2pdf")
+        st.code("ps2pdf hybrid_align.ps hybrid_align.pdf", language="bash")
+        st.markdown("[Visit MUMmer4 GitHub Page](https://github.com/mummer4/mummer)")
+        st.markdown("[Read MUMmer4 Publication](https://pubmed.ncbi.nlm.nih.gov/29373581/)")
+
+        st.write("###")
+
+        st.write("**23.Merge the two assemblies together using quickmerge to possibly improve the contiguity of the assembly**")
+        st.write("✔️create a 'quickmerge' conda environment, activate the conda environment, and install quickmerge via conda")
+        st.code("""
+        conda create -n quickmerge
+        conda activate quickmerge
+        conda install bioconda::quickmerge
+        """, language="bash")
+        st.write("✔️verify the installation of quickmerge")
+        st.code("""
+        which quickmerge
+        which merge_wrapper.py
+        merge_wrapper.py -h
+        """, language="bash")
+        st.write("✔️Merge a hybrid assembly (MaSuRCA_CABOG) with PacBio-only assembly (Flye)")
+        st.code("""
+        merge_wrapper.py -pre CPB -hco 5.0 -c 1.5 -l 0 -ml 5000 /media/raid/Wee/WeeYeZhi/output/MaSuRCA_results/MaSuRCA_CABOG_raw_assembly_latestmodifiedPE_gapclosing_trimmedadapter_results/CA.mr.67.17.15.0.02/primary.genome.scf.fasta /media/raid/Wee/WeeYeZhi/output/flye_results/PacBio_CLR_only_assembly/flye_results/assembly.fasta # use the default values of hco,c,l and ml
+        """, language="bash")
+        st.write("✔️Merge a Canu assembly with a FALCON assembly (this is the previous published pipeline)")
+
+        st.write("###")
+
+        st.write("**24. Predict the list of coding genes and proteins of the CPB genome using BRAKER3**")
         st.write("✔️switch to a non-root user")
         st.code("su cbr15", language="bash")
         st.write("✔️after switching, get your user ID & group ID")
@@ -1037,11 +1235,11 @@ conda install -c bioconda perl""", language="bash")
         st.write("✔️set GeneMark-ETP path")
         st.code("", language="bash")
 
-        st.write("**23. Check the BUSCO completeness score for the protein sequences predicted by BRAKER3 in the form of braker.aa file**")
+        st.write("**25. Check the BUSCO completeness score for the protein sequences predicted by BRAKER3 in the form of braker.aa file**")
         st.code("export NUMEXPR_MAX_THREADS=48", language="bash")
         st.code("nohup busco -m protein -i /path/to/your/braker.aa -c 48 -l lepidoptera_odb12 -o CPB_raw_hybrid_assembly_busco > CPB_raw_hybrid_assembly_busco_output.log 2>&1 &", language="bash")
 
-        st.write("**23. Compute the QUAST metrics for the genome assembly with the additional braker.gff3 file produced by BRAKER3 to know how well the predicted genes are supported by your genome assembly")
+        st.write("**26. Compute the QUAST metrics for the genome assembly with the additional braker.gff3 file produced by BRAKER3 to know how well the predicted genes are supported by your genome assembly")
         st.code("nohup quast.py /path/to/your/assembled_CPB_genome.fa --report-all-metrics --large --eukaryote --threads 48 -o quast_output --gff /path/to/braker.gff3 > quast_output.log 2>&1 &", language="bash")
 
 # Phase 2: Reference-Based Transcriptomics Analysis
@@ -1327,7 +1525,9 @@ if selected == "Additional Notes":
         st.header("Additional Note ❗")
         st.write("###")
         st.write("1. Kill the process")
-        st.code("kill 103839 100000", language="bash") # This is the safest kill approach to kill processes running in the background. After running this command, you have to wait for 1-2 minutes. Only then, you try to run "ps aux | grep process_name" to check whether the process has been successfully terminated
+        st.code("""
+        kill 103839 100000 # This is the safest kill approach to kill processes running in the background. After running this command, you have to wait for 1-2 minutes. Only then, you try to run "ps aux | grep process_name" to check whether the process has been successfully terminated
+        """, language="bash")
         st.code("pkill -9 -f spades",language="bash")  # force kill all 'spades' related processes without the need to specify the ID of the process # This is very dangerous to run as it might kill dwservice if the service happens to reference to the spades process in the launch command
         st.code("kill -9 103839", language="bash")  # force kill the main spades process with the process ID, '103839'. This is the safest command to kill the running bioinformatics process
 
@@ -1358,69 +1558,64 @@ if selected == "Additional Notes":
 
         st.write("###")
 
-        st.write("5. To check the version of the bioinformatics tools that you have downloaded within your conda environment")
-        st.code("conda list | grep spades", language=" bash")
-
-        st.write("###")
-
-        st.write("6. Delete and clean all the files within the working directory")
+        st.write("5. Delete and clean all the files within the working directory")
         st.code("rm -rf /path/to/your/directory/*", language="bash")
 
         st.write("###")
 
-        st.write("7. Remember to stop running the Docker desktop if you dont use it to save up CPU resources. Double check whether the Docker desktop already stops running in the background. After checking the status, exit by running 'q'.")
+        st.write("6. Remember to stop running the Docker desktop if you dont use it to save up CPU resources. Double check whether the Docker desktop already stops running in the background. After checking the status, exit by running 'q'.")
         st.code("systemctl --user stop docker-desktop", language="bash")
         st.code("systemctl --user status docker-desktop", language="bash")
         st.code("q", language="bash")
 
         st.write("###")
 
-        st.write("8. If you want to show/teach others how to code within Ubuntu/Linux terminal")
+        st.write("7. If you want to show/teach others how to code within Ubuntu/Linux terminal")
         st.code("PS1='$ '", language="bash") # run this command to change how the Linux terminal looks like so that it saves & continues displaying both the previous command lines and results, allowing you to continue coding
         st.code("#", language="bash") # specify this '#" to add a comment before executing any command line/code
 
         st.write("###")
 
-        st.write("9. End the Ubuntu/Linux terminal session")
+        st.write("8. End the Ubuntu/Linux terminal session")
         st.code("exit", language="bash")
 
         st.write("###")
 
-        st.write("10. Clear the terminal")
+        st.write("9. Clear the terminal")
         st.code("clear", language="bash")
 
         st.write("###")
 
-        st.write("11. To check how to cite R and R packages in RStudio")
+        st.write("10. To check how to cite R and R packages in RStudio")
         st.code("citation()", language="r")
 
         st.write("###")
 
-        st.write("12. To run code in RStudio, you can use the keyboard shortcut 'Ctrl + Enter' to run the code instead of manually clicking the 'run' button")
+        st.write("11. To run code in RStudio, you can use the keyboard shortcut 'Ctrl + Enter' to run the code instead of manually clicking the 'run' button")
 
         st.write("###")
 
-        st.write("13. If you want to display all of the available bioconductor packages offered in RStudio")
+        st.write("12. If you want to display all of the available bioconductor packages offered in RStudio")
         st.code("BiocManager::available()", language="r")
 
         st.write("###")
 
-        st.write("14. Use the str() function to examine the structure of the file that you have stored in the variable") # examine how many rows of observations, how many columns of variables, examine whether it is a dataframe, list, vector, matrix being stored in the variable, examine the data type in RStudio
+        st.write("13. Use the str() function to examine the structure of the file that you have stored in the variable") # examine how many rows of observations, how many columns of variables, examine whether it is a dataframe, list, vector, matrix being stored in the variable, examine the data type in RStudio
         st.code("str('meta')") # assume that the name of the variable used to store the sample metadata.csv file is meta
 
         st.write("###")
 
-        st.write("15. To remove all the files within a single directory (by staying within the same directory)")
+        st.write("14. To remove all the files within a single directory (by staying within the same directory)")
         st.code("rm *", language="bash")
 
         st.write("###")
 
-        st.write("16. To remove all the subdirectories and files within a single directory (by staying within the same directory")
+        st.write("15. To remove all the subdirectories and files within a single directory (by staying within the same directory")
         st.code("rm -r *", language="bash")
 
         st.write("###")
 
-        st.write("17. To decompress a file (.gz)")
+        st.write("16. To decompress a file (.gz)")
         st.code("""
         gunzip filename.gz # decompress a single file without keeping the original gzipped file
         gunzip -k filename.gz # decompress a single file only one at a time while keeping the original gzipped file
@@ -1429,9 +1624,74 @@ if selected == "Additional Notes":
 
         st.write("###")
 
-        st.write("18. To check whether a program crashes/suddenly get killed, when you suspect a hardware/memory issue, when you debug weird behaviour in WSL or Linux")
+        st.write("17. To check whether a program crashes/suddenly get killed, when you suspect a hardware/memory issue, when you debug weird behaviour in WSL or Linux")
         st.code("""
         dmesg | tail -n 20 # display the last 20 lines of kernel messages to view boot process details, device connection events, memory errors, processes being killed due to OOM conditions
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("18. Print the current working directory")
+        st.code("pwd", language="bash")
+
+        st.write("###")
+
+        st.write("19. Rename a previously created conda environment")
+        st.code("""
+        conda deactivate / conda activate base # make sure you are not staying within the conda environment that you wish to rename
+        conda rename -n falcon pb-assembly # apply this command, "conda rename -n old_env new_env". This will change the previously created 'falcon' environment to 'pb-assembly'. Make sure that your installed conda version is 4.1.0+. You can check the installed conda version via "conda --version"
+        """)
+
+        st.write("###")
+
+        st.write("20. Verify the installation of the bioinformatic tool that you've just installed via conda")
+        st.code("""
+        conda list name_of_the_installed_bioinformatic_tool # list the installed bioinformatic tool's package environment
+        which name_of_the_installed_bioinformatic_tool # display the filepath of the installed bioinformatic tool
+        whereis name_of_the_installed_bioinformatic_tool # it does the same thing as using the 'which' command
+        conda list | grep name_of_the_bioinformatic_tool_installed # this does the same thing as the first one
+        name_of_the_bioinformatic_tool_installed --version # check the version of the installed bioinformatics tool
+        name_of_the_bioinformatic_tool_installed --help # display the help (user manual) of the installed bioinformatic tool
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("21. Check disk space available inside the computer")
+        st.code("""
+        df -h # show total disk space, used space, available space, and percentage of use for each mounted filesystem
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("22. Check memory usage available inside the computer")
+        st.code("""
+        free -h # display the total amount of free and used physical & swap memory in the system in a human-readable format
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("23. To check back & record the previous commands that you have run on the terminal (this is useful for your logbook record)")
+        st.code("""
+        history | grep busco # view the list of history of running busco commands on the terminal
+        """)
+
+        st.write("###")
+
+        st.write("24. Display all the processes running as a cbr15 user in the background")
+        st.code("ps -U cbr15 -l -H | grep ' S '", language="bash")
+
+        st.write("###")
+
+        st.write("25. If strict channel priority is enabled in your Conda configuration which prevents you from installing a conda package (because another channel with a higher priority doesnt contain the required conda package), then you can add '--no-channel-priority' flag while installing the required conda package")
+        st.code("""
+        conda install bioconda::flash --no-channel-priority # be sure to run this command within a created conda environment as a non-root user to avoid affecting the system globally
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("26. If you want to send the output into an output.log file while printing/displaying the output in the terminal at the same time, run the 'tee' flag")
+        st.code("""
+        command | tee output.log
         """, language="bash")
 
         st.write("###")
