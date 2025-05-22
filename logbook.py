@@ -31,6 +31,7 @@ raconGPU_file = current_dir / "assets" / "polishing_with_RaconGPU_4_rounds.sh"
 raconCPU_file = current_dir / "assets" / "polishing_with_RaconCPU_4_rounds.sh"
 falcon_stats_file = current_dir / "assets" / "countFasta.pl"
 busco_plot_file = current_dir / "assets" / "busco_figure.R"
+gc_histogram_plot_file = current_dir / "assets" / "Plot_histogram_of_GC_content_distribution_of_genome_assembly_via_bbmap.Rmd"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
 # ---- HEADER SECTION ----
@@ -98,7 +99,32 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**2. Assign taxonomic labels to DNA sequences of raw Illumina paired end read and raw PacBio read via Kraken2**")
+        st.write("**2. Output the GC content of each contig of the SPAdes raw Illumina-only assembly**")
+        st.write("✔️activate the bbmap conda environment")
+        st.code("conda activate bbmap", language="bash")
+        st.write("✔️measure the GC content of each contig of the SPAdes raw Illumina-only assembly by running the stats.sh script")
+        st.code("""
+        nohup stats.sh in=/media/raid/Wee/WeeYeZhi/output/SPAdesresults/SPAdes_raw_Illumina_only_assembly_full_mode/SPAdes_raw_Illumina_only_assembly_full_mode/scaffolds.fasta gc=gc.txt gchist=gc_histogram.txt gcformat=4 > GC_content_stats_SPAdes_raw_Illumina_only_assembly_output.log 2>&1 &
+        """, language="bash")
+        # ----LOAD GZIP BASH SCRIPT----
+        # Check if the file exists before reading
+        if gc_histogram_plot_file.exists():
+            with open(gc_histogram_plot_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download RMarkdown Script to Plot Histogram",
+                data=script_byte,
+                file_name=gc_histogram_plot_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{gc_histogram_plot_file.name} does not exist.")
+
+        st.write("###")
+
+        st.write("**3. Assign taxonomic labels to DNA sequences of raw Illumina paired end read and raw PacBio read via Kraken2**")
         st.write("✔️create a 'kraken2' conda environment, activate the conda environment and install kraken2 via conda")
         st.code("""
         conda create -n kraken2
@@ -128,7 +154,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**3. Perform QC check to try merging both the raw forward and reverse read of Illumina paired-end read together via FLASH**")
+        st.write("**4. Perform QC check to try merging both the raw forward and reverse read of Illumina paired-end read together via FLASH**")
         st.write("✔️create a 'flash' conda environment, activate it, and install flash via conda")
         st.code("conda install bioconda::flash", language="bash")
         st.write("✔️verify the installation of flash")
@@ -174,7 +200,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.markdown("[Read FLASH Publication](https://academic.oup.com/bioinformatics/article/27/21/2957/217265)")
         st.write("###")
 
-        st.write("**4. Check the base quality of the 30 raw fastq files by using Falco**")
+        st.write("**5. Check the base quality of the 30 raw fastq files by using Falco**")
         st.write("✔️install Falco within Linux terminal")
         st.code("conda install -c bioconda falco", language='bash')
         st.write("✔️check the base quality of all the .fastq.gz files one by one by using the falco bash script")
@@ -196,7 +222,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**5. Trim and clean the 30 raw reads using fastp**")
+        st.write("**6. Trim and clean the 30 raw reads using fastp**")
         st.write("✔️install fastp within Linux terminal")
         st.code("sudo apt -y install fastp", language='bash')
         st.write(
@@ -219,7 +245,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**6. Check the base quality of the 30 trimmed .fastq.gz files once again using falco**")
+        st.write("**7. Check the base quality of the 30 trimmed .fastq.gz files once again using falco**")
         st.write("✔️create and activate the 'falco' conda environment")
         st.code("""
                       conda create -n falco
@@ -251,24 +277,24 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**7. Check the base quality of the two short illumina .fastq files provided by LKM by using Falco**")
+        st.write("**8. Check the base quality of the two short illumina .fastq files provided by LKM by using Falco**")
         st.code("falco Conopomorpha_raw_1.fastq.gz", language="bash")
         st.code("falco Conopomorpha_raw_2.fastq.gz", language="bash")
 
         st.write("###")
 
-        st.write("**8. Trim and clean the two short illumina .fastq files using fastp**")
+        st.write("**9. Trim and clean the two short illumina .fastq files using fastp**")
         st.code("nohup fastp -i /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1.fastq.gz -I /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2.fastq.gz -o /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq.gz -O /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq.gz -n 2 -f 15 -q 20 -l 70 --correction --detect_adapter_for_pe --html /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results_stricter/fastp_report.html --json /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results_stricter/fastp_report.json > fastp_output.log 2>&1 &", language="bash") # apply relaxed fastp parameter by setting -l 70 (originally wanted to retain more reads, but seems like a lot of sequencing errors and kmer artifacts remained)
 
         st.write("###")
 
-        st.write("**9. Check the base quality of the two short Illumina .fastq files using Falco once again**")
+        st.write("**10. Check the base quality of the two short Illumina .fastq files using Falco once again**")
         st.code("falco trimmed_Conopomorpha_1.fastq.gz", language="bash")
         st.code("falco trimmed_Conopomorpha_2.fastq.gz", language="bash")
 
         st.write("###")
 
-        st.write("**10. Alternatively, you can also trim the two short Illumina .fastq files using Cutadapt**")
+        st.write("**11. Alternatively, you can also trim the two short Illumina .fastq files using Cutadapt**")
         st.write("✔️create and activate the 'cutadapt' conda environment")
         st.code("""
               conda create -n cutadapt
@@ -289,7 +315,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**11. Estimate the haploid genome size of the insect using jellyfish**")
+        st.write("**12. Estimate the haploid genome size of the insect using jellyfish**")
         st.write("✔️ perform k-mer counting")
         st.code("nohup jellyfish count -m 19 -s 50G -t 48 -C /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq -o k_19_mer_counts.jf > jellyfish_k19_output.log 2>&1 &", language="bash")
         st.code("nohup jellyfish count -m 21 -s 50G -t 48 -C /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_1/trimmed_Conopomorpha_1.fastq /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_fastp_2/trimmed_Conopomorpha_2.fastq -o k_21_mer_counts.jf > jellyfish_k21_output.log 2>&1 &", language="bash")
@@ -322,7 +348,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**12. Check & compare the quality of the raw & processed LKM PacBio read using NanoPlot**")
+        st.write("**13. Check & compare the quality of the raw & processed LKM PacBio read using NanoPlot**")
         st.write("✔️create and activate the 'nanoplot' conda environment")
         st.code("""
                 conda create -n nanoplot
@@ -338,7 +364,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("13. If the quality of the PacBio read is bad, then proovread 2.14.1 will be used to correct the PacBio read using the short Illumina read")
+        st.write("14. If the quality of the PacBio read is bad, then proovread 2.14.1 will be used to correct the PacBio read using the short Illumina read")
         st.write("✔️create and activate the 'proovread' conda environment")
         st.code("""
         conda create -n proovread
@@ -393,7 +419,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         # Perform genome assembly
 
-        st.write("**14. Perform Illumina-only assembly to assemble the raw forward and reverse Illumina paired end read via SPAdes together**")
+        st.write("**15. Perform Illumina-only assembly to assemble the raw forward and reverse Illumina paired end read via SPAdes together**")
         st.write("✔️create a 'SPAdes' conda environment, activate the conda environment, and install SPAdes via conda")
         st.code("""
         conda create -n SPAdes
@@ -411,7 +437,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("nohup spades.py --threads 16 --memory 500 --pe1-1 --pe1-2 --pe1-m -o > spades_raw_merged_Illumina_only_assembly_output.log 2>&1 &", language="bash")
 
 
-        st.write("**15. Perform genome assembly to construct a complete reference genome of CPB using SPAdes (assemble short reads and long reads together)**")
+        st.write("**16. Perform genome assembly to construct a complete reference genome of CPB using SPAdes (assemble short reads and long reads together)**")
         st.write("✔️create and activate a virtual environment called SPAdes")
         st.code("""
         conda create -n SPAdes
@@ -464,7 +490,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
         st.write("---")
 
-        st.write("**16. Determine the library insert size of the Illumina paired-end read using bbmerge (contained within the BBMap package**)")
+        st.write("**17. Determine the library insert size of the Illumina paired-end read using bbmerge (contained within the BBMap package**)")
         st.write("✔️create and activate the 'bbmap' conda environment")
         st.code("""
                 conda create -n bbmap
@@ -482,7 +508,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**Alternatively, use another hybrid assembler called MaSuRCA**")
+        st.write("**18. Alternatively, use another hybrid assembler called MaSuRCA**")
         st.write("✔️create and activate the 'masurca' conda environment")
         st.code("""
                 conda create -n masurca
@@ -541,7 +567,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("---")
         st.write("###")
 
-        st.write("Perform PacBio CLR-only assembly via FALCON")
+        st.write("**19. Perform PacBio CLR-only assembly via FALCON**")
         st.write("✔️create the 'falcon' conda environment and activate it")
         st.code("""
         conda create -n falcon
@@ -608,7 +634,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**13. Perform PacBio CLR-only assembly via HiCanu**")
+        st.write("**20. Perform PacBio CLR-only assembly via HiCanu**")
         st.write("✔️create and activate a virtual environment called hicanu")
         st.code("""
                conda create -n hicanu
@@ -643,7 +669,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("---")
         st.write("###")
 
-        st.write("Alternatively, you can perform PacBio HiFi-only assembly using HiFiASM")
+        st.write("**21. Alternatively, you can perform PacBio HiFi-only assembly using HiFiASM**")
         st.write("✔️create and activate the 'hifiasm' conda environment")
         st.code("""
                      conda create -n hifiasm
@@ -671,7 +697,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
         st.write("---")
 
-        st.write("Alternatively, you can perform PacBio HiFi-only assembly using Verkko")
+        st.write("**22. Alternatively, you can perform PacBio HiFi-only assembly using Verkko**")
         st.write("✔️create and activate the 'verkko' conda environment")
         st.code("""
                           conda create -n verkko
@@ -694,7 +720,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
         st.write("---")
 
-        st.write("Alternatively, you can perform PacBio HiFi-only assembly or PacBio CLR-only assembly using Flye")
+        st.write("**23. Alternatively, you can perform PacBio HiFi-only assembly or PacBio CLR-only assembly using Flye**")
         st.write("✔️create and activate the 'Flye' conda environment")
         st.code("""
                                  conda create -n flye
@@ -722,7 +748,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         # Polishing
 
-        st.write("Perform long-read polishing via Racon-CPU")
+        st.write("**24. Perform long-read polishing via Racon-CPU**")
         st.write("✔️create and activate the 'racon' conda environment")
         st.code("""
         conda create -n racon
@@ -785,7 +811,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
         st.write("---")
 
-        st.write("Perform long-read polishing with Racon-GPU")
+        st.write("**25. Perform long-read polishing with Racon-GPU**")
         st.write("✔️create and activate the 'racon-gpu' conda environment")
         st.code("""
         conda create -n racon-gpu
@@ -835,7 +861,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
         st.write("---")
 
-        st.write("Perform short-read polishing with POLCA to correct base-level errors")
+        st.write("**26. Perform short-read polishing with POLCA to correct base-level errors**")
         st.write("✔️activate the 'masurca' conda environment")
         st.code("conda activate masurca", language="bash")
         st.write("✔️find the location of the POLCA script (polca.sh)")
@@ -849,7 +875,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
         st.write("---")
 
-        st.write("**15. Index the genome assembly by using bwa-mem2**")
+        st.write("**27. Index the genome assembly by using bwa-mem2**")
         st.write("✔️create a virtual environment called bwa-mem2")
         st.code("conda create -n bwa-mem2", language="bash")
         st.write("✔️activate the bwa-mem2 environment")
@@ -865,7 +891,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         # Continue working in the same 'bwa-mem2' environment
 
-        st.write("**16. Correct the genome assembly provided by LKM using short reads**")
+        st.write("**28. Correct the genome assembly provided by LKM using short reads**")
         st.write("✔️align short genomic reads with the genome assembly using bwa-mem2 to produce a SAM file")
         st.code("nohup bwa-mem2 mem -t 48 /media/Raid/Wee/WeeYeZhi/resources_from_LKM/hybrid_genome_assembly_of_CPB/CPB_insect_draft_assembly.v4.fa /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_1/trimmed_Conopomorpha_raw_1.fastq /media/Raid/Wee/WeeYeZhi/output/Illumina_reads_LKM/fastp_results/Conopomorpha_raw_2/trimmed_Conopomorpha_raw_2.fastq > CPB_raw_hybrid_assembly_output.sam 2> CPB_raw_hybrid_assembly_output_sam.log &", language="bash")
         st.write("✔️install samtools within the 'samtools' conda environment")
@@ -895,7 +921,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**17. Align long read with the genome assembly to output the alignment statistics later (Optional) (No need to run this before running Longstitch as Longstitch already incorporated the minimap2 pipeline)**")
+        st.write("**29. Align long read with the genome assembly to output the alignment statistics later (Optional) (No need to run this before running Longstitch as Longstitch already incorporated the minimap2 pipeline)**")
         st.write("✔️create a new environment named as 'minimap2' and activate it")
         st.code("conda create -n minimap2", language="bash")
         st.code("conda activate minimap2", language="bash")
@@ -911,7 +937,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**18. Correct the genome assembly provided by LKM further using long read**")
+        st.write("**30. Correct the genome assembly provided by LKM further using long read**")
         st.write("✔️create a new environment named as 'longstitch' with a compatible version of Python to install longstitch")
         st.code("conda create -n longstitch", language="bash")
         st.code("conda install -c bioconda longstitch", language="bash")
@@ -956,7 +982,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**19. Evaluate the completeness of the genome assembly after scaffolding**")
+        st.write("**31. Evaluate the completeness of the genome assembly after scaffolding**")
         st.write("✔️create a virtual environment called 'busco_env' & install BUSCO within the environment")
         st.code("""
         conda create -n busco_env
@@ -1005,7 +1031,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**20. Evaluate the quality of the genome assembly after scaffolding**")
+        st.write("**32. Evaluate the quality of the genome assembly after scaffolding**")
         st.write("✔️create a virtual environment called 'quast'")
         st.code("conda create -n quast", language="bash")
         st.write("✔️activate the 'quast' environment")
@@ -1021,7 +1047,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**21. Perform softmasking for the repeat regions of the genome assembly using RepeatMasker before running BRAKER3**")
+        st.write("**33. Perform softmasking for the repeat regions of the genome assembly using RepeatMasker before running BRAKER3**")
         st.write("✔️install RepeatMasker via bioconda")
         st.code("conda install -c bioconda repeatmasker", language="bash") # this should install the other required dependencies like perl & dfam database
         st.write("✔️display the help menu of Repeatmasker to make sure you have installed it correctly")
@@ -1040,7 +1066,7 @@ conda install -c bioconda perl""", language="bash")
 
         st.write("###")
 
-        st.write("**22. Align the best CPB genome assembly with the LKM hybrid assembly using MUMmer4 to detect SNPs, indels, insertions, deletions**")
+        st.write("**34. Align the best CPB genome assembly with the LKM hybrid assembly using MUMmer4 to detect SNPs, indels, insertions, deletions**")
         st.write("✔️create a 'mummer4' conda environment, activate the conda environment, & install mummer4 via conda")
         st.code("""
         conda create -n mummer4
@@ -1068,7 +1094,7 @@ conda install -c bioconda perl""", language="bash")
 
         st.write("###")
 
-        st.write("**23.Merge the two assemblies together using quickmerge to possibly improve the contiguity of the assembly**")
+        st.write("**35.Merge the two assemblies together using quickmerge to possibly improve the contiguity of the assembly**")
         st.write("✔️create a 'quickmerge' conda environment, activate the conda environment, and install quickmerge via conda")
         st.code("""
         conda create -n quickmerge
@@ -1089,7 +1115,7 @@ conda install -c bioconda perl""", language="bash")
 
         st.write("###")
 
-        st.write("**24. Predict the list of coding genes and proteins of the CPB genome using BRAKER3**")
+        st.write("**36. Predict the list of coding genes and proteins of the CPB genome using BRAKER3**")
         st.write("✔️switch to a non-root user")
         st.code("su cbr15", language="bash")
         st.write("✔️after switching, get your user ID & group ID")
@@ -1265,7 +1291,7 @@ conda install -c bioconda perl""", language="bash")
         st.write("✔️set GeneMark-ETP path")
         st.code("", language="bash")
 
-        st.write("**25. Check the BUSCO completeness score for the protein sequences predicted by BRAKER3 in the form of braker.aa file**")
+        st.write("**37. Check the BUSCO completeness score for the protein sequences predicted by BRAKER3 in the form of braker.aa file**")
         st.code("export NUMEXPR_MAX_THREADS=48", language="bash")
         st.code("nohup busco -m protein -i /path/to/your/braker.aa -c 48 -l lepidoptera_odb12 -o CPB_raw_hybrid_assembly_busco > CPB_raw_hybrid_assembly_busco_output.log 2>&1 &", language="bash")
 
