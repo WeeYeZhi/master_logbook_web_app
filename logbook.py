@@ -18,6 +18,7 @@ st.set_page_config(page_title="My LogBook", page_icon="📚", layout="wide")
 current_dir = Path(__file__).parent if "__file__" in locals() else Path.cwd()
 falco1_file = current_dir / "assets" / "falco1.sh"
 falco2_file = current_dir / "assets" / "falco2.sh"
+fastqc_file = current_dir / "assets" / "fastqc.sh"
 gzip_file = current_dir / "assets" / "gzip.sh"
 fastp_file = current_dir / "assets" / "fastp.sh"
 genomeestimate_file = current_dir / "assets" / "genome_estimate.py"
@@ -31,6 +32,8 @@ raconGPU_file = current_dir / "assets" / "polishing_with_RaconGPU_4_rounds.sh"
 raconCPU_file = current_dir / "assets" / "polishing_with_RaconCPU_4_rounds.sh"
 falcon_stats_file = current_dir / "assets" / "countFasta.pl"
 busco_plot_file = current_dir / "assets" / "busco_figure.R"
+trimmomatic_file = current_dir / "assets" / "trimmomatic.sh"
+trinity_sample_file = current_dir / "assets" / "trinity_samples.txt"
 gc_histogram_plot_file = current_dir / "assets" / "Plot_histogram_of_GC_content_distribution_of_genome_assembly_via_bbmap.Rmd"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
@@ -992,10 +995,10 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
 
         st.write("**32. Evaluate the completeness of the genome assembly after scaffolding**")
-        st.write("✔️create a virtual environment called 'busco_env' & install BUSCO within the environment")
+        st.write("✔️create a virtual environment called 'busco' & install BUSCO within the environment")
         st.code("""
-        conda create -n busco_env
-        conda activate busco_env
+        conda create -n busco
+        conda activate busco
         """, language="bash")
         st.write("✔️install BUSCO via conda")
         st.code("conda install bioconda::busco", language="bash")
@@ -1009,10 +1012,10 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("✔️draw BUSCO plot for comparison using python script (built inside the busco conda package))")
         st.code("""
         which busco # to find the location of BUSCO executable 
-        find /home/your_user/miniconda3/envs/busco_env/ -name generate_plot.py # find the location of the generate_plot.py file to output its filepath
-        head -n 5 /home/cbr15/anaconda3/envs/busco_env/bin/generate_plot.py # display the first 5 lines to see whether there is a shebang line, "#!/usr/bin/env python3" at the first line of the file. If have, then no need to specify the flag, "python3" while running the command to draw the BUSCO plot
-        nohup /home/cbr15/anaconda3/envs/busco_env/bin/generate_plot.py -wd /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_summaries -rt specific --no_r > busco_plot_output.log 2>&1 & # output only the R code to be run inside the RStudio later to draw the BUSCO plot # no need to specify the flag, "python3" if the file has the shebang line
-        nohup python3 /home/cbr15/anaconda3/envs/busco_env/bin/generate_plot.py -wd /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_summaries -rt specific --no_r > busco_plot_output.log 2>&1 & # output only the R code to be run inside the RStudio later to draw the BUSCO plot # need to specify the flag, "python3" if the file doesn't have the shebang line
+        find /home/your_user/miniconda3/envs/busco/ -name generate_plot.py # find the location of the generate_plot.py file to output its filepath
+        head -n 5 /home/cbr15/anaconda3/envs/busco/bin/generate_plot.py # display the first 5 lines to see whether there is a shebang line, "#!/usr/bin/env python3" at the first line of the file. If have, then no need to specify the flag, "python3" while running the command to draw the BUSCO plot
+        nohup /home/cbr15/anaconda3/envs/busco/bin/generate_plot.py -wd /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_summaries -rt specific --no_r > busco_plot_output.log 2>&1 & # output only the R code to be run inside the RStudio later to draw the BUSCO plot # no need to specify the flag, "python3" if the file has the shebang line
+        nohup python3 /home/cbr15/anaconda3/envs/busco/bin/generate_plot.py -wd /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_summaries -rt specific --no_r > busco_plot_output.log 2>&1 & # output only the R code to be run inside the RStudio later to draw the BUSCO plot # need to specify the flag, "python3" if the file doesn't have the shebang line
         """, language="bash")
         st.write("✔️generate the BUSCO plot within RStudio")
         # ----LOAD  BASH SCRIPT----
@@ -1124,7 +1127,160 @@ conda install -c bioconda perl""", language="bash")
 
         st.write("###")
 
-        st.write("**37. Predict the list of coding genes and proteins of the CPB genome using BRAKER3**")
+        st.write("**38. Check the quality of all the transcriptomic reads of CPB derived from the NCBI SRA database via FASTQC**")
+        st.write("✔️create a 'fastqc' conda environment, activate the environment and install fastqc via bioconda")
+        st.code("""
+        conda create -n fastqc
+        conda activate fastqc
+        conda install bioconda::fastqc
+        """, language="bash")
+        st.write("✔️verify the installation of fastqc")
+        st.code("""
+        which fastqc
+        fastqc -h
+        fastqc -v
+        """, language="bash")
+        st.write("✔️run FASTQC on the transcriptomic reads of CPB derived from NCBI SRA database")
+        st.code("""
+        fastqc -f fastq -t 16 -o output_dir SRR11266556_1.fastq.gz # example of fastqc command to run fastqc on a single .fastq file
+        """, language="bash")
+        st.write("✔️Alternatively, automate the FASTQC run process in large batch mode via bash script")
+        st.code("""
+        dos2unix fastqc.sh
+        chmod +x fastqc.sh
+        nohup bash fastqc.sh > fastqc_raw_RNA_seq_from_NCBI_SRA_results_output.log 2>&1 &
+        """, language="bash")
+        # ----LOAD  BASH SCRIPT----
+        # Check if the file exists before reading
+        if fastqc_file.exists():
+            with open(fastqc_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download FASTQC Bash Script",
+                data=script_byte,
+                file_name=fastqc_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{fastqc_file.name} does not exist.")
+        st.markdown("[Visit FASTQC GitHub User Manual Page (navigate to the data section)](https://github.com/s-andrews/FastQC/blob/master/fastqc)")
+        st.markdown("[Visit FASTQC Conda Installation Page](https://anaconda.org/bioconda/fastqc)")
+        st.markdown("[Visit FASTQC Reports & Documentation Page](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)")
+        st.markdown("[Read and analyze Illumina read with good FASTQC result](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/good_sequence_short_fastqc.html)")
+
+        st.write("###")
+
+        st.write("**39. Aggregate all the FASTQC results of raw CPB transcriptomic reads into one single HTML report for easier data comparison, analysis and visualization**")
+        st.write("✔️create a 'multiqc' conda environment, activate the environment and install MultiQC via bioconda")
+        st.code("""
+        conda create -n multiqc
+        conda activate multiqc
+        conda install bioconda::multiqc
+        """, language="bash")
+        st.code("""
+        which multiqc
+        multiqc -h
+        """, language="bash")
+        st.write("")
+        st.code("""
+        multiqc . -o /media/raid/Wee/WeeYeZhi/output/multiqc_raw_RNA_seq_from_NCBI_SRA_results # run this multiqc command within the directory containing all the previous FASTQC results of the reads
+        """, language="bash")
+        st.markdown("[Visit MultiQC Conda Installation Page](https://anaconda.org/bioconda/multiqc)")
+        st.markdown("[Visit MultiQC GitHub Page](https://github.com/MultiQC/MultiQC?tab=readme-ov-file)")
+        st.markdown("[Visit MultiQC User Manual Page](https://docs.seqera.io/multiqc/getting_started/running_multiqc)")
+
+        st.write("###")
+
+        st.write("**40. Trim off the adapter sequences from the transcriptomic Illumina paired end read via trimmomatic (if you want to trim it externally first before running trinity pipeline)**")
+        st.write("✔️create a 'trimmomatic' conda environment, activate the environment and install trimmomatic via bioconda")
+        st.code("""
+        conda create -n trimmomatic
+        conda activate trimmomatic
+        conda install bioconda::trimmomatic
+        """, language="bash")
+        st.write("✔️verify the installation of trimmomatic")
+        st.code("""
+        which trimmomatic
+        trimmomatic -h
+        """, language="bash")
+        st.write("✔️run trimmomatic to trim adapter sequences off from a transcriptomic Illumina paired end read")
+        st.code("""
+        trimmomatic PE -threads 16 input_R1.fastq input_R2.fastq output_R1_paired.fastq output_R1_unpaired.fastq output_R2_paired.fastq output_R2_unpaired.fastq ILLUMINACLIP:/path/to/adapter.fa:2:30:10 SLIDINGWINDOW:4:5 LEADING:5 TRAILING:5 MINLEN:25 # run trimmomatic to trim a single Illumina paired end read file only one at a time
+        """, language="bash")
+        st.write("✔️Alternatively, run trimmomatic to perform adapter trimming process in large batches via bash script")
+        st.code("""
+        dos2unix trimmomatic.sh
+        chmod +x trimmomatic.sh
+        bash trimmomatic.sh
+        """, language="bash")
+        # ----LOAD  BASH SCRIPT----
+        # Check if the file exists before reading
+        if trimmomatic_file.exists():
+            with open(trimmomatic_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Trimmomatic Bash Script",
+                data=script_byte,
+                file_name=trimmomatic_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{trimmomatic_file.name} does not exist.")
+        st.markdown("[Visit Trimmomatic Conda Installation Page](https://anaconda.org/bioconda/trimmomatic)")
+        st.markdown("[Visit Trimmomatic GitHub User Manual Page](https://github.com/usadellab/Trimmomatic)")
+
+        st.write("###")
+
+        st.write("**41. Perform transcriptome assembly via Trinity**")
+        st.write("✔️create a 'trinity' conda environment, activate the environment and install trinity via bioconda")
+        st.code("""
+        conda create -n trinity
+        conda activate trinity
+        conda install bioconda::trinity
+        """, language="bash")
+        st.write("✔️verify the installation of Trinity")
+        st.code("""
+        Trinity --show_full_usage_info
+        which Trinity
+        """, language="bash")
+        st.write("✔️run Trinity to perform comprehensive transcriptome assembly to assemble all the transcriptomic reads derived from all the CPB developmental stages (larva, pupa & adult)")
+        st.code("""
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/raw_RNA_seq_from_NCBI_SRA/trinity_samples.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --trimmomatic --quality_trimming_params "ILLUMINACLIP:/media/raid/Wee/WeeYeZhi/raw_RNA_seq_from_NCBI_SRA/adapter.fa:2:30:10 SLIDINGWINDOW:4:5 LEADING:5 TRAILING:5 MINLEN:25" --output /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly > /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly/trinity_output.log 2>&1 & # run this command within the working directory containing all the .fastq.gz files so that trinity is able to find those transcriptomic read files
+        """, language="bash")
+        # ----LOAD TRINITY SAMPLE FILE----
+        # Check if the file exists before reading
+        if trinity_sample_file.exists():
+            with open(trinity_sample_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Trinity Sample File",
+                data=script_byte,
+                file_name=trinity_sample_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{trinity_sample_file.name} does not exist.")
+        st.markdown("[Visit Trinity Conda Installation Page](https://anaconda.org/bioconda/trinity)")
+        st.markdown("[Visit Trinity GitHub Installation Page](https://github.com/trinityrnaseq/trinityrnaseq/wiki/Installing-Trinity)")
+        st.markdown("[Visit Trinity GitHub Wikipedia Page](https://github.com/trinityrnaseq/trinityrnaseq/wiki)")
+        st.markdown("[Visit Trinity GitHub User Manual Page](https://github.com/trinityrnaseq/trinityrnaseq/wiki/Running-Trinity)")
+        st.markdown("[Visit Trinity User Manual Page](https://stab.st-andrews.ac.uk/wiki/index.php/Trinity)")
+        st.markdown("[Read Trinity User Manual Documentation](https://stab.st-andrews.ac.uk/wiki/index.php?title=Trinity&action=pdfbook&format=single)")
+        st.markdown("[Visit Trinity User Manual Page 2](https://eagle.fish.washington.edu/whale/fish546/Trinity_r2013-08-14_analysis1-2014-02-08-20-44-13.233/bin/trinityrnaseq_r2013_08_14/docs/advanced_trinity_guide.html)")
+        st.markdown("[Visit Trinity GitHub Progress Monitoring Page](https://github.com/trinityrnaseq/trinityrnaseq/wiki/Trinity-Progress-Monitoring)")
+        st.markdown("[Read how to determine the orientation of the transcriptomic read libraries whether it is in the reverse-forward (RF) or forward-reverse (FR) orientation to specify the --SS_lib_type flag](https://knowledge.illumina.com/library-preparation/rna-library-prep/library-preparation-rna-library-prep-reference_material-list/000002238)")
+        st.markdown("[Download list of adapter sequences contained within the Illumina paired end read to run trimmomatic for adapter removal purposes](https://github.com/usadellab/Trimmomatic/tree/main/adapters)")
+        st.markdown("[Read how to create adapter files to perform adapter removal via trimmomatic](https://www.biostars.org/p/250425/)")
+
+        st.write("###")
+
+        st.write("**42. Predict the list of coding genes and proteins of the CPB genome using BRAKER3**")
         st.write("✔️switch to a non-root user")
         st.code("su cbr15", language="bash")
         st.write("✔️after switching, get your user ID & group ID")
@@ -1300,11 +1456,11 @@ conda install -c bioconda perl""", language="bash")
         st.write("✔️set GeneMark-ETP path")
         st.code("", language="bash")
 
-        st.write("**38. Check the BUSCO completeness score for the protein sequences predicted by BRAKER3 in the form of braker.aa file**")
+        st.write("**43. Check the BUSCO completeness score for the protein sequences predicted by BRAKER3 in the form of braker.aa file**")
         st.code("export NUMEXPR_MAX_THREADS=48", language="bash")
         st.code("nohup busco -m protein -i /path/to/your/braker.aa -c 48 -l lepidoptera_odb12 -o CPB_raw_hybrid_assembly_busco > CPB_raw_hybrid_assembly_busco_output.log 2>&1 &", language="bash")
 
-        st.write("**26. Compute the QUAST metrics for the genome assembly with the additional braker.gff3 file produced by BRAKER3 to know how well the predicted genes are supported by your genome assembly")
+        st.write("**44. Compute the QUAST metrics for the genome assembly with the additional braker.gff3 file produced by BRAKER3 to know how well the predicted genes are supported by your genome assembly")
         st.code("nohup quast.py /path/to/your/assembled_CPB_genome.fa --report-all-metrics --large --eukaryote --threads 48 -o quast_output --gff /path/to/braker.gff3 > quast_output.log 2>&1 &", language="bash")
 
 # Phase 2: Reference-Based Transcriptomics Analysis
