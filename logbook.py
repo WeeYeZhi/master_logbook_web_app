@@ -19,7 +19,6 @@ current_dir = Path(__file__).parent if "__file__" in locals() else Path.cwd()
 fastqc_raw_RNA_seq_file = current_dir / "assets" / "fastqc_raw_RNA_seq.sh"
 fastqc_trimmed_RNA_seq_file = current_dir / "assets" / "fastqc_trimmed_RNA_seq.sh"
 gzip_file = current_dir / "assets" / "gzip.sh"
-star_file = current_dir / "assets" / "RNAseq_alignment_with_STAR.sh"
 deseq2rmd_file = current_dir / "assets" / "deseq2.Rmd"
 gromacs_file = current_dir / "assets" / "Gromacs_codes.txt"
 busco_plot_file = current_dir / "assets" / "busco_figure.R"
@@ -27,14 +26,12 @@ trimmomatic_file = current_dir / "assets" / "trimmomatic.sh"
 trinity_samples_sequenced_by_LKM = current_dir / "assets" / "trinity_samples_sequenced_by_LKM.txt"
 trinity_samples_sequenced_by_INBIOSIS = current_dir / "assets" / "trinity_samples_sequenced_by_INBIOSIS.txt"
 trinity_samples_sequenced_by_LKM_and_INBIOSIS = current_dir / "assets" / "trinity_samples_sequenced_by_LKM_and_INBIOSIS.txt"
-bowtie2_mapping_after_cdhitest_trinity_file = current_dir/ "assets" / "bowtie2_mapping_after_cdhitest_trinity.sh"
-bowtie2_mapping_after_trimmomatic_file = current_dir / "assets" / "bowtie2_mapping_after_trimmomatic.sh"
-generate_read_mapping_statistics_after_trimmomatic_file = current_dir / "assets" / "generate_mapping_statistics_after_trimmomatic.sh"
-generate_read_mapping_statistics_after_cdhitest_trinity_file = current_dir / "assets" / "generate_mapping_statistics_after_cdhitest_trinity.sh"
 transrate_file = current_dir / "assets" / "transrate.sh"
 salmon_transcript_quantification_after_trimmomatic = current_dir / "assets" / "salmon_quantify_after_trimmomatic.sh"
 salmon_transcript_quantification_after_cdhitest_trinity = current_dir / "assets" / "salmon_quantify_after_cdhitest_trinity.sh"
+salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS = current_dir / "assets" / "salmon_quantify_after_cdhitest_trinity_NCBI_FCS.sh"
 swissprot_fasta_file = current_dir / "assets" / "uniprot_sprot.fasta.gz"
+pymol_movie_script = current_dir / "assets" / "movie01_script.pml"
 CPB_pic = current_dir / "assets" / "CPB.png"
 
 # ---- HEADER SECTION ----
@@ -448,136 +445,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**13. Index the already deduplicated transcriptome assembly, followed by mapping the cleaned trimmed reads (trimmed via Trimmomatic) back to the transcriptome assembly via Bowtie2**")
-        st.write("✔️create a 'bowtie2' conda environment, activate the environment and install bowtie2 via bioconda")
-        st.code("""
-        conda create -n bowtie2
-        conda activate bowtie2
-        conda install bioconda::bowtie2
-        conda install bioconda::samtools
-        """, language="bash")
-        st.write("✔️verify the installation of bowtie2")
-        st.code("""
-        which bowtie2
-        which bowtie2-build
-        bowtie2 -h
-        bowtie2 --version
-        """, language="bash")
-        st.write("✔️build a bowtie index from the already deduplicated CPB transcriptome assembly IV")
-        st.code("""
-        nohup bowtie2-build /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_assembly_done_by_LKM_and_INBIOSIS.Trinity.fasta /media/raid/Wee/WeeYeZhi/output/bowtie2_results/bowtie2_build_results/trinity_assembly_after_trimmomatic/deduplicated_filtered_transcripts > /media/raid/Wee/WeeYeZhi/output/bowtie2_results/bowtie2_build_results/trinity_assembly_after_trimmomatic/bowtie2_build_output.log 2>&1 & # for this, /media/raid/Wee/WeeYeZhi/output/bowtie2_results/bowtie2_build_results/trinity_assembly_after_trimmomatic/deduplicated_filtered_transcripts, you specify the path to your index prefixes.
-        nohup bowtie2-build /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest.fasta /media/raid/Wee/WeeYeZhi/output/bowtie2_results/bowtie2_build_results/trinity_assembly_after_cdhitest_trinity/deduplicated_filtered_transcripts > /media/raid/Wee/WeeYeZhi/output/bowtie2_results/bowtie2_build_results/trinity_assembly_after_cdhitest_trinity/bowtie2_build_output.log 2>&1 & # for this, /media/raid/Wee/WeeYeZhi/output/bowtie2_results/bowtie2_build_results/trinity_assembly_after_cdhitest_trinity/deduplicated_filtered_transcripts, you specify the path to your index prefixes.
-        """, language="bash")
-        st.write("✔️map 9 cleaned paired end read (trimmed via Trimmomatic) back to the indexed transcriptome assembly (before running deduplication) using a bash script")
-        st.code("""
-        dos2unix bowtie2_mapping_after_trimmomatic.sh
-        chmod +x bowtie2_mapping_after_trimmomatic.sh
-        nohup bash bowtie2_mapping_after_trimmomatic.sh > bowtie2_mapping_after_trimmomatic_output.log 2>&1 &
-        """, language="bash")
-        # ----LOAD BOWTIE2 MAPPING FILE----
-        # Check if the file exists before reading
-        if bowtie2_mapping_after_trimmomatic_file.exists():
-            with open(bowtie2_mapping_after_trimmomatic_file, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Bowtie2 Mapping (Before Deduplication) Bash Script",
-                data=script_byte,
-                file_name=bowtie2_mapping_after_trimmomatic_file.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{bowtie2_mapping_after_trimmomatic_file.name} does not exist.")
-        st.write("✔️map 9 cleaned paired end read (trimmed via Trimmomatic) back to the already indexed, deduplicated transcriptome assembly using a bash script")
-        st.code("""
-        dos2unix bowtie2_mapping_after_cdhitest_trinity.sh
-        chmod +x bowtie2_mapping_after_cdhitest_trinity.sh
-        nohup bash bowtie2_mapping_after_cdhitest_trinity.sh > bowtie2_mapping_after_cdhitest_trinity_output.log 2>&1 &
-        """, language="bash")
-        # ----LOAD BOWTIE2 MAPPING FILE----
-        # Check if the file exists before reading
-        if bowtie2_mapping_after_cdhitest_trinity_file.exists():
-            with open(bowtie2_mapping_after_cdhitest_trinity_file, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Bowtie2 Mapping (After Deduplication) Bash Script",
-                data=script_byte,
-                file_name=bowtie2_mapping_after_cdhitest_trinity_file.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{bowtie2_mapping_after_cdhitest_trinity_file.name} does not exist.")
-        st.markdown("[Visit Bowtie2 Conda Installation Page](https://anaconda.org/bioconda/bowtie2)")
-        st.markdown("[Visit Bowtie2 GitHub Page](https://github.com/BenLangmead/bowtie2/tree/master)")
-
-        st.write("###")
-
-        st.write("**14. Compress the .SAM files to .BAM files, followed by sorting and indexing the .BAM files via samtools using a bash script (where the sorted BAM files will be viewed and inspected via the Integrated Genomics Viewer (IGV) browser later)**")
-        st.write("✔️create a 'samtools' conda environment, activate the environment and install samtools via bioconda")
-        st.code("""
-        conda create -n samtools
-        conda activate samtools
-        conda install bioconda::samtools
-        """, language="bash")
-        st.write("✔️verify the installation of samtools")
-        st.code("""
-        which samtools
-        which samtools view
-        which samtools sort
-        which samtools index
-        samtools -h
-        samtools --version
-        """, language="bash")
-        st.write("run the bash script to generate the read mapping statistics (before running assembly deduplication)")
-        st.code("""
-        dos2unix generate_mapping_statistics_after_trimmomatic.sh
-        chmod +x generate_mapping_statistics_after_trimmomatic.sh
-        nohup bash generate_mapping_statistics_after_trimmomatic.sh > generate_mapping_statistics_after_trimmomatic_output.log 2>&1 &
-        """, language="bash")
-        # ----LOAD GENERATE_READ_MAPPING_STATISTICS (BEFORE DEDUPLICATION) FILE----
-        # Check if the file exists before reading
-        if generate_read_mapping_statistics_after_trimmomatic_file.exists():
-            with open(generate_read_mapping_statistics_after_trimmomatic_file, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Generate_Read_Mapping_Statistics (Before Deduplication) Bash Script",
-                data=script_byte,
-                file_name=generate_read_mapping_statistics_after_trimmomatic_file.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{generate_read_mapping_statistics_after_trimmomatic_file.name} does not exist.")
-        st.write("run the bash script to generate the read mapping statistics (after running assembly deduplication)")
-        st.code("""
-        dos2unix generate_mapping_statistics_after_cdhitest_trinity.sh
-        chmod +x generate_mapping_statistics_after_cdhitest_trinity.sh
-        nohup bash generate_mapping_statistics_after_cdhitest_trinity.sh > generate_mapping_statistics_after_cdhitest_trinity_output.log 2>&1 &
-        """, language="bash")
-        # ----LOAD GENERATE_READ_MAPPING_STATISTICS (AFTER DEDUPLICATION) FILE----
-        # Check if the file exists before reading
-        if  generate_read_mapping_statistics_after_cdhitest_trinity_file.exists():
-            with open(generate_read_mapping_statistics_after_cdhitest_trinity_file, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Generate_Read_Mapping_Statistics (After Deduplication) Bash Script",
-                data=script_byte,
-                file_name=generate_read_mapping_statistics_after_cdhitest_trinity_file.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{generate_read_mapping_statistics_after_cdhitest_trinity_file.name} does not exist.")
-        st.markdown("[Visit Samtools Conda Installation Page](https://anaconda.org/bioconda/samtools)")
-
-        st.write("###")
-
-        st.write("**15. Compute the basic statistics of the CPB transcriptome assembly via Trinity**")
+        st.write("**13. Compute the basic statistics of the CPB transcriptome assembly via Trinity**")
         st.write("✔️activate the 'trinity' conda environment")
         st.code("""
         conda activate trinity
@@ -590,11 +458,12 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("""
         perl /home/cbr15/anaconda3/envs/trinity/bin/TrinityStats.pl /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_assembly_done_by_LKM_and_INBIOSIS.Trinity.fasta > stats_trinity_assembly_after_trimmomatic.log
         perl /home/cbr15/anaconda3/envs/trinity/bin/TrinityStats.pl /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta > stats_trinity_assembly_after_cdhitest_trinity.log
+        perl /home/cbr15/anaconda3/envs/trinity/bin/TrinityStats.pl /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/clean.fasta > stats_trinity_assembly_after_cdhitest_trinity_NCBI_FCS.log
         """, language="bash")
 
         st.write("###")
 
-        st.write("**16. Perform reference-free quality assessment of de novo CPB transcriptome assembly for 3 times via TransRate (before deduplication, after deduplication, & after NCBI-FCS)**")
+        st.write("**14. Perform reference-free quality assessment of de novo CPB transcriptome assembly for 3 times via TransRate (before deduplication, after deduplication, & after NCBI-FCS)**")
         st.write("✔️install transrate via docker container")
         st.code("""
         docker pull genevia/transrate:v1.0.3_orp # pull the transrate docker image from the DockerHub registry
@@ -614,8 +483,10 @@ if selected == "Phase 1: Sequence-Based Analysis":
         """, language="bash")
         st.write("✔️show the log file content of the transrate docker that is running in the background")
         st.code("""
-        docker logs transrate # show the log file content of the run by using the designated name of the docker container
-        docker ps -a # list all the current actively running and stopped docker containers
+        docker logs orp_transrate # show the log file content of the run by using the designated name of the docker container before deduplication
+        docker logs orp_transrate_after_deduplication # show the log file content of the run by using the designated name of the docker container after deduplication 
+        docker logs orp_transrate_after_NCBI_FCS # show the log file content of the run by using the designated name of the docker container after deduplication & NCBI-FCS
+        docker ps -a # list all the current actively running and stopped docker containers. Those that exited with code 0 is the successful run
         """, language="bash")
         st.markdown("[Visit TransRate GitHub Page](https://github.com/blahah/transrate)")
         st.markdown("[Visit TransRate Conda Installation Page](https://anaconda.org/bioconda/transrate)")
@@ -624,7 +495,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**18. Run Salmon to perform transcript abundance estimation**")
+        st.write("**15. Run Salmon to perform transcript abundance estimation**")
         st.write("✔️create a 'salmon' conda environment, activate the environment and install salmon via bioconda")
         st.code("""
         conda create -n salmon
@@ -641,8 +512,9 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("""
         nohup salmon index -t /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_trimmomatic.fasta -p 16 -i /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_trimmomatic/transcripts_index_after_trimmomatic -k 31 > /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_trimmomatic/salmon_index_after_trimmomatic_output.log 2>&1 &
         nohup salmon index -t /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta -p 16 -i /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_cdhitest_trinity/transcripts_index_after_cdhitest_trinity -k 31 > /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_cdhitest_trinity/salmon_index_after_cdhitest_trinity_output.log 2>&1 &
+        nohup salmon index -t /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/clean.fasta -p 16 -i /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_cdhitest_trinity_NCBI_FCS/transcripts_index_after_cdhitest_trinity_NCBI_FCS -k 31 > /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_cdhitest_trinity_NCBI_FCS/salmon_index_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 &
         """, language="bash")
-        st.write("✔️perform transcript abundance quantification against the transcriptome assembly for two times (before & after running CD-HIT-EST & Trinity script)")
+        st.write("✔️perform transcript abundance quantification against the transcriptome assembly for three times (before running deduplication, after running deduplication, and after running NCBI-FCS)")
         st.code("""
         dos2unix salmon_quantify_after_trimmomatic.sh
         chmod +x salmon_quantify_after_trimmomatic.sh
@@ -683,36 +555,72 @@ if selected == "Phase 1: Sequence-Based Analysis":
             )
         else:
             st.error(f"{salmon_transcript_quantification_after_cdhitest_trinity.name} does not exist.")
+        st.code("""
+        dos2unix salmon_quantify_after_cdhitest_trinity_NCBI_FCS.sh
+        chmod +x salmon_quantify_after_cdhitest_trinity_NCBI_FCS.sh
+        nohup bash salmon_quantify_after_cdhitest_trinity_NCBI_FCS.sh > salmon_quantify_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 &
+        """, language="bash")
+        # ----LOAD SALMON TRANSCRIPT QUANTIFICATION BASH AFTER NCBI FCS FILE----
+        # Check if the file exists before reading
+        if salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS.exists():
+            with open(salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Salmon Transcript Quantification After NCBI FCS Bash File",
+                data=script_byte,
+                file_name=salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS.name} does not exist.")
+        st.write("✔️remove the tilde suffix inside all the quant.sf files produced by the salmon quantification run after NCBI FCS (otherwise you are going to encounter an error complaining that it cannot find certain transcripts ID due to mismatches between transcripts ID inside the both the gene_to_trans_map file and salmon quantification file)")
+        st.code("""
+        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR11266554.sf # remember to copy the source code from the pycharm file and paste it to the terminal. You cannot copy and paste the command from the logbook website.
+        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR11266555.sf
+        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR11266556.sf
+        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690969.sf
+        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690970.sf
+        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690971.sf
+        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690972.sf
+        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690973.sf
+        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690974.sf
+        """, language="bash")
         st.markdown("[Visit Salmon GitHub Page](https://github.com/COMBINE-lab/salmon)")
         st.markdown("[Visit Salmon User Manual Page](https://salmon.readthedocs.io/en/latest/salmon.html#using-salmon)")
         st.markdown("[Visit Salmon Conda Installation Page](https://anaconda.org/bioconda/salmon)")
 
         st.write("###")
 
-        st.write("**19. Compute the ExN50 statistics of the transcriptome assemblies (before & after running CD-HIT-EST & Trinity script)**")
+        st.write("**16. Compute the ExN50 statistics of the transcriptome assemblies (before & after running CD-HIT-EST & Trinity script)**")
         st.write("✔️activate the 'trinity' conda environment")
         st.code("""
         conda activate trinity
         """, language="bash")
-        st.write("✔️generate the gene to trans map file for the CPB transcriptome assembly (before & after running CD-HIT-EST & Trinity script)")
+        st.write("✔️generate the gene to trans map file for the CPB transcriptome assembly for 3 times (before deduplication, after deduplication & after NCBI FCS)")
         st.code("""
         perl /home/cbr15/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_trimmomatic.fasta > /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_trimmomatic/trinity_assembly_after_trimmomatic.Trinity.fasta.gene_trans_map
         perl /home/cbr15/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta > /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity/trinity_assembly_after_cdhitest_trinity.Trinity.fasta.gene_trans_map
+        perl /home/cbr15/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/clean.fasta > /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS/trinity_assembly_after_cdhitest_trinity_NCBI_FCS.Trinity.fasta.gene_trans_map
         """, language="bash")
         st.write("✔️compute and obtain the expression matrix after quantifying the abundance of transcripts via Salmon")
         st.code("""
         nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method salmon --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_trimmomatic/trinity_assembly_after_trimmomatic.Trinity.fasta.gene_trans_map --out_prefix salmon --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_trimmomatic/salmon_transcript_quantification_files_after_trimmomatic.list > trinity_abundance_to_estimates_after_trimmomatic_output.log 2>&1 &
         nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method salmon --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity/trinity_assembly_after_cdhitest_trinity.Trinity.fasta.gene_trans_map --out_prefix salmon --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity/salmon_transcript_quantification_files_after_cdhitest_trinity.list > trinity_abundance_to_estimates_after_cdhitest_trinity_output.log 2>&1 &
+        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method salmon --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS/trinity_assembly_after_cdhitest_trinity_NCBI_FCS.Trinity.fasta.gene_trans_map --out_prefix salmon --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS/salmon_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS.list > trinity_abundance_to_estimates_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 &
         """, language="bash")
         st.write("✔️compute the ExN50 statistics of the CPB transcriptome assembly at gene level (instead of transcript level) to remove bias")
         st.code("""
         perl /home/cbr15/anaconda3/envs/trinity/bin/contig_ExN50_statistic.pl /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_trimmomatic/salmon.isoform.TMM.EXPR.matrix /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_trimmomatic.fasta gene | tee ExN50_after_trimmomatic.gene.stats
         perl /home/cbr15/anaconda3/envs/trinity/bin/contig_ExN50_statistic.pl /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity/salmon.isoform.TMM.EXPR.matrix /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta gene | tee ExN50_after_cdhitest_trinity.gene.stats
+        perl /home/cbr15/anaconda3/envs/trinity/bin/contig_ExN50_statistic.pl /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS/salmon.isoform.TMM.EXPR.matrix /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/modified_clean.fasta gene | tee ExN50_after_cdhitest_trinity_NCBI_FCS.gene.stats # run the command, "sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' clean.fasta > modified_clean.fasta" first to remove the ~ suffixes within the assembly file generated and cleaned via NCBI FCS pipeline, before using it to compute the ExN50 values
         """, language="bash")
         st.write("✔️remove the first line 'nohup: ignoring input' from each of the generated ExN50.stats file before plotting the ExN50 graph via sed to avoid encountering error when parsing the file")
         st.code("""
         sed -i '1d' ExN50_after_trimmomatic.gene.stats
         sed -i '1d' ExN50_after_cdhitest_trinity.gene.stats
+        sed -i '1d' ExN50_after_cdhitest_trinity_NCBI_FCS.gene.stats
         """, language="bash")
         st.write("✔️install the ggplot2 conda package within the trinity conda environment via conda-forge")
         st.code("""
@@ -723,11 +631,17 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("""
         nohup Rscript /media/raid/Wee/WeeYeZhi/output/trinity_ExN50_gene_level_statistics_calculation_results/trinity_assembly_after_trimmomatic/plot_ExN50_statistic.Rscript ExN50_after_trimmomatic.gene.stats > plot_ExN50_statistic_after_trimmomatic_output.log 2>&1 &
         nohup Rscript /media/raid/Wee/WeeYeZhi/output/trinity_ExN50_gene_level_statistics_calculation_results/trinity_assembly_after_cdhitest_trinity/plot_ExN50_statistic.Rscript ExN50_after_cdhitest_trinity.gene.stats > plot_ExN50_statistic_after_cdhitest_trinity_output.log 2>&1 &
+        nohup Rscript /media/raid/Wee/WeeYeZhi/output/trinity_ExN50_gene_level_statistics_calculation_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS/plot_ExN50_statistic.Rscript ExN50_after_cdhitest_trinity_NCBI_FCS.gene.stats > plot_ExN50_statistic_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 &
         """, language="bash")
 
-        st.write("###")
+# Phase 2: Reference-Based Transcriptomics Analysis
 
-        st.write("**20. Identify coding regions within transcript sequences/transcriptome via TransDecoder**")
+if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
+    with st.container():
+        st.write("---")
+        st.header("Phase 2: Transcriptomic and Structural-Based Analysis 🪢")
+        st.write("###")
+        st.write("**1. Identify coding regions within transcript sequences/transcriptome via TransDecoder**")
         st.write("✔️create a 'transdecoder' conda environment, activate the environment and install TransDecoder via bioconda")
         st.code("""
         conda create -n transdecoder
@@ -799,7 +713,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**21. Annotate the CPB transcriptome assembly via Trinotate**")
+        st.write("**2. Annotate the CPB transcriptome assembly via Trinotate**")
         st.write("✔️create a 'trinotate' conda environment, activate the environment and install trinotate via bioconda")
         st.code("""
         conda create -n trinotate
@@ -873,127 +787,9 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.markdown("[Visit TMHMM User Manual & Download Page](https://services.healthtech.dtu.dk/services/TMHMM-2.0/)")
         st.markdown("[Visit SignalP6 User Manual & Download Page](https://services.healthtech.dtu.dk/services/SignalP-6.0/)")
 
-# Phase 2: Reference-Based Transcriptomics Analysis
-
-if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
-    with st.container():
-        st.write("---")
-        st.header("Transcriptomic and Structural-Based Analysis 🪢")
-        st.write("###")
-        st.write("**1. Align RNA-seq data with the genome assembly using STAR2**")
-        st.write("✔️Create & activate the 'star' conda environment")
-        st.code("""
-        conda create -n star
-        conda activate star""", language="bash")
-        st.write("✔️navigate to the desired working directory and clone the star's remote repository")
-        st.code("git clone https://github.com/alexdobin/STAR.git", language="bash")
-        st.write("✔️install the necessary compilers (g++ compiler, which is a c++ compiler) and build tools (make) within the conda environment")
-        st.code("conda install -c conda-forge gxx_linux-64 make", language="bash") #
-        st.write("✔️build star from source after cloning the repository")
-        st.code("""
-        cd STAR/source
-        make STAR""", language="bash")
-        st.write("✔️double check whether you have installed STAR successfully by checking its version")
-        st.code("""
-        ls STAR/source/STAR
-        STAR --version
-        STAR --help""", language="bash")
-        st.write("✔️generate the index file of the genome assembly using STAR2")
-        st.code("""
-        STAR # execute STAR aligner
-        --runThreadN 40 # specify the number of threads used for genome indices generation run
-        --runMode genomeGenerate # direct STAR to run genome indices generation job
-        --sjdbGTFfile Homo_sapiens.GRCh38.97.gtf # specify the path to the file with annotated transcripts in the standard GTF format (produced by BRAKER3)
-        --genomeDir GRCh38 # specify the directory to store the output indexed genome file
-        --genomeFastaFiles GRCh38.dna.primary.fa # provide your genome of interest in the form of fasta (.fa) format
-        --sjdbOverhang 99 # specify the length of the genomic sequence on each side of the splice junction that will be used for constructing the splice junction database during the genome indexing step. In this case, 99 is specified if the maximum length of your RNA-seq data is 100. If the maximum length of your RNA-seq data is 150, please specify 149. This is highly recommended for you to specify. The default value is 100.
-        """, language="bash")
-        st.write("✔️align the clean RNA-seq data derived from the NCBI SRA database one by one with the indexed genome assembly")
-        st.code("""
-        STAR # execute STAR aligner
-        --runThreadN 40 # specify the number of threads
-        --genomeDir GRCh38 # specify the directory where the indexed genome file produced by the previous STAR indexing process is located
-        --sjdbGTFfile Homo_sapiens.GRCh38.97.gtf # provide the path to the GTF file for gene annotations (produced by BRAKER3)
-        --readFilesIn /path/to/sample_R1.fastq.gz /path/to/sample_R2.fastq.gz # input FastQ files for paired-end reads
-        --readFilesCommand zcat # specify this flag only if your input RNA-seq reads is compressed. For gzipped files, specify 'readFilesCommand zcat' or 'readFilesCommand gunzip -c'. Whereas, for bzip2-compressed files, specify 'readFilesCommand bunzip2 -c'. Bear in mind that you do not need to specify this flag if your input RNA-seq reads are not compressed.
-        --outSAMtype BAM SortedByCoordinate # set the output type to BAM and sort by coordinates
-        --outSAMunmapped Within # output unmapped reads within the BAM file
-        --outSAMattributes Standard # specify the use of standard attributes to include in the output BAM file
-        --quantMode GeneCounts # enable gene count mode for quantification. This is optional (no need to specify if you are going to use featureCounts to count the total number of mapped reads per gene)
-        --outFileNamePrefix AlignmentSample1 # define the prefix of the output file names to be "AlignmentSample1..."
-        --twopassMode Basic # set the two-pass mode to Basic for alignment (enable STAR to align your input RNA-seq data twice to improve alignment accuracy) (For the most sensitive & novel discovery of splice junctions, it is recommended to run STAR in the 2-pass mode.) 
-        """, language="bash")
-        st.write("✔️Alternatively, perform batch processing by aligning all the clean RNA-seq data derived from the NCBI SRA database at one single time with the indexed genome assembly")
-        # ----LOAD STAR BASH SCRIPT----
-        # Check if the file exists before reading
-        if star_file.exists():
-            with open(star_file, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download STAR Bash Script",
-                data=script_byte,
-                file_name=star_file.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        st.markdown("[Visit STAR GitHub Page](https://github.com/alexdobin/STAR?tab=readme-ov-file)")
-        st.markdown("[Visit STAR User Manual Page](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf)")
-
         st.write("###")
 
-        st.write("**2. Alternatively, align RNA-seq data with genome assembly using HISAT2**")
-        st.write("✔️Create & activate the 'hisat2' conda environment")
-        st.code("""
-        conda create -n hisat2
-        conda activate hisat2""", language="bash")
-        st.write("✔️navigate to the desired working directory and clone the HISAT2's remote repository")
-        st.code("git clone https://github.com/DaehwanKimLab/hisat2.git", language="bash")
-        st.write("✔️install and build hisat2 tools within the conda environment")
-        st.code("""
-        cd hisat2
-        make
-        """, language="bash")
-        st.write("✔️build and create the index for the genome assembly using HISAT2 build")
-        st.code("""
-        hisat2-build # used to build an index for the reference genome assembly so that it can be used later for aligning sequencing reads using HISAT2. This index allows HISAT2 to quickly and efficiently map sequencing reads to the reference genome during the alignment process.
-        genome.fa # specify the path to the genome assembly
-        genome # specify the prefix of the output indexed genome file
-        """, language="bash")
-        st.write("✔️After indexing the genome assembly, align one single paired-end read with the reference genome assembly using HISAT2")
-        st.code("""
-        hisat2 # execute HISAT2 aligner
-        -x genome # specify the prefix of the indexed genome file produced by the previous HISAT2-build pipeline
-        -1 reads_1.fq # specify the forward read of the paired-end read
-        -2 reads_2.fq # specify the reverse read of the paired-end read
-        -S output.sam # specify the output file format for the alignment to save the alignment results in the file, 'output.sam'
-        """, language="bash")
-        st.markdown("[Visit HISAT2 GitHub Page](https://github.com/DaehwanKimLab/hisat2?tab=readme-ov-file)")
-        st.markdown("[Visit HISAT2 User Manual Page](https://daehwankimlab.github.io/hisat2/manual/)")
-        st.markdown("[Read HISAT2 Publication](https://www.nature.com/articles/s41587-019-0201-4)")
-        st.markdown("[Read HISAT Publication](https://www.nature.com/articles/nmeth.3317)")
-        st.markdown("[Read this publication to compare between STAR2 and HISAT2](https://ieeexplore.ieee.org/document/10178793)")
-
-        st.write("###")
-
-        st.write("**3. After aligning RNA-seq data with the genome assembly, count the total number of mapped reads per gene using featureCounts**")
-        st.code("""
-        featureCounts # execute featureCounts, which is read-counting tool from the Subread package that counts how many aligned reads (from BAM files) fall within annotated genomic features (like genes or exons).
-        -T 40 # specify the number of threads (CPU cores)
-        -p # tell featureCounts that the input BAM files are from paired-end sequencing whereas it counts read pairs as one fragment instead of counting each read separately. (Only specify this if your RNA-seq data is considered paired-end read) (If your read is considered single-end, no need to specify this flag)
-        -t exon # tell featureCounts to look for 'feature_type = exon' entry in the GTF file, and count the reads overlapping those exon regions only
-        -g gene_id # tell featureCounts to group exons by their gene id, using the gene_id attribute in the GTF file (all exons with the same gene_id will be grouped together)(check your gtf annotation file & decide whether or not you want to group exons by gene_name or gene_id)
-        -F GTF # tell featureCounts that the provided genome annotation file in .gtf format
-        -a Homo_sapiens.GRCh38.97.gtf # specify the input genome annotation file in the GTF format (produced by previous BRAKER3 pipeline)
-        -o countmatrix.txt S1.bam ... Sn.bam # specify the name of the output file as this output file will contain a table with read counts for each gene across all the RNA-seq samples
-        """, language="bash")
-        st.markdown("[Visit featureCounts User Manual Page](https://rnnh.github.io/bioinfo-notebook/docs/featureCounts.html)")
-        st.markdown("[Visit featureCounts Demonstration Video](https://asciinema.org/a/306584?autoplay=1)")
-        st.markdown("[Read featureCounts Publication](https://academic.oup.com/bioinformatics/article/30/7/923/232889?login=false)")
-
-        st.write("###")
-
-        st.write("**4. Perform differential expression gene (DEG) analysis using R**")
+        st.write("**3. Perform differential expression gene (DEG) analysis using R**")
         st.write("✔️install BiocManager in RStudio") #BiocManager is the official R package that is used to install Bioconductor packages, manage Bioconductor versions, & handle dependencies correctly between CRAN & Bioconductor
         st.code("""if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")""", language="r")
@@ -1088,7 +884,7 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         st.write("❗PCA is typically performed on the expression data (counts or normalized counts) as shown in the 'analysisObject' dataframe, not on the results of differential gene expression as shown in the 'resOrdered_unique'.")
         st.write("---")
 
-        st.write("**5. Install eggNOG-mapper to perform functional annotation (orthology-based functional annotation) of novel genome sequence of C. cramerella**")
+        st.write("**4. Install eggNOG-mapper to perform functional annotation (orthology-based functional annotation) of novel genome sequence of C. cramerella**")
         st.write("✔️create & activate the 'eggnogmapper' conda environment")
         st.code("""
                conda create -n eggnogmapper
@@ -1115,17 +911,9 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
 if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
     with st.container():
         st.write("---")
-        st.header("Molecular Docking and Dynamics Simulation 🧱")
+        st.header("Phase 3: Molecular Docking and Dynamics Simulation 🖥️🧪")
         st.write("###")
         st.write("Use both AlphaFold3 & ColabFold server to model the selected 3D developmental protein structures and superimpose the two structures with UCSF ChimeraX & compare their quality metrics in the form of table. To ensure compliance with AlphaFold3 server terms and usage, only use the results of AlphaFold3 server for structural analysis and structural comparison. Use ColabFold server for docking later")
-
-
-# Phase 4: Molecular Docking & Dynamics Simulation
-
-if selected == "Phase 4: Molecular Docking & Dynamics Simulation":
-    with st.container():
-        st.write("---")
-        st.header("Molecular Docking & Dynamics Simulation 🖥️🧪")
         st.write("###")
         st.write("You can use logMD to visualize the trajectory of your protein-ligand complex easily (logMD functions the same as VMD)")
         st.write("generative AI drug design method, DrugHive")
@@ -1144,7 +932,29 @@ if selected == "Phase 4: Molecular Docking & Dynamics Simulation":
             )
         else:
             st.error(f"{gromacs_file.name} does not exist.")
+
+        st.write("###")
+
         st.write("checkout visual molecular dynamics (VMD) 2 Alpha")
+
+        st.write("###")
+
+        st.write("Use the pymol movie script to make a movie for your protein")
+        # ----LOAD PYMOL MOVIE SCRIPT----
+        # Check if the file exists before reading
+        if pymol_movie_script.exists():
+            with open(pymol_movie_script, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Pymol Movie Script",
+                data=script_byte,
+                file_name=pymol_movie_script.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{pymol_movie_script.name} does not exist.")
         st.markdown("[Visit the logmd GitHub Page](https://github.com/log-md/logmd)")
         st.markdown("[Try logmd here](https://colab.research.google.com/drive/12adhXXF1MQIzh_vEwKX9r_iF6jV-CNHE#scrollTo=N2_uubn_2qGM)")
         st.markdown("[Try logmd here](https://rcsb.ai/logmd/3d090180)")
