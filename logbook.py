@@ -765,22 +765,33 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         st.write("---")
         st.header("Phase 2: Transcriptomic and Structural-Based Analysis 🪢")
         st.write("###")
+
         st.write("**1. Identify coding regions within transcript sequences/transcriptome via TransDecoder**")
-        st.write("✔️create a 'transdecoder' conda environment, activate the environment and install TransDecoder via bioconda")
+        st.write("✔️pull the TransDecoder docker image from DockerHub")
         st.code("""
-        conda create -n transdecoder
-        conda activate transdecoder
-        conda install bioconda::transdecoder
+        docker pull trinityrnaseq/transdecoder # you are actually pulling the 'latest' docker image & please record the digest ID 
         """, language="bash")
-        st.write("✔️install blast & hmmer via bioconda externally within the same conda environment (since TransDecoder conda package does not contain blast & hmmer)")
+        st.write("✔️obtain the digest ID of the latest Trinotate docker image")
         st.code("""
-        conda install bioconda::blast
-        conda install bioconda::hmmer
+        docker image inspect --format '{{.RepoDigests}}' trinityrnaseq/transdecoder:latest # you will obtain trinityrnaseq/transdecoder@sha256:80fa372fe94bc0ac4440fea7905c47e05187d13b1e837f8dca72c0ca49ab1bb4 where other scientists can run the command, docker pull trinityrnaseq/transdecoder@sha256:80fa372fe94bc0ac4440fea7905c47e05187d13b1e837f8dca72c0ca49ab1bb4 to use the same docker transdecoder image with the same software environment
+        """, language="bash")
+        st.write("✔️check whether the TransDecoder docker image has been successfully pulled")
+        st.code("""
+        docker images
+        """, language="bash")
+        st.write("✔️verify the pull of the TransDecoder docker image")
+        st.code("""
+        docker run --rm trinityrnaseq/transdecoder which makeblastdb
+        docker run --rm trinityrnaseq/transdecoder which hmmpress
+        docker run --rm trinityrnaseq/transdecoder which TransDecoder.LongOrfs
+        docker run --rm trinityrnaseq/transdecoder which blastp
+        docker run --rm trinityrnaseq/transdecoder which hmmsearch
+        docker run --rm trinityrnaseq/transdecoder which TransDecoder.Predict
         """, language="bash")
         st.write("✔️download UniProt Swiss-Prot FASTA file externally from UniProt’s website (https://www.uniprot.org/downloads) under the Swiss-Prot section & create the UniProt database")
         st.code("""
         gunzip uniprot_sprot.fasta.gz # uncompress the file first before creating the database as makeblastdb does not accept gzipped file as input
-        nohup makeblastdb -in uniprot_sprot.fasta -dbtype prot -out uniprot_sprot > makeblastdb_output.log 2>&1 & # create the UniProt Swiss-Prot database
+        docker run --user 1000:1000 -d --name make_swissprot_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "makeblastdb -in /data/transdecoder_results/make_swissprot_database/uniprot_sprot.fasta -dbtype prot -out /data/transdecoder_results/make_swissprot_database/uniprot_sprot"
         """, language="bash")
         # ----LOAD UNIPROT SWISS-PROT FASTA FILE----
         # Check if the file exists before reading
@@ -801,35 +812,26 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         st.code("""
         wget https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz # download the main HMM profile database for hmmsearch from the official EBI FTP server
         gunzip Pfam-A.hmm.gz # uncompress the file
-        nohup hmmpress Pfam-A.hmm > hmmpress_output.log 2>&1 & # prepare and index the database before using it for hmmsearch
-        """, language="bash")
-        st.write("✔️verify the installation of transdecoder, blast & hmmer")
-        st.code("""
-        which TransDecoder.LongOrfs
-        which TransDecoder.Predict
-        which blastp
-        which hmmsearch
-        which hmmpress
+        docker run --user 1000:1000 -d --name hmmpress -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "hmmpress /data/transdecoder_results/hmmsearch_results/Pfam-A.hmm"
         """, language="bash")
         st.write("✔️extract the long open reading frames (ORFs) from the CPB transcriptome assembly")
         st.code("""
-        nohup TransDecoder.LongOrfs -S -t /media/raid/Wee/WeeYeZhi/output/cd_hit_est_results/cd_hit_est_results_after_kraken2_sortmerna/Trinity_cdhitest95.fasta --output_dir transdecoder_extract_ORFs > /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_extract_ORFs/transdecoder_extract_ORFs_output.log 2>&1 &
+        docker run --user 1000:1000 -d --name ORF_extraction -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "TransDecoder.LongOrfs -S -t /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --output_dir /data/transdecoder_results/transdecoder_ORF_extraction_results"
         """, language="bash")
         st.write("✔️run BLASTp to blast the protein sequences predicted from the CPB transcriptome assembly against the SwissProt protein database")
         st.code("""
-        nohup blastp -query /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_extract_ORFs/Trinity_cdhitest95.fasta.transdecoder_dir/longest_orfs.pep -db /media/raid/Wee/WeeYeZhi/output/transdecoder_results/make_swissprot_database/uniprot_sprot -max_target_seqs 5 -outfmt 6 -evalue 1e-5 -num_threads 16 > blastp.outfmt6 2> blastp_error.log &
+        docker run --user 1000:1000 -d --name blastp_search -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "blastp -query /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep -db /data/transdecoder_results/make_swissprot_database/uniprot_sprot -max_target_seqs 1 -outfmt 6 -evalue 1e-5 -num_threads 16 > /data/transdecoder_results/ncbi_blastp_results/blastp.outfmt6"
         """, language="bash")
         st.write("✔️run HMMSEARCH to identify the protein domains in the predicted ORFs using the Pfam database")
         st.code("""
-        nohup hmmsearch --cpu 16 -E 1e-10 --domtblout pfam.domtblout /media/raid/Wee/WeeYeZhi/output/transdecoder_results/hmmsearch/Pfam-A.hmm /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_extract_ORFs/Trinity_cdhitest95.fasta.transdecoder_dir/longest_orfs.pep > hmmsearch_output.log 2>&1 &
+        docker run --user 1000:1000 -d --name hmmsearch -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "hmmsearch --cpu 16 -E 1e-10 --domtblout /data/transdecoder_results/hmmsearch_results/pfam.domtblout /data/transdecoder_results/hmmsearch_results/Pfam-A.hmm /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep"
         """, language="bash")
-        st.write("✔️filter and select predicted ORFs that have supported BLASTp hits and Pfam domains")
+        st.write("✔️filter and retain predicted ORFs that have supported BLASTp hits and Pfam domains")
         st.code("""
-        nohup TransDecoder.Predict -t /media/raid/Wee/WeeYeZhi/output/cd_hit_est_results/cd_hit_est_results_after_kraken2_sortmerna/Trinity_cdhitest95.fasta --retain_pfam_hits /media/raid/Wee/WeeYeZhi/output/transdecoder_results/hmmsearch/pfam.domtblout --retain_blastp_hits /media/raid/Wee/WeeYeZhi/output/transdecoder_results/ncbi_blastp/blastp.outfmt6 -O /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_extract_ORFs > transdecoder_predict_ORFs_output.log 2>&1 &
+        docker run --user 1000:1000 -d --name ORF_prediction -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "TransDecoder.Predict -t /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --retain_pfam_hits /data/transdecoder_results/hmmsearch_results/pfam.domtblout --retain_blastp_hits /data/transdecoder_results/ncbi_blastp_results/blastp.outfmt6 -O /data/transdecoder_results/transdecoder_ORF_extraction_results"
         """, language="bash")
-        st.markdown("[Visit TransDecoder Conda Installation Page](https://anaconda.org/bioconda/transdecoder)")
-        st.markdown("[Visit BLAST Conda Installation Page](https://anaconda.org/bioconda/blast)")
-        st.markdown("[Visit HMMER Conda Installation Page](https://anaconda.org/bioconda/hmmer)")
+        st.markdown("[Visit TransDecoder Docker Installation Page](https://github.com/TransDecoder/TransDecoder/wiki/TransDecoder_Docker_or_Singularity)")
+        st.markdown("[Visit TransDecoder Docker Image on DockerHub](https://hub.docker.com/r/trinityrnaseq/transdecoder)")
         st.markdown("[Visit TransDecoder GitHub User Manual Page](https://github.com/TransDecoder/TransDecoder/wiki)")
         st.markdown("[Download the Pfam database](https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/)")
         st.markdown("[Download UniProt Swiss-Prot Fasta File to create SwissProt Database](https://www.uniprot.org/downloads)")
@@ -838,43 +840,47 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         st.write("###")
 
         st.write("**2. Annotate the CPB transcriptome assembly via Trinotate**")
-        st.write("✔️create a 'trinotate' conda environment, activate the environment and install trinotate via bioconda")
+        st.write("✔️pull the Trinotate docker image from DockerHub")
         st.code("""
-        conda create -n trinotate
-        conda activate trinotate
-        conda install bioconda::trinotate
+        docker pull trinityrnaseq/trinotate
         """, language="bash")
-        st.write("✔️verify the installation of trinotate")
+        st.write("✔️check whether the Trinotate docker image has been successfully pulled")
         st.code("""
-        which Trinotate
-        Trinotate -h
-        which hmmsearch
-        which blastp
+        docker images
         """, language="bash")
-        st.write("✔️set the environment variables")
+        st.write("✔️print the full path to the Trinotate executable file and verify the pull of the Trinotate docker image")
         st.code("""
-        export TRINOTATE_HOME=/home/cbr15/anaconda3/envs/trinotate/bin
-        export TRINOTATE_DATA_DIR=/media/raid/Wee/WeeYeZhi/output/trinotate_results/trinotate_data_dir
+        docker run --rm trinityrnaseq/trinotate find / -type f -name Trinotate 2>/dev/null
+        docker run --rm trinityrnaseq/trinotate /usr/local/src/Trinotate/Trinotate -h
         """, language="bash")
-        st.write("✔️build trinotate sqlite database and download the resources")
+        st.write("✔️start running the Trinotate docker container (with the container being named as 'trinotate') and keep it alive in the background, and set the environment variables")
         st.code("""
-        nohup $TRINOTATE_HOME/Trinotate --create --db myTrinotate.sqlite --trinotate_data_dir /media/raid/Wee/WeeYeZhi/output/trinotate_results/trinotate_data_dir --use_diamond > create_trinotate_sqlite_database_output.log 2>&1 &
+        docker run -dit --user 1000:1000 --name trinotate -e TRINOTATE_HOME=/usr/local/src/Trinotate/Trinotate -e TRINOTATE_DATA_DIR=/data/trinotate_results/trinotate_data_dir -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash # remember to run docker stop and docker rm after running trinotate, otherwise it is going to consume resources
         """, language="bash")
-        st.write("✔️prepare BLAST and Pfam databases")
+        st.write("✔️build the trinotate sqlite database")
         st.code("""
-        makeblastdb -in $TRINOTATE_DATA_DIR/uniprot_sprot.pep -dbtype prot
-        gunzip $TRINOTATE_DATA_DIR/Pfam-A.hmm.gz
-        hmmpress $TRINOTATE_DATA_DIR/Pfam-A.hmm
+        docker exec -d trinotate /bin/bash -c "\$TRINOTATE_HOME/Trinotate --create --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --trinotate_data_dir /data/trinotate_results/trinotate_data_dir --use_diamond" # bear in mind that the build process will help you to automatically download the two resources, namely 'uniprot_sprot.pep' and 'Pfam-A.hmm.gz'.
         """, language="bash")
-        st.write("✔️initialize trinotate sqlite database")
+        st.write("✔️prepare both the BLASTp and Pfam databases that have been previously created by the built process")
         st.code("""
-        nohup $TRINOTATE_HOME/Trinotate /media/raid/Wee/WeeYeZhi/output/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --init --gene_trans_map /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly.Trinity.fasta.gene_trans_map --transcript_fasta /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly.Trinity.fasta --transdecoder_pep /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_extract_ORFs/trinity_CPB_transcriptome_assembly.Trinity.fasta.transdecoder.pep > initialize_trinotate_sqlite_database_output.log 2>&1 &
+        docker exec -d trinotate /bin/bash -c "makeblastdb -in \$TRINOTATE_DATA_DIR/uniprot_sprot.pep -dbtype prot"
+        docker exec -d trinotate /bin/bash -c "gunzip \$TRINOTATE_DATA_DIR/Pfam-A.hmm.gz"
+        docker exec -d trinotate /bin/bash -c "hmmpress \$TRINOTATE_DATA_DIR/Pfam-A.hmm"
+        """, language="bash")
+        st.write("✔️initialize the trinotate sqlite database")
+        st.code("""
+        docker exec -d trinotate /bin/bash -c "/$TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --init --gene_trans_map /data/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.Trinity.fasta.gene_trans_map --transcript_fasta /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --transdecoder_pep /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.pep"
         """, language="bash")
         st.write("✔️run diamond in BLASTx mode to blast translated nucleotide against protein")
         st.code("""
-        nohup diamond blastx -d $TRINOTATE_DATA_DIR/uniprot_sprot.pep -q /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly.Trinity.fasta -o blastx.outfmt6 -f 6 -p 16 -e 1e-5 > blastx_run_output.log 2>&1 &
+        docker exec -d trinotate /bin/bash -c "diamond blastx -d \$TRINOTATE_DATA_DIR/uniprot_sprot.pep -q /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta -o /data/trinotate_results/diamond_blastx_results/blastx.outfmt6 -f 6 -p 16 -e 1e-5"
         """, language="bash")
-        st.write("✔️install the gzipped file of SignalP6 at https://services.healthtech.dtu.dk/services/SignalP-6.0/, verify the installation and run SignalP6 to predict the signal peptide molecules of the predicted CPB protein sequences")
+        st.write("✔️run BLASTp & hmmsearch again using the files generated by trinotate sqlite database construction step")
+        st.code("""
+        docker exec -d trinotate /bin/bash -c "blastp -query /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.pep -db /data/trinotate_results/trinotate_data_dir/uniprot_sprot -max_target_seqs 1 -outfmt 6 -evalue 1e-5 -num_threads 16 > /data/trinotate_results/ncbi_blastp_results/blastp.outfmt6"
+        docker exec -d trinotate /bin/bash -c "hmmsearch --cpu 16 -E 1e-10 --domtblout /data/trinotate_results/hmmsearch_results/pfam.domtblout /data/trinotate_results/trinotate_data_dir/Pfam-A.hmm /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.pep"
+        """, language="bash")
+        st.write("✔️create an isolated conda environment called signalp6, activate the conda environment, install the gzipped file of SignalP6 at https://services.healthtech.dtu.dk/services/SignalP-6.0/, verify the installation and run SignalP6 to predict the signal peptide molecules of the predicted CPB protein sequences")
         st.code("""
         conda create -n signalp6 python=3.8 -y
         conda activate signalp6
@@ -885,31 +891,69 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         pip install signalp-6-package/
         SIGNALP_DIR=$(python -c "import signalp; import os; print(os.path.dirname(signalp.__file__))") && mkdir -p "$SIGNALP_DIR/model_weights" && cp -r /media/raid/Wee/WeeYeZhi/output/trinotate_results/signalp6_installation/signalp6_fast/signalp-6-package/models/* "$SIGNALP_DIR/model_weights/"
         which signalp6
-        nohup signalp6 --fastafile /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_extract_ORFs/trinity_CPB_transcriptome_assembly.Trinity.fasta.transdecoder.pep --organism eukarya --mode fast --format txt --output_dir signalp6_results > /media/raid/Wee/WeeYeZhi/output/signalp6_results/signalp6_output.log 2>&1 &
+        nohup signalp6 --fastafile /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.pep --organism eukarya --mode fast --format txt --output_dir /media/raid/Wee/WeeYeZhi/output/trinotate_results/signalp6_results > /media/raid/Wee/WeeYeZhi/output/trinotate_results/signalp6_results/signalp6_output.log 2>&1 &
         """, language="bash")
         st.write("✔️install the gzipped file of TMHMM at https://services.healthtech.dtu.dk/services/TMHMM-2.0/, verify the installation and run TMHMM to predict the transmembrane domains of the predicted CPB protein sequences")
         st.code("""
         tar -xzvf tmhmm-2.0c.Linux.tar.gz # extract the tmhmm file
         ./tmhmm -h # navigate into the working directory, /media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/bin before you run the command
-        tmhmm -m TMHMM2.0.model -f /media/raid/Wee/WeeYeZhi/transdecoder_results/trinity_CPB_transcriptome_assembly.Trinity.fasta.transdecoder.pep
+        tmhmm -m TMHMM2.0.model -f /media/raid/Wee/WeeYeZhi/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.pep
         """, language="bash")
-        st.write("✔️Load the BLASTp, BLASTx, and Pfam results into the created Trinotate SQLite Database")
+        st.write("✔️install DeepTHMMM via Docker & run it to predict the transmembrane domains of the predicted CPB protein sequences")
         st.code("""
-        $TRINOTATE_HOME/Trinotate myTrinotate.sqlite LOAD_swissprot_blastp /media/raid/Wee/WeeYeZhi/output/transdecoder_results/ncbi_blastp/blastp.outfmt6 
-        $TRINOTATE_HOME/Trinotate myTrinotate.sqlite LOAD_swissprot_blastx /media/raid/Wee/WeeYeZhi/output/transdecoder_results/diamond_blastx/blastx.outfmt6
-        $TRINOTATE_HOME/Trinotate myTrinotate.sqlite LOAD_pfam /media/raid/Wee/WeeYeZhi/output/transdecoder_results/hmmsearch/pfam.domtblout
+        docker pull gnick18/deepthmmm # pull the DeepTHMMM docker image from DockerHub
+        docker images # verify whether the DeepTHMMM docker image has been successfully pulled
+        docker run -d --user 1000:1000 --name deepthmmm -v /media/raid/Wee/WeeYeZhi/output:/data gnick18/deepthmmm /bin/bash -c "biolib run --local 'DTU/DeepTMHMM:1.0.24' --fasta /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.pep > /data/trinotate_results/deeptmhmm_results/tmhmm.out" 
+        docker ps # check whether the DeepTHMMM docker container has been successfully created and running
+        """, language="bash")
+        st.write("✔️install eggNOG-mapper via docker and run it to assign orthologs/evolutionary functional relationships to the predicted protein sequences of CPB")
+        st.code("""
+        docker pull nanozoo/eggnog-mapper:2.1.13--c16a7d2 # pull the eggNOGmapper Docker image from DockerHub
+        docker images # verify whether the eggNOGmapper Docker image has been successfully pulled
+        docker run -d --user 1000:1000 --name download_eggnogmapper_database -v /media/raid/Wee/WeeYeZhi/output:/data nanozoo/eggnog-mapper:2.1.13--c16a7d2 /bin/bash -c "download_eggnog_data.py --data_dir /data/trinotate_results/eggnogmapper_database" # download the eggNOGmapper database
+        docker logs download_eggnogmapper_database # view the log content of the run
+        docker run -d --user 1000:1000 --name eggnogmapper_search -v /media/raid/Wee/WeeYeZhi/output:/data nanozoo/eggnog-mapper:2.1.13--c16a7d2 /bin/bash -c "emapper.py -i /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.pep -m diamond --data_dir /data/trinotate_results/eggnogmapper_database --cpu 16 --itype protein -o CPB --output_dir /data/trinotate_results/eggnogmapper_results" # run eggNOGmapper to assign orthologs to the predicted protein sequences of CPB
+        docker logs eggnogmapper_search # view the log content of the run
+        docker ps # check whether the eggNOGmapper Docker container is still running in the background smoothly, just in case if the container exits due to errors 
+        """, language="bash")
+        st.write("✔️install infernal via docker and run it")
+        st.code("""
+        docker pull rfam/rfam-3d-seed-alignments # pull the infernal docker image from DockerHub
+        docker images # verify whether the infernal docker image has been successfully pulled
+        wget ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/Rfam.cm.gz # download the Rfam covariance model database via ftp (just in case if the docker image does not contain it)
+        wget ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/Rfam.clanin # download the Rfam clan database via ftp (just in case if the docker image does not contain it)
+        gunzip Rfam.cm.gz # unzip the downloaded Rfam CM database
+        docker run --rm rfam/rfam-3d-seed-alignments cmpress -h # output the running options available in the cmpress program
+        docker run --rm rfam/rfam-3d-seed-alignments cmscan -h # output the running options available in the cmscan program
+        docker run -d --user 1000:1000 --name infernal_cmpress -v /media/raid/Wee/WeeYeZhi/output:/data rfam/rfam-3d-seed-alignments /bin/bash -c "cmpress Rfam.cm" # compress and index the downloaded covariance model (CM) database via cmpress. 
+        docker run -d --user 1000:1000 --name infernal_cmscan -v /media/raid/Wee/WeeYeZhi/output:/data rfam/rfam-3d-seed-alignments /bin/bash -c "cmscan --cut_ga --rfam --nohmmonly --clanin Rfam.clanin --oskip --fmt 2 -o infernal_output.txt --tblout infernal.out Rfam.cm /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.cds" # scan the predicted CPB coding regions of the transcript sequences against the CM models to check whether any of your predicted coding sequences match known RNA families from Rfam. Later, you need to filter and remove all the hits (detected non-coding RNAs) if there are any since you are only interested in the mRNA coding regions. Run infernal as a QC check to filter non-coding RNAs from the coding regions of the transcriptome
+        """, language="bash")
+        st.write("✔️Load the BLASTp, BLASTx, Pfam, SignalP6, TMHMM, Infernal & eggNOGmapper results into the created Trinotate SQLite Database")
+        st.code("""
+        docker exec -d trinotate /bin/bash -c "\$TRINOTATE_HOME/Trinotate /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite LOAD_swissprot_blastp /data/transdecoder_results/ncbi_blastp_results/blastp.outfmt6" 
+        docker exec -d trinotate /bin/bash -c "\$TRINOTATE_HOME/Trinotate /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite LOAD_swissprot_blastx /data/trinotate_results/diamond_blastx_results/blastx.outfmt6"
+        docker exec -d trinotate /bin/bash -c "\$TRINOTATE_HOME/Trinotate /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite LOAD_pfam /data/transdecoder_results/hmmsearch_results/pfam.domtblout"
+        docker exec -d trinotate /bin/bash -c "\$TRINOTATE_HOME/Trinotate /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite LOAD_signalp /data/trinotate_results/signalp6_results/signalp6.out"
+        docker exec -d trinotate /bin/bash -c "\$TRINOTATE_HOME/Trinotate /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite LOAD_tmhmm /data/trinotate_results/deeptmhmm_results/tmhmm.out"
+        docker exec -d trinotate /bin/bash -c "\$TRINOTATE_HOME/Trinotate /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite LOAD_infernal /data/trinotate_results/infernal_results/infernal.out"
+        docker exec -d trinotate /bin/bash -c "\$TRINOTATE_HOME/Trinotate /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite LOAD_eggnog /data/trinotate_results/eggnogmapper_results/eggnogmapper.out" # please modify the name of the output file after you have successfully run eggnogmapper
         """, language="bash")
         st.write("Generate the CPB transcriptome annotation report")
         st.code("""
         $TRINOTATE_HOME/Trinotate myTrinotate.sqlite --report > trinotate_annotation_report.tsv
         """, language="bash")
         st.markdown("[Visit Trinotate GitHub Wikipedia](https://github.com/Trinotate/Trinotate/wiki)")
-        st.markdown("[Visit Trinotate Conda Installation Page](https://anaconda.org/bioconda/trinotate)")
+        st.markdown("[Read how to load the results into the Trinotate SQLite Database](https://github.com/griffithlab/rnaseq_tutorial/wiki/Trinotate-Functional-Annotation)")
+        st.markdown("[Read how to cite Trinotate and all of the other tools](https://github.com/Trinotate/Trinotate/wiki/Lit-References)")
         st.markdown("[Visit Trinotate GitHub User Manual Page](https://github.com/Trinotate/Trinotate/wiki/Software-installation-and-data-required)")
+        st.markdown("[Read how to run DeepTHMMM locally and via Docker](https://dtu.biolib.com/DeepTMHMM)")
         st.markdown("[Visit TMHMM GitHub User Manual Page](https://github.com/dansondergaard/tmhmm.py)")
         st.markdown("[Visit SignalP6 GitHub User Manual Page](https://github.com/fteufel/signalp-6.0/blob/main/installation_instructions.md)")
         st.markdown("[Visit TMHMM User Manual & Download Page](https://services.healthtech.dtu.dk/services/TMHMM-2.0/)")
         st.markdown("[Visit SignalP6 User Manual & Download Page](https://services.healthtech.dtu.dk/services/SignalP-6.0/)")
+        st.markdown("[Read Infernal Documentation](http://eddylab.org/infernal/)")
+        st.markdown("[Download the latest covariance model files (.cm) & clan files (.clanin) manually from the Rfam database](https://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/)")
+        st.markdown("[How to solve the issue of getting an empty output results file/columns](https://github.com/Trinotate/Trinotate.github.io/issues/70)")
 
         st.write("###")
 
