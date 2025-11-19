@@ -28,17 +28,17 @@ trinity_samples_sequenced_by_LKM = current_dir / "assets" / "trinity_samples_seq
 trinity_samples_sequenced_by_INBIOSIS = current_dir / "assets" / "trinity_samples_sequenced_by_INBIOSIS.txt"
 trinity_samples_sequenced_by_LKM_and_INBIOSIS = current_dir / "assets" / "trinity_samples_sequenced_by_LKM_and_INBIOSIS.txt"
 transrate_file = current_dir / "assets" / "transrate.sh"
-salmon_transcript_quantification_after_trimmomatic = current_dir / "assets" / "salmon_quantify_after_trimmomatic.sh"
-salmon_transcript_quantification_after_trimmomatic_list = current_dir / "assets" / "salmon_transcript_quantification_files_after_trimmomatic.list"
-salmon_transcript_quantification_after_cdhitest_trinity = current_dir / "assets" / "salmon_quantify_after_cdhitest_trinity.sh"
-salmon_transcript_quantification_after_cdhitest_trinity_list = current_dir / "assets" / "salmon_transcript_quantification_files_after_cdhitest_trinity.list"
-salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS = current_dir / "assets" / "salmon_quantify_after_cdhitest_trinity_NCBI_FCS.sh"
-salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_list = current_dir / "assets" / "salmon_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS.list"
-salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_transrate_filtering = current_dir / "assets" / "salmon_quantify_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.sh"
-salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_list = current_dir / "assets" / "salmon_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.list"
 swissprot_fasta_file = current_dir / "assets" / "uniprot_sprot.fasta.gz"
 pymol_movie_script = current_dir / "assets" / "movie01_script.pml"
 CPB_pic = current_dir / "assets" / "CPB.png"
+bowtie2_mapping_after_trimmomatic = current_dir / "assets" / "bowtie2_mapping_after_trimmomatic.sh"
+generate_mapping_statistics_after_trimmomatic = current_dir / "assets" / "generate_mapping_statistics_after_trimmomatic.sh"
+bowtie2_mapping_after_cdhitest_trinity = current_dir / "assets" / "bowtie2_mapping_after_cdhitest_trinity.sh"
+generate_mapping_statistics_after_cdhitest_trinity = current_dir / "assets" / "generate_mapping_statistics_after_cdhitest_trinity.sh"
+bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS = current_dir / "assets" / "bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS.sh"
+generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS = current_dir / "assets" /"generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS.sh"
+bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate = current_dir / "assets" / "bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate.sh"
+generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS_transrate = current_dir / "assets" / "generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS_transrate.sh"
 
 # ---- HEADER SECTION ----
 with st.container():
@@ -260,15 +260,15 @@ if selected == "Phase 1: Sequence-Based Analysis":
         """, language="bash")
         st.write("✔️run Trinity to perform comprehensive transcriptome assembly to assemble all the 3 raw transcriptomic Illumina paired end reads (sequenced by LKM) after trimming the reads via Trimmomatic")
         st.code("""
-        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM/trinity_samples_sequenced_by_LKM.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --output /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM > /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM/trinity_assembly_done_by_LKM_output.log 2>&1 & 
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM/trinity_samples_sequenced_by_LKM.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM > /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM/trinity_assembly_done_by_LKM_output.log 2>&1 & 
         """, language="bash")
         st.write("✔️run Trinity to perform transcriptome assembly to assemble all the 6 raw transcriptomic Illumina paired end reads (sequenced by INBIOSIS) after trimming the reads via Trimmomatic")
         st.code("""
-        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_INBIOSIS/trinity_samples_sequenced_by_INBIOSIS.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --output /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_INBIOSIS > /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_INBIOSIS/trinity_assembly_done_by_INBIOSIS_output.log 2>&1 & 
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_INBIOSIS/trinity_samples_sequenced_by_INBIOSIS.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_INBIOSIS > /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_INBIOSIS/trinity_assembly_done_by_INBIOSIS_output.log 2>&1 & 
         """, language="bash")
         st.write("✔️run Trinity to perform comprehensive transcriptome assembly to assemble all the 9 raw transcriptomic Illumina paired end reads (sequenced by LKM and INBIOSIS)")
         st.code("""
-        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_samples_sequenced_by_LKM_and_INBIOSIS.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --output /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly > /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly/trinity_output.log 2>&1 & 
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_samples_sequenced_by_LKM_and_INBIOSIS.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly > /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly/trinity_output.log 2>&1 & 
         """, language="bash")
         # ----LOAD TRINITY SAMPLE FILE sequenced BY LKM----
         # Check if the file exists before reading
@@ -406,6 +406,11 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("""
         sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/clean.fasta > /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/modified_clean.fasta
         """, language="bash")
+        st.write("✔️remove the suffix from the assembly fasta file to keep only the transcript ID")
+        st.code("""
+        sed 's/ .*$//' modified_clean.fasta > latest_modified_clean.fasta
+        mv latest_modified_clean.fasta modified_clean.fasta
+        """, language="bash")
 
         st.write("###")
 
@@ -429,14 +434,16 @@ if selected == "Phase 1: Sequence-Based Analysis":
         nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_INBIOSIS/trinity_assembly_done_by_INBIOSIS.Trinity.fasta -c 16 -l lepidoptera_odb12 -o /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_results_of_transcriptome_assembly_done_by_INBIOSIS > /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_results_of_transcriptome_assembly_done_by_INBIOSIS/busco_trinity_assembly_done_by_INBIOSIS_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly assembled using reads sequenced by INBIOSIS
         nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_assembly_done_by_LKM_and_INBIOSIS.Trinity.fasta -c 16 -l lepidoptera_odb12 -o /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_results_of_transcriptome_assembly_done_by_LKM_and_INBIOSIS > /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_results_of_transcriptome_assembly_done_by_LKM_and_INBIOSIS/CPB_transcriptome_assembly_busco_done_by_LKM_and_INBIOSIS_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly assembled using reads sequenced by both LKM & INBIOSIS
         nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta -c 16 -l lepidoptera_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after deduplication
-        nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta -c 16 -l lepidoptera_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after NCBI FCS
-        nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta -c 16 -l lepidoptera_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after removing bad contigs via TransRate
+        nohup busco -m transcriptome -i /media/cbr14/Two/Wee/WeeYeZhi/output/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta -c 16 -l lepidoptera_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after NCBI FCS
+        nohup busco -m transcriptome -i /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta -c 16 -l lepidoptera_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after removing bad contigs via TransRate (by using lepidoptera_odb12 dataset)
+        nohup busco -m transcriptome -i /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta -c 16 -l insecta_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after removing bad contigs via TransRate (by using insecta_odb12 dataset)
+        nohup busco -m transcriptome -i /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta -c 16 -l endopterygota_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after removing bad contigs via TransRate (by using endopterygota_odb12 dataset)
         """, language="bash")
         st.write("✔️draw BUSCO plot for comparison using python script (built inside the busco conda package))")
         st.code("""
         which busco # to find the location of BUSCO executable 
         head -n 5 /home/cbr15/anaconda3/envs/busco/bin/generate_plot.py # display the first 5 lines to see whether there is a shebang line, "#!/usr/bin/env python3" at the first line of the file. If have, then no need to specify the flag, "python3" while running the command to draw the BUSCO plot
-        nohup python3 /home/cbr15/anaconda3/envs/busco/bin/generate_plot.py -wd /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_summaries_transcriptome_lepidoptera_odb12 -rt specific --no_r > busco_plot_output.log 2>&1 & # output only the R code to be run inside the RStudio later to draw the BUSCO plot # need to specify the flag, "python3" if the file doesn't have the shebang line
+        nohup python3 /home/cbr14/anaconda3/envs/busco/bin/generate_plot.py -wd /media/cbr14/Two/Wee/WeeYeZhi/output/Buscoresults/BUSCO_summaries_transcriptome -rt specific --no_r > busco_plot_output.log 2>&1 & # output only the R code to be run inside the RStudio later to draw the BUSCO plot # need to specify the flag, "python3" if the file doesn't have the shebang line
         """, language="bash")
         # ----LOAD THE GENERATE_BUSCO_PLOT PYTHON SCRIPT----
         # Check if the file exists before reading
@@ -484,10 +491,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         """, language="bash")
         st.write("✔️run the TrinityStats.pl script")
         st.code("""
-        perl /home/cbr15/anaconda3/envs/trinity/bin/TrinityStats.pl /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_assembly_done_by_LKM_and_INBIOSIS.Trinity.fasta > stats_trinity_assembly_after_trimmomatic.log
-        perl /home/cbr15/anaconda3/envs/trinity/bin/TrinityStats.pl /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta > stats_trinity_assembly_after_cdhitest_trinity.log
-        perl /home/cbr15/anaconda3/envs/trinity/bin/TrinityStats.pl /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta > stats_trinity_assembly_after_cdhitest_trinity_NCBI_FCS.log
-        perl /home/cbr15/anaconda3/envs/trinity/bin/TrinityStats.pl /media/raid/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta > stats_trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.log
+        perl /home/cbr14/anaconda3/envs/trinity/bin/TrinityStats.pl /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta > stats_trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.log
         """, language="bash")
 
         st.write("###")
@@ -497,34 +501,21 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("""
         docker pull genevia/transrate:v1.0.3_orp # pull the transrate docker image from the DockerHub registry
         docker images # verify that the transrate docker image has been successfully pulled
-        """, language="bash")
-        st.write("✔️run transrate to evaluate the CPB transcriptome assembly (before deduplication) via docker")
-        st.code("""
-        docker run --user 1000:1000 -d --name orp_transrate -v /media/raid/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_assembly_done_by_LKM_and_INBIOSIS.Trinity.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_trimmomatic" 
-        """, language="bash")
-        st.write("✔️run transrate to evaluate the CPB transcriptome assembly (after deduplication) via docker")
-        st.code("""
-        docker run --user 1000:1000 -d --name orp_transrate_after_deduplication -v /media/raid/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity" 
+        id -u && id -g # check the current user ID and group ID
         """, language="bash")
         st.write("✔️run transrate to evaluate the CPB transcriptome assembly (after NCBI-FCS) via Docker")
         st.code("""
-        docker run --user 1000:1000 -d --name orp_transrate_after_NCBI_FCS -v /media/raid/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS" 
+        docker run --user 1000:1000 -d --name orp_transrate_after_NCBI_FCS -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS" 
         """, language="bash")
         st.write("✔️run transrate to evaluate the CPB transcriptome assembly (after filtering & removing bad contigs via Transrate) via Docker")
         st.code("""
-        docker run --user 1000:1000 -d --name orp_transrate_after_NCBI_FCS_transrate_filtering -v /media/raid/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering" 
+        docker run --user 1000:1000 -d --name orp_transrate_after_NCBI_FCS_transrate_filtering -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering" 
         """, language="bash")
         st.write("✔️show the log file content of the transrate docker that is running in the background")
         st.code("""
-        docker logs orp_transrate # show the log file content of the run by using the designated name of the docker container before deduplication
-        docker logs orp_transrate_after_deduplication # show the log file content of the run by using the designated name of the docker container after deduplication 
         docker logs orp_transrate_after_NCBI_FCS # show the log file content of the run by using the designated name of the docker container after deduplication & NCBI-FCS
         docker logs orp_transrate_after_NCBI_FCS_transrate_filtering # show the log file content of the run by using the designated name of the docker container after deduplication & NCBI-FCS & removing bad contigs via Transrate      
         docker ps -a # list all the current actively running and stopped docker containers. Those that exited with code 0 is the successful run
-        """, language="bash")
-        st.write("✔️remove the tilde suffix (~) inside the transcriptome assembly fasta headers before submission into the TSA database")
-        st.code("""
-        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' good.clean.fasta > modified.good.clean.fasta
         """, language="bash")
         st.markdown("[Visit TransRate GitHub Page](https://github.com/blahah/transrate)")
         st.markdown("[Visit TransRate Conda Installation Page](https://anaconda.org/bioconda/transrate)")
@@ -533,217 +524,98 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**14. Run Salmon to perform transcript abundance estimation**")
-        st.write("✔️create a 'salmon' conda environment, activate the environment and install salmon via bioconda")
+        st.write("**14. Check the total number of full length coding transcripts**")
+        st.write("✔️download the UniProt SwissProt database")
         st.code("""
-        conda create -n salmon
-        conda activate salmon
-        conda install bioconda::salmon
+        wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
         """, language="bash")
-        st.write("✔️verify the installation of Salmon")
+        st.write("✔️build a blastable database")
         st.code("""
-        which salmon
-        salmon index -h
-        salmon quant -h
+        makeblastdb -in uniprot_sprot.fasta -dbtype prot
         """, language="bash")
-        st.write("✔️build a salmon index for the CPB transcriptome assembly in mapping-based mode")
+        st.write("✔️perform the blast search, reporting only the top alignment")
         st.code("""
-        nohup salmon index -t /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_trimmomatic.fasta -p 16 -i /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_trimmomatic/transcripts_index_after_trimmomatic -k 31 > /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_trimmomatic/salmon_index_after_trimmomatic_output.log 2>&1 &
-        nohup salmon index -t /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta -p 16 -i /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_cdhitest_trinity/transcripts_index_after_cdhitest_trinity -k 31 > /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_cdhitest_trinity/salmon_index_after_cdhitest_trinity_output.log 2>&1 &
-        nohup salmon index -t /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta -p 16 -i /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_cdhitest_trinity_NCBI_FCS/transcripts_index_after_cdhitest_trinity_NCBI_FCS -k 31 > /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_cdhitest_trinity_NCBI_FCS/salmon_index_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 &
-        nohup salmon index -t /media/raid/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta -p 16 -i /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/transcripts_index_after_cdhitest_trinity_NCBI_FCS_transrate_filtering -k 31 > /media/raid/Wee/WeeYeZhi/output/salmon_results/salmon_index/salmon_index_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/salmon_index_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 &
+        blastx -help
+        nohup blastx -query /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta -db /media/cbr14/Two/Wee/WeeYeZhi/output/count_full_length_transcript_results/uniprot_sprot.fasta -out blastx.outfmt6 -evalue 1e-20 -num_threads 16 -max_target_seqs 1 -outfmt 6 2> error_output.log &
         """, language="bash")
-        st.write("✔️perform transcript abundance quantification against the transcriptome assembly for three times (before running deduplication, after running deduplication, and after running NCBI-FCS)")
+        st.write("✔️examine the percentage of the target being aligned to by the best matching Trinity transcript")
         st.code("""
-        dos2unix salmon_quantify_after_trimmomatic.sh
-        chmod +x salmon_quantify_after_trimmomatic.sh
-        nohup bash salmon_quantify_after_trimmomatic.sh > salmon_quantify_after_trimmomatic_output.log 2>&1 &
+        nohup perl /home/cbr14/anaconda3/envs/trinity/bin/analyze_blastPlus_topHit_coverage.pl /media/cbr14/Two/Wee/WeeYeZhi/output/count_full_length_transcript_results/blastx_search_results/blastx.outfmt6 /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta /media/cbr14/Two/Wee/WeeYeZhi/output/count_full_length_transcript_results/uniprot_sprot.fasta 2> error_output.log &
         """, language="bash")
-        # ----LOAD SALMON TRANSCRIPT QUANTIFICATION BASH AFTER TRIMMOMATIC FILE----
-        # Check if the file exists before reading
-        if salmon_transcript_quantification_after_trimmomatic.exists():
-            with open(salmon_transcript_quantification_after_trimmomatic, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Salmon Transcript Quantification After Trimmomatic Bash File",
-                data=script_byte,
-                file_name=salmon_transcript_quantification_after_trimmomatic.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{salmon_transcript_quantification_after_trimmomatic.name} does not exist.")
+        st.write("✔️group multiple HSPs per transcript/database_match pairing to collect all the pieces of alignment between one transcript and one protein")
         st.code("""
-        dos2unix salmon_quantify_after_cdhitest_trinity.sh
-        chmod +x salmon_quantify_after_cdhitest_trinity.sh
-        nohup bash salmon_quantify_after_cdhitest_trinity.sh > salmon_quantify_after_cdhitest_trinity_output.log 2>&1 &
+        perl -I /home/cbr14/anaconda3/envs/trinity/bin/PerlLib /home/cbr14/anaconda3/envs/trinity/bin/blast_outfmt6_group_segments.pl /media/cbr14/Two/Wee/WeeYeZhi/output/count_full_length_transcript_results/blastx_search_results/blastx.outfmt6 /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta /media/cbr14/Two/Wee/WeeYeZhi/output/count_full_length_transcript_results/uniprot_sprot.fasta > blastx.outfmt6.grouped
         """, language="bash")
-        # ----LOAD SALMON TRANSCRIPT QUANTIFICATION BASH AFTER CDHITEST & TRINITY FILE----
-        # Check if the file exists before reading
-        if salmon_transcript_quantification_after_cdhitest_trinity.exists():
-            with open(salmon_transcript_quantification_after_cdhitest_trinity, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Salmon Transcript Quantification After CDHITEST & Trinity Bash File",
-                data=script_byte,
-                file_name=salmon_transcript_quantification_after_cdhitest_trinity.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{salmon_transcript_quantification_after_cdhitest_trinity.name} does not exist.")
+        st.write("✔️compute the coverage percentage by length to check the percentage of the protein that is covered by the transcript")
         st.code("""
-        dos2unix salmon_quantify_after_cdhitest_trinity_NCBI_FCS.sh
-        chmod +x salmon_quantify_after_cdhitest_trinity_NCBI_FCS.sh
-        nohup bash salmon_quantify_after_cdhitest_trinity_NCBI_FCS.sh > salmon_quantify_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 &
+        perl -I /home/cbr14/anaconda3/envs/trinity/bin/PerlLib /home/cbr14/anaconda3/envs/trinity/bin/blast_outfmt6_group_segments.tophit_coverage.pl /media/cbr14/Two/Wee/WeeYeZhi/output/count_full_length_transcript_results/blast_outfmt6_group_segments.pl_results/blastx.outfmt6.grouped > blast_outfmt6_group_segments.tophit_coverage.tsv
         """, language="bash")
-        # ----LOAD SALMON TRANSCRIPT QUANTIFICATION BASH AFTER NCBI FCS FILE----
-        # Check if the file exists before reading
-        if salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS.exists():
-            with open(salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Salmon Transcript Quantification After NCBI FCS Bash File",
-                data=script_byte,
-                file_name=salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS.name} does not exist.")
-        st.code("""
-        dos2unix salmon_quantify_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.sh
-        chmod +x salmon_quantify_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.sh
-        nohup bash salmon_quantify_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.sh > salmon_quantify_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 &
-        """, language="bash")
-        # ----LOAD SALMON TRANSCRIPT QUANTIFICATION BASH AFTER NCBI FCS & TRANSRATE FILTERING FILE----
-        # Check if the file exists before reading
-        if salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.exists():
-            with open(salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_transrate_filtering, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Salmon Transcript Quantification After NCBI FCS & Transrate Filtering Bash File",
-                data=script_byte,
-                file_name=salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.name} does not exist.")
-        st.write("✔️remove the tilde suffix inside all the quant.sf files produced by the salmon quantification run after NCBI FCS (otherwise you are going to encounter an error complaining that it cannot find certain transcripts ID due to mismatches between transcripts ID inside the both the gene_to_trans_map file and salmon quantification file)")
-        st.code("""
-        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR11266554.sf # remember to copy the source code from the pycharm file and paste it to the terminal. You cannot copy and paste the command from the logbook website.
-        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR11266555.sf
-        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR11266556.sf
-        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690969.sf
-        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690970.sf
-        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690971.sf
-        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690972.sf
-        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690973.sf
-        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' quant.sf > quant_SRR9690974.sf
-        """, language="bash")
-        st.markdown("[Visit Salmon GitHub Page](https://github.com/COMBINE-lab/salmon)")
-        st.markdown("[Visit Salmon User Manual Page](https://salmon.readthedocs.io/en/latest/salmon.html#using-salmon)")
-        st.markdown("[Visit Salmon Conda Installation Page](https://anaconda.org/bioconda/salmon)")
 
         st.write("###")
 
-        st.write("**15. Compute the ExN50 statistics of the transcriptome assemblies (before deduplication, after deduplication, after NCBI FCS and after removing bad contigs via TransRate)**")
+        st.write("**15. Generate the gene to trans map file for the CPB transcriptome assembly**")
+        st.code("""
+        perl /home/cbr14/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta > /media/cbr14/Two/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**16. Align the trimmed reads back to the CPB transcriptome assembly via Bowtie2 (alignment-based approach**)")
+        st.write("✔️create a bowtie2 conda environment, activate the environment, and install bowtie2 via bioconda")
+        st.code("""
+        conda create -n bowtie2
+        conda activate bowtie2
+        conda install bioconda::bowtie2
+        """, language="bash")
+        st.write("✔️index the CPB transcriptome assembly via Bowtie2")
+        st.code("""
+        nohup bowtie2-build /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta /media/cbr14/Two/Wee/WeeYeZhi/output/bowtie2_results/bowtie2_build_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate > /media/cbr14/Two/Wee/WeeYeZhi/output/bowtie2_results/bowtie2_build_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate/bowtie2_build_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️map the trimmed reads back to the CPB transcriptome assembly via Bowtie2 by using a bash script")
+        st.code("""
+        dos2unix bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate.sh
+        chmod +x bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate.sh
+        nohup bash bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate.sh > bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate_output.log 2>&1 &
+        """, language="bash")
+        # ----LOAD THE BOWTIE2 MAPPING AFTER CDHITEST TRINITY NCBI FCS TRANSRATE SCRIPT----
+        # Check if the file exists before reading
+        if bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate.exists():
+            with open(bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Bowtie2 Mapping After CDHITEST Trinity NCBI FCS TransRate Script",
+                data=script_byte,
+                file_name=bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate.name} does not exist.")
+        st.markdown("[Visit Bioconda Installation of Bowtie2](https://anaconda.org/)")
+
+        st.write("###")
+
+        st.write("17. Run the transcript quantification step (follow the Trinity GitHub manual)")
         st.write("✔️activate the 'trinity' conda environment")
         st.code("""
         conda activate trinity
         """, language="bash")
-        st.write("✔️generate the gene to trans map file for the CPB transcriptome assembly for 4 times (before deduplication, after deduplication & after NCBI FCS & after removing bad contigs via TransRate)")
+        st.write("✔️run the align_and_estimate_abundance.pl script by running alignment-based approach via Bowtie2 and transcript quantification via RSEM")
         st.code("""
-        perl /home/cbr15/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_trimmomatic.fasta > /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_trimmomatic/trinity_assembly_after_trimmomatic.Trinity.fasta.gene_trans_map
-        perl /home/cbr15/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta > /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity/trinity_assembly_after_cdhitest_trinity.Trinity.fasta.gene_trans_map
-        perl /home/cbr15/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta > /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS/trinity_assembly_after_cdhitest_trinity_NCBI_FCS.Trinity.fasta.gene_trans_map
-        perl /home/cbr15/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/raid/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta > /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.Trinity.fasta.gene_trans_map
+        nohup perl /home/cbr14/anaconda3/envs/trinity/bin/align_and_estimate_abundance.pl --transcripts /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --seqType fq --samples_file /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_samples_sequenced_by_LKM_and_INBIOSIS.txt --est_method RSEM --aln_method bowtie2 --gene_trans_map /media/cbr14/Two/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map --prep_reference --SS_lib_type RF --thread_count 16 --output_dir /media/cbr14/Two/Wee/WeeYeZhi/output/align_and_estimate_abundance.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate > trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_output.log 2>&1 &
         """, language="bash")
-        st.write("✔️compute and obtain the expression matrix after quantifying the abundance of transcripts via Salmon")
+
+        st.write("###")
+
+        st.write("**18. Compute the ExN50 statistics of the transcriptome assemblies (before deduplication, after deduplication, after NCBI FCS and after removing bad contigs via TransRate)**")
+        st.write("✔️compute and obtain the expression matrix after quantifying the abundance of transcripts via RSEM (Trinity_trans.gene.TMM.EXPR.matrix will be used to run DEG analysis later & Trinity_trans.isoform.TMM.EXPR.matrix will be used to compute the EX90N50 value of the CPB transcriptome assembly later")
         st.code("""
-        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method salmon --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_trimmomatic/trinity_assembly_after_trimmomatic.Trinity.fasta.gene_trans_map --out_prefix salmon --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_trimmomatic/salmon_transcript_quantification_files_after_trimmomatic.list > trinity_abundance_to_estimates_after_trimmomatic_output.log 2>&1 &
-        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method salmon --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity/trinity_assembly_after_cdhitest_trinity.Trinity.fasta.gene_trans_map --out_prefix salmon --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity/salmon_transcript_quantification_files_after_cdhitest_trinity.list > trinity_abundance_to_estimates_after_cdhitest_trinity_output.log 2>&1 &
-        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method salmon --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS/trinity_assembly_after_cdhitest_trinity_NCBI_FCS.Trinity.fasta.gene_trans_map --out_prefix salmon --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS/salmon_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS.list > trinity_abundance_to_estimates_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 &
-        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method salmon --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.Trinity.fasta.gene_trans_map --out_prefix salmon --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/salmon_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.list > trinity_abundance_to_estimates_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 &
+        nohup perl /home/cbr14/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method RSEM --gene_trans_map /media/cbr14/Two/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map --out_prefix Trinity_trans --name_sample_by_basedir --quant_files /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/RSEM_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS_transrate.list > /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/abundance_estimates_to_matrix_after_cdhitest_trinity_NCBI_FCS_transrate_output.log 2>&1 &
         """, language="bash")
-        # ----LOAD SALMON TRANSCRIPT QUANTIFICATION LIST FILE BEFORE DEDUPLICATION----
-        # Check if the file exists before reading
-        if salmon_transcript_quantification_after_trimmomatic_list.exists():
-            with open(salmon_transcript_quantification_after_trimmomatic_list, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Salmon Transcript Quantification List File Before Deduplication",
-                data=script_byte,
-                file_name=salmon_transcript_quantification_after_trimmomatic_list.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{salmon_transcript_quantification_after_trimmomatic_list.name} does not exist.")
-            # ----LOAD SALMON TRANSCRIPT QUANTIFICATION LIST FILE AFTER DEDUPLICATION----
-            # Check if the file exists before reading
-        if salmon_transcript_quantification_after_cdhitest_trinity_list.exists():
-            with open(salmon_transcript_quantification_after_cdhitest_trinity_list, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Salmon Transcript Quantification List File After Deduplication",
-                data=script_byte,
-                file_name=salmon_transcript_quantification_after_cdhitest_trinity_list.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{salmon_transcript_quantification_after_cdhitest_trinity_list.name} does not exist.")
-            # ----LOAD SALMON TRANSCRIPT QUANTIFICATION LIST FILE AFTER NCBI FCS----
-            # Check if the file exists before reading
-        if salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_list.exists():
-            with open(salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_list, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Salmon Transcript Quantification List File After NCBI FCS",
-                data=script_byte,
-                file_name=salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_list.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_list.name} does not exist.")
-            # ----LOAD SALMON TRANSCRIPT QUANTIFICATION LIST FILE AFTER REMOVING BAD CONTIGS VIA TRANSRATE----
-            # Check if the file exists before reading
-        if salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_list.exists():
-            with open(salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_list, "rb") as script_file:
-                script_byte = script_file.read()
-
-            # Add download button
-            st.download_button(
-                label="Download Salmon Transcript Quantification List File After Removing Bad Contigs via TransRate",
-                data=script_byte,
-                file_name=salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_list.name,  # Extract just the file name
-                mime="application/x-sh",  # MIME type for shell scripts
-            )
-        else:
-            st.error(f"{salmon_transcript_quantification_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_list.name} does not exist.")
         st.write("✔️compute the ExN50 statistics of the CPB transcriptome assembly at gene level (instead of transcript level) to remove bias")
         st.code("""
-        perl /home/cbr15/anaconda3/envs/trinity/bin/contig_ExN50_statistic.pl /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_trimmomatic/salmon.isoform.TMM.EXPR.matrix /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_trimmomatic.fasta gene | tee ExN50_after_trimmomatic.gene.stats
-        perl /home/cbr15/anaconda3/envs/trinity/bin/contig_ExN50_statistic.pl /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity/salmon.isoform.TMM.EXPR.matrix /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta gene | tee ExN50_after_cdhitest_trinity.gene.stats
-        perl /home/cbr15/anaconda3/envs/trinity/bin/contig_ExN50_statistic.pl /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS/salmon.isoform.TMM.EXPR.matrix /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta gene | tee ExN50_after_cdhitest_trinity_NCBI_FCS.gene.stats # run the command, "sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' clean.fasta > modified_clean.fasta" first to remove the ~ suffixes within the assembly file generated and cleaned via NCBI FCS pipeline, before using it to compute the ExN50 values
-        perl /home/cbr15/anaconda3/envs/trinity/bin/contig_ExN50_statistic.pl /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/salmon.isoform.TMM.EXPR.matrix /media/raid/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta gene | tee ExN50_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.gene.stats # run the command, "sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' clean.fasta > modified_clean.fasta" first to remove the ~ suffixes within the assembly file generated and cleaned via NCBI FCS pipeline, before using it to compute the ExN50 values
-        """, language="bash")
-        st.write("✔️remove the first line 'nohup: ignoring input' from each of the generated ExN50.stats file before plotting the ExN50 graph via sed to avoid encountering error when parsing the file")
-        st.code("""
-        sed -i '1d' ExN50_after_trimmomatic.gene.stats
-        sed -i '1d' ExN50_after_cdhitest_trinity.gene.stats
-        sed -i '1d' ExN50_after_cdhitest_trinity_NCBI_FCS.gene.stats
-        sed -i '1d' ExN50_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.gene.stats
+        perl /home/cbr14/anaconda3/envs/trinity/bin/contig_ExN50_statistic.pl /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/Trinity_trans.isoform.TMM.EXPR.matrix /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta gene | tee ExN50_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.gene.stats 
         """, language="bash")
         st.write("✔️install the ggplot2 conda package within the trinity conda environment via conda-forge")
         st.code("""
@@ -752,11 +624,9 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("✔️download the 'plot_ExN50_statistic.Rscript' file from https://github.com/trinityrnaseq/trinityrnaseq/blob/master/util/misc/plot_ExN50_statistic.Rscript as the trinity conda package does not contain this Rscript (need to download separately)")
         st.write("✔️plot and visualize the ExN50 statistics results of the CPB transcriptome assembly")
         st.code("""
-        nohup Rscript /media/raid/Wee/WeeYeZhi/output/trinity_ExN50_gene_level_statistics_calculation_results/trinity_assembly_after_trimmomatic/plot_ExN50_statistic.Rscript ExN50_after_trimmomatic.gene.stats > plot_ExN50_statistic_after_trimmomatic_output.log 2>&1 &
-        nohup Rscript /media/raid/Wee/WeeYeZhi/output/trinity_ExN50_gene_level_statistics_calculation_results/trinity_assembly_after_cdhitest_trinity/plot_ExN50_statistic.Rscript ExN50_after_cdhitest_trinity.gene.stats > plot_ExN50_statistic_after_cdhitest_trinity_output.log 2>&1 &
-        nohup Rscript /media/raid/Wee/WeeYeZhi/output/trinity_ExN50_gene_level_statistics_calculation_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS/plot_ExN50_statistic.Rscript ExN50_after_cdhitest_trinity_NCBI_FCS.gene.stats > plot_ExN50_statistic_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 &
-        nohup Rscript /media/raid/Wee/WeeYeZhi/output/trinity_ExN50_gene_level_statistics_calculation_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/plot_ExN50_statistic.Rscript ExN50_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.gene.stats > plot_ExN50_statistic_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 &
+        nohup Rscript /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_ExN50_gene_level_statistics_calculation_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/plot_ExN50_statistic.Rscript ExN50_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.gene.stats > plot_ExN50_statistic_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 &
         """, language="bash")
+        st.markdown("[Bear in mind that running abundance_estimates_to_matrix.pl script automatically generates both the transcript-level and gene-level expression matrices for you already](https://github.com/trinityrnaseq/trinityrnaseq/issues/356)")
 
 # Phase 2: Reference-Based Transcriptomics Analysis
 
@@ -764,6 +634,7 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
     with st.container():
         st.write("---")
         st.header("Phase 2: Transcriptomic and Structural-Based Analysis 🪢")
+
         st.write("###")
 
         st.write("**1. Identify coding regions within transcript sequences/transcriptome via TransDecoder**")
@@ -788,8 +659,26 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         docker run --rm trinityrnaseq/transdecoder which hmmsearch
         docker run --rm trinityrnaseq/transdecoder which TransDecoder.Predict
         """, language="bash")
-        st.write("✔️download UniProt Swiss-Prot FASTA file externally from UniProt’s website (https://www.uniprot.org/downloads) under the Swiss-Prot section & create the UniProt database")
+        st.write("✔️download the already preformatted BLAST NCBI NR database file (NCBI non-redundant protein database) and decompress each preformatted file by using the update_blastdb.pl script")
         st.code("""
+        conda create -n blast
+        conda activate blast
+        conda install bioconda::blast
+        which update_blastdb.pl
+        update_blastdb.pl --help
+        nohup perl /home/cbr14/anaconda3/envs/blast/bin/update_blastdb.pl --passive --decompress nr 2> error_output.log &
+        """, language="bash")
+        st.write("✔️download the NCBI NR database FASTA file from https://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/, create a DIAMOND-formatted reference NR database, and run DIAMOND BLASTp")
+        st.code("""
+        conda create -n diamond && conda activate diamond && conda install bioconda::diamond
+        nohup wget ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA/nr.gz 2> error_output.log & # download the FASTA format of the NCBI NR database file
+        nohup diamond makedb --in /media/raid/Wee/WeeYeZhi/output/transdecoder_results/diamond_indexed_ncbi_nr_database/nr.gz --db nr --threads 16 2> /media/raid/Wee/WeeYeZhi/output/transdecoder_results/ncbi_nr_database/error_output.log &
+        nohup diamond blastp --db /media/raid/Wee/WeeYeZhi/output/transdecoder_results/diamond_indexed_ncbi_nr_database/nr --query /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep --out /media/raid/Wee/WeeYeZhi/output/transdecoder_results/ncbi_blastp_against_nr_results/blastp.outfmt5 --outfmt 5 --ultra-sensitive --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /media/raid/Wee/WeeYeZhi/output/transdecoder_results/diamond_blastp_tmp_dir/diamond_blastp_XML 2> /media/raid/Wee/WeeYeZhi/output/transdecoder_results/diamond_blastp_tmp_dir/diamond_blastp_XML/error_output.log & # output BLASTp results in XML format
+        nohup diamond blastp --db /media/raid/Wee/WeeYeZhi/output/transdecoder_results/diamond_indexed_ncbi_nr_database/nr --query /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep --out /media/raid/Wee/WeeYeZhi/output/transdecoder_results/ncbi_blastp_against_nr_results/blastp.outfmt6 --outfmt 6 --ultra-sensitive --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /media/raid/Wee/WeeYeZhi/output/transdecoder_results/diamond_blastp_tmp_dir/diamond_blastp_tabular 2> /media/raid/Wee/WeeYeZhi/output/transdecoder_results/diamond_blastp_tmp_dir/diamond_blastp_tabular/error_output.log & # output BLASTp results in tabular format
+        """, language="bash")
+        st.write("✔️alternatively, if you want to use a smaller protein database file like uniprot_sprot.fasta, you can download UniProt Swiss-Prot FASTA file externally from UniProt’s website (https://www.uniprot.org/downloads) under the Swiss-Prot section & create the UniProt database")
+        st.code("""
+        wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
         gunzip uniprot_sprot.fasta.gz # uncompress the file first before creating the database as makeblastdb does not accept gzipped file as input
         docker run --user 1000:1000 -d --name make_swissprot_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "makeblastdb -in /data/transdecoder_results/make_swissprot_database/uniprot_sprot.fasta -dbtype prot -out /data/transdecoder_results/make_swissprot_database/uniprot_sprot"
         """, language="bash")
@@ -816,20 +705,26 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         """, language="bash")
         st.write("✔️extract the long open reading frames (ORFs) from the CPB transcriptome assembly")
         st.code("""
-        docker run --user 1000:1000 -d --name ORF_extraction -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "TransDecoder.LongOrfs -S -t /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --output_dir /data/transdecoder_results/transdecoder_ORF_extraction_results"
+        docker run --user 1000:1000 -d --name ORF_extraction -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "TransDecoder.LongOrfs -S -t /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --output_dir /data/transdecoder_results/transdecoder_ORF_extraction_results"
         """, language="bash")
-        st.write("✔️run BLASTp to blast the protein sequences predicted from the CPB transcriptome assembly against the SwissProt protein database")
+        st.write("✔️run NCBI BLASTp to blast the protein sequences predicted from the CPB transcriptome assembly against the SwissProt protein database")
         st.code("""
-        docker run --user 1000:1000 -d --name blastp_search -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "blastp -query /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep -db /data/transdecoder_results/make_swissprot_database/uniprot_sprot -max_target_seqs 1 -outfmt 6 -evalue 1e-5 -num_threads 16 > /data/transdecoder_results/ncbi_blastp_results/blastp.outfmt6"
+        docker run --user 1000:1000 -d --name blastp_search_against_swissprot_output_tabular -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "blastp -query /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep -db /data/transdecoder_results/make_swissprot_database/uniprot_sprot -max_target_seqs 1 -outfmt 6 -evalue 1e-5 -num_threads 16 > /data/transdecoder_results/ncbi_blastp_against_swissprot_results/blastp.outfmt6"
+        """, language="bash")
+        st.write("✔️run NCBI BLASTp to blast the protein sequences predicted from the CPB transcriptome assembly against the NCBI NR database")
+        st.code("""
+        docker run --user 1000:1000 -d --name blastp_search_against_nr_output_tabular -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "blastp -query /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep -db /data/transdecoder_results/ncbi_nr_database/nr -max_target_seqs 1 -outfmt 6 -evalue 1e-5 -num_threads 16 > /data/transdecoder_results/ncbi_blastp_against_nr_results/blastp.outfmt6" # output the tabular format of BLASTp results
+        docker run --user 1000:1000 -d --name blastp_search_against_nr_output_XML -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "blastp -query /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep -db /data/transdecoder_results/ncbi_nr_database/nr -max_target_seqs 1 -outfmt 5 -evalue 1e-5 -num_threads 16 > /data/transdecoder_results/ncbi_blastp_against_nr_results/blastp.outfmt5" # output the XML format of the BLASTp results
         """, language="bash")
         st.write("✔️run HMMSEARCH to identify the protein domains in the predicted ORFs using the Pfam database")
         st.code("""
-        docker run --user 1000:1000 -d --name hmmsearch -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "hmmsearch --cpu 16 -E 1e-10 --domtblout /data/transdecoder_results/hmmsearch_results/pfam.domtblout /data/transdecoder_results/hmmsearch_results/Pfam-A.hmm /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep"
+        docker run --user 1000:1000 -d --name hmmsearch -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "hmmsearch --cpu 16 -E 1e-5 --domtblout /data/transdecoder_results/hmmsearch_results/pfam.domtblout /data/transdecoder_results/hmmsearch_results/Pfam-A.hmm /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep"
         """, language="bash")
         st.write("✔️filter and retain predicted ORFs that have supported BLASTp hits and Pfam domains")
         st.code("""
-        docker run --user 1000:1000 -d --name ORF_prediction -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "TransDecoder.Predict -t /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --retain_pfam_hits /data/transdecoder_results/hmmsearch_results/pfam.domtblout --retain_blastp_hits /data/transdecoder_results/ncbi_blastp_results/blastp.outfmt6 -O /data/transdecoder_results/transdecoder_ORF_extraction_results"
+        docker run --user 1000:1000 -d --name ORF_prediction -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "TransDecoder.Predict -t /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --retain_pfam_hits /data/transdecoder_results/hmmsearch_results/pfam.domtblout --retain_blastp_hits /data/transdecoder_results/ncbi_blastp_against_nr_results/blastp.outfmt6 -O /data/transdecoder_results/transdecoder_ORF_extraction_results"
         """, language="bash")
+        st.markdown("[Read how to download NCBI NR, swissprot, and nt database files before running BLAST](https://www.ncbi.nlm.nih.gov/books/NBK62345/)")
         st.markdown("[Visit TransDecoder Docker Installation Page](https://github.com/TransDecoder/TransDecoder/wiki/TransDecoder_Docker_or_Singularity)")
         st.markdown("[Visit TransDecoder Docker Image on DockerHub](https://hub.docker.com/r/trinityrnaseq/transdecoder)")
         st.markdown("[Visit TransDecoder GitHub User Manual Page](https://github.com/TransDecoder/TransDecoder/wiki)")
@@ -855,7 +750,7 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         """, language="bash")
         st.write("✔️start running the Trinotate docker container (with the container being named as 'trinotate') and keep it alive in the background, and set the environment variables")
         st.code("""
-        docker run -it --user 0:0 --name trinotate -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data -e TRINOTATE_HOME=/usr/local/src/Trinotate -e TRINOTATE_DATA_DIR=/data/trinotate_results/trinotate_data_dir trinityrnaseq/trinotate /bin/bash # remember to run docker stop and docker rm after running trinotate, otherwise it is going to consume resources
+        docker run -it --user 0:0 --name trinotate -v /media/raid/Wee/WeeYeZhi/output:/data -e TRINOTATE_HOME=/usr/local/src/Trinotate -e TRINOTATE_DATA_DIR=/data/trinotate_results/trinotate_data_dir trinityrnaseq/trinotate /bin/bash # remember to run docker stop and docker rm after running trinotate, otherwise it is going to consume resources
         """, language="bash")
         st.write("✔️connect back to the running Trinotate docker container (run this command everytime after you exit the terminal to connect back to the running Trinotate docker container)")
         st.code("""
@@ -873,17 +768,32 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         """, language="bash")
         st.write("✔️import CPB transcriptome and protein data into the Trinotate sqlite database to initialize the trinotate sqlite database")
         st.code("""
-        $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --init --gene_trans_map /data/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.Trinity.fasta.gene_trans_map --transcript_fasta /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --transdecoder_pep /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.pep
+        $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --init --gene_trans_map /data/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map --transcript_fasta /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --transdecoder_pep /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.pep
         """, language="bash")
-        st.write("✔️run diamond in BLASTx mode to blast translated nucleotide against protein")
+        st.write("✔️run diamond in BLASTx mode to blast translated nucleotide against protein (perform local blastx)")
         st.code("""
-        sed -E 's/>(TRINITY[^ ]+_i[0-9]+)\.p[0-9]+.*/>\1/' /media/cbr14/Two/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.cds > /media/cbr14/Two/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.cds # trim off the long coding FASTA sequence headers to retain only the transcript IDs
-        diamond blastx -d $TRINOTATE_DATA_DIR/uniprot_sprot.dmnd -q /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.cds -o /data/trinotate_results/diamond_blastx_results/blastx.outfmt6 -f 6 -p 16 -e 1e-5
+        sed -E 's/>(TRINITY[^ ]+_i[0-9]+)\.p[0-9]+.*/>\1/' /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.cds > /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.cds # trim off the long coding FASTA sequence headers to retain only the transcript IDs
+        diamond blastx -d $TRINOTATE_DATA_DIR/uniprot_sprot.dmnd -q /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.cds -o /data/trinotate_results/diamond_blastx_results/blastx.outfmt6 -f 6 -p 16 -e 1e-5 # run BLASTx against the SwissProt database
+        docker run --user 1000:1000 -d --name blastx_tabular_results_against_nr_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/transdecoder_results/diamond_indexed_ncbi_nr_database/nr.dmnd -q /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.cds -o /data/trinotate_results/diamond_blastx_results/blastx.outfmt6 --outfmt 6 --ultra-sensitive --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_tabular_results_of_trinotate" # run BLASTX against the NR database to output the tabular format of the BLASTX results
+        docker run --user 1000:1000 -d --name blastx_XML_results_against_nr_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/transdecoder_results/diamond_indexed_ncbi_nr_database/nr.dmnd -q /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.cds -o /data/trinotate_results/diamond_blastx_results/blastx.outfmt5 --outfmt 5 --ultra-sensitive --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_XML_results_of_trinotate" # run BLASTX against the NR database to output the XML format of the BLASTX results
         """, language="bash")
-        st.write("✔️run BLASTp & hmmsearch again using the files generated by trinotate sqlite database construction step")
+        st.write("✔️run BLASTp & hmmsearch again using the files generated by trinotate sqlite database construction step (perform local blastp)")
         st.code("""
-        diamond blastp -d $TRINOTATE_DATA_DIR/uniprot_sprot.dmnd -q /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep -o /data/trinotate_results/diamond_blastp_results/blastp.outfmt6 -f 6 -p 16 -e 1e-5
-        hmmsearch --cpu 16 -E 1e-10 --domtblout /data/trinotate_results/hmmsearch_results/pfam.domtblout /data/trinotate_results/trinotate_data_dir/Pfam-A.hmm /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep
+        sed -E 's/^(>[^ ]*).*/\1/' /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder.pep > /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep # trim off the long protein FASTA sequence headers to retain only protein IDs in order to avoid encountering "OSError: [Errno 36] File name too long"
+        docker run --user 1000:1000 -d --name blastp_tabular_results_against_nr_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastp -d /data/transdecoder_results/diamond_indexed_ncbi_nr_database/nr.dmnd -q /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep -o /data/trinotate_results/diamond_blastp_results/blastp.outfmt6 --outfmt 6 --ultra-sensitive --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastp_tabular_results_of_trinotate" # output the tabular format of the BLASTp results
+        docker run --user 1000:1000 -d --name blastp_XML_results_against_nr_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastp -d /data/transdecoder_results/diamond_indexed_ncbi_nr_database/nr.dmnd -q /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep -o /data/trinotate_results/diamond_blastp_results/blastp.outfmt5 --outfmt 5 --ultra-sensitive --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastp_XML_results_of_trinotate" # output the XML format of the BLASTp results
+        docker run --user 1000:1000 -d --name hmmsearch -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "hmmsearch --cpu 16 -E 1e-5 --domtblout /data/trinotate_results/hmmsearch_results/pfam.domtblout /data/trinotate_results/trinotate_data_dir/Pfam-A.hmm /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep"
+        """, language="bash")
+        st.write("✔️run interproscan to scan the predicted CPB protein sequences against the protein family, domain, function, and binding sites classification database to try annotate the predicted CPB protein sequences")
+        st.code("""
+        docker pull interpro/interproscan:5.76-107.0 # pull the interproscan docker image with a specific tag of 5.76-107.0 from DockerHub 
+        docker images # verify whether the interproscan docker image has been successfully pulled
+        nohup curl -O http://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.76-107.0/alt/interproscan-data-5.76-107.0.tar.gz 2> download_interproscan_database_error_output.log & # download the gzipped file of the interproscan database
+        curl -O http://ftp.ebi.ac.uk/pub/software/unix/iprscan/5/5.76-107.0/alt/interproscan-data-5.76-107.0.tar.gz.md5 # download the .md5 extension of the interproscan database 
+        md5sum -c interproscan-data-5.76-107.0.tar.gz.md5 # verify whether the download is complete to make sure the download inteproscan database file is not corrupted
+        tar -pxzf interproscan-data-5.76-107.0.tar.gz # extract the downloaded interproscan database to interproscan-5.76-107.0/data
+        sed '/^>/! s/*//g' /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep > /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed_for_interproscan.fasta.transdecoder.pep # remove all the asterisk signs (which represent stop codons inside the fasta sequence lines) before running interproscan since interproscan expects the input protein file to only include known amino acid letters
+        docker run --user 1000:1000 -d --name interproscan -v /media/raid/Wee/WeeYeZhi/output:/data -v /media/raid/Wee/WeeYeZhi/output/trinotate_results/interproscan_results/interproscan_database/interproscan-5.76-107.0/data:/opt/interproscan/data interpro/interproscan:5.76-107.0 --input /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed_for_interproscan.fasta.transdecoder.pep --seqtype p --formats TSV,XML --cpu 16 --tempdir /data/trinotate_results/interproscan_results/interproscan_temp_dir --output-dir /data/trinotate_results/interproscan_results
         """, language="bash")
         st.write("✔️create an isolated conda environment called signalp6, activate the conda environment, install the gzipped file of SignalP6 at https://services.healthtech.dtu.dk/services/SignalP-6.0/, verify the installation and run SignalP6 to predict the signal peptide molecules of the predicted CPB protein sequences")
         st.code("""
@@ -897,38 +807,40 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         pip install signalp-6-package/
         SIGNALP_DIR=$(python -c "import signalp; import os; print(os.path.dirname(signalp.__file__))") && mkdir -p "$SIGNALP_DIR/model_weights" && cp -r /media/cbr14/Two/Wee/WeeYeZhi/output/trinotate_results/signalp6_results/signalp6_installation/signalp6_fast/signalp-6-package/models/* "$SIGNALP_DIR/model_weights/"
         which signalp6
-        nohup signalp6 --fastafile /media/cbr14/Two/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep --organism eukarya --mode fast --format txt --output_dir /media/cbr14/Two/Wee/WeeYeZhi/output/trinotate_results/signalp6_results > /media/cbr14/Two/Wee/WeeYeZhi/output/trinotate_results/signalp6_results/signalp6_output.log 2>&1 & # After running this command, you will automatically obtain a final output file, known as prediction_results.txt file
+        nohup signalp6 --fastafile /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep --organism eukarya --mode fast --format txt --output_dir /media/raid/Wee/WeeYeZhi/output/trinotate_results/signalp6_results > /media/raid/Wee/WeeYeZhi/output/trinotate_results/signalp6_results/signalp6_output.log 2>&1 & # After running this command, you will automatically obtain a final output file, known as prediction_results.txt file
         """, language="bash")
         st.write("✔️install the gzipped file of TMHMM at https://services.healthtech.dtu.dk/services/TMHMM-2.0/, verify the installation and run TMHMM to predict the transmembrane domains of the predicted CPB protein sequences")
         st.code("""
         tar -xzvf tmhmm-2.0c.Linux.tar.gz # extract the tmhmm file
-        cd /media/cbr14/Two/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin # navigate into this working directory before you run tmhmm
+        cd /media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin # navigate into this working directory before you run tmhmm
         which perl # check the working directory to perl for your system
         nano tmhmm # change the shebang line of the tmhmm program perl script to /home/cbr14/opt/Colabfold/localcolabfold/colabfold-conda/bin/perl
         nano tmhmmformat.pl # change the shebang line of the tmhmmformat program perl script to /home/cbr14/opt/Colabfold/localcolabfold/colabfold-conda/bin/perl
-        export PATH="/media/cbr14/Two/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin:$PATH" # note that the export of the PATH environment variable to the tmhmm executable file is just temporary and will only take effect for the current terminal session
+        export PATH="/media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin:$PATH" # note that the export of the PATH environment variable to the tmhmm executable file is just temporary and will only take effect for the current terminal session
         which tmhmm # double check the system can access the tmhmm executable file correctly after exporting the PATH variable 
-        tmhmm --short /media/cbr14/Two/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep > /media/cbr14/Two/Wee/WeeYeZhi/output/trinotate_results/tmhmm_results/tmhmm.out
+        tmhmm --short /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep > /media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_results/tmhmm.out
         """, language="bash")
         st.write("✔️use the eggNOG-mapper program that comes together with the Trinotate Docker image and run it to assign orthologs/evolutionary functional relationships to the predicted protein sequences of CPB")
         st.code("""
-        docker run -it --user 0:0 --name eggnogmapper -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data -e EGGNOGMAPPER=/usr/local/src/eggnog-mapper-2.1.9 trinityrnaseq/trinotate /bin/bash # Note that the previous Trinotate docker image pull process already came with the pre-built eggnogmapper package. You no longer need to install eggnogmapper externally. Remember to run docker stop and docker rm after running eggnogmapper, otherwise it is going to consume resources
-        $EGGNOGMAPPER/emapper.py -i /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep -m diamond --data_dir /data/trinotate_results/trinotate_data_dir/EGGNOG_DATA_DIR --cpu 16 --itype proteins -o CPB --output_dir /data/trinotate_results/eggnogmapper_results # run eggNOGmapper to assign orthologs to the predicted protein sequences of CPB. Note that the eggnogmapper database was already previously downloaded and saved in the EGGNOG_DATA_DIR during the Trinotate sqlite database creation step
+        docker run -it --user 0:0 --name eggnogmapper -v /media/raid/Wee/WeeYeZhi/output:/data -e EGGNOGMAPPER=/usr/local/src/eggnog-mapper-2.1.9 trinityrnaseq/trinotate /bin/bash # Note that the previous Trinotate docker image pull process already came with the pre-built eggnogmapper package. You no longer need to install eggnogmapper externally. Remember to run docker stop and docker rm after running eggnogmapper, otherwise it is going to consume resources
+        $EGGNOGMAPPER/emapper.py -i /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep -m diamond --ultra-sensitive --data_dir /data/trinotate_results/trinotate_data_dir/EGGNOG_DATA_DIR --cpu 16 --itype proteins -o CPB --output_dir /data/trinotate_results/eggnogmapper_results # run eggNOGmapper to assign orthologs to the predicted protein sequences of CPB. Note that the eggnogmapper database was already previously downloaded and saved in the EGGNOG_DATA_DIR during the Trinotate sqlite database creation step
+        docker run --user 0:0 -d --name eggnogmapper -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "/usr/local/src/eggnog-mapper-2.1.9/emapper.py -i /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep -m diamond --sensmode ultra-sensitive --data_dir /data/trinotate_results/trinotate_data_dir/EGGNOG_DATA_DIR --cpu 16 --itype proteins -o CPB --output_dir /data/trinotate_results/eggnogmapper_results" # Alternatively, you can run this command at one go to run the docker container in the background with the most sensitive parameter of DIAMOND search
         """, language="bash")
         st.write("✔️use the infernal program that comes together with the Trinotate Docker image and run it")
         st.code("""
         wget ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/Rfam.cm.gz # download the Rfam covariance model database via ftp (just in case if the docker image does not contain it). Note that this command was already run by the previous trinotate sqlite database creation step
         wget ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/Rfam.clanin # download the Rfam clan database via ftp (just in case if the docker image does not contain it).  Note that this command was already run by the previous trinotate sqlite database creation step
         gunzip Rfam.cm.gz # unzip the downloaded Rfam CM database. Note that this command was already run by the previous trinotate sqlite database creation step
-        docker run -it --user 0:0 --name infernal -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data -e INFERNAL_CMSCAN=/usr/local/src/infernal-1.1.2/src trinityrnaseq/trinotate /bin/bash # Note that the previous Trinotate docker image pull process already came with the pre-built infernal package, hence you can just use its cmscan programme. You no longer need to install infernal externally. Remember to run docker stop and docker rm after running infernal, otherwise it is going to consume resources
+        docker run -it --user 0:0 --name infernal -v /media/raid/Wee/WeeYeZhi/output:/data -e INFERNAL_CMSCAN=/usr/local/src/infernal-1.1.2/src trinityrnaseq/trinotate /bin/bash # Note that the previous Trinotate docker image pull process already came with the pre-built infernal package, hence you can just use its cmscan programme. You no longer need to install infernal externally. Remember to run docker stop and docker rm after running infernal, otherwise it is going to consume resources
         $INFERNAL_CMSCAN/cmscan --cut_ga --rfam --nohmmonly --clanin /data/trinotate_results/trinotate_data_dir/Rfam.clanin --oskip --fmt 2 -o /data/trinotate_results/infernal_results/infernal_output.txt --tblout /data/trinotate_results/infernal_results/infernal.out /data/trinotate_results/trinotate_data_dir/Rfam.cm /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.cds # scan the predicted CPB coding regions of the transcript sequences against the CM models to check whether any of your predicted coding sequences match known RNA families from Rfam. Later, you need to filter and remove all the hits (detected non-coding RNAs) if there are any since you are only interested in the mRNA coding regions. Run infernal as a QC check to filter non-coding RNAs from the coding regions of the transcriptome
+        docker run --user 0:0 -d --name infernal -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "/usr/local/src/infernal-1.1.2/src/cmscan --cut_ga --rfam --nohmmonly --clanin /data/trinotate_results/trinotate_data_dir/Rfam.clanin --oskip --fmt 2 -o /data/trinotate_results/infernal_results/infernal_output.txt --tblout /data/trinotate_results/infernal_results/infernal.out /data/trinotate_results/trinotate_data_dir/Rfam.cm /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.cds" # Alternatively, you can run this infernal command at one go in the background
         """, language="bash")
         st.write("✔️Load the BLASTp, BLASTx, Pfam, SignalP6, TMHMM, Infernal & eggNOGmapper results into the created Trinotate SQLite Database")
         st.code("""
         $TRINOTATE_HOME/Trinotate -h # display all the command-line options available to run Trinotate correctly
-        $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --LOAD_swissprot_blastp /data/transdecoder_results/ncbi_blastp_results/blastp.outfmt6
+        $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --LOAD_swissprot_blastp /data/trinotate_results/diamond_blastp_results/blastp.outfmt6
         $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --LOAD_swissprot_blastx /data/trinotate_results/diamond_blastx_results/blastx.outfmt6
-        $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --LOAD_pfam /data/transdecoder_results/hmmsearch_results/pfam.domtblout
+        $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --LOAD_pfam /data/trinotate_results/hmmsearch_results/pfam.domtblout
         $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --LOAD_signalp /data/trinotate_results/signalp6_results/prediction_results.txt
         $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --LOAD_tmhmmv2 /data/trinotate_results/tmhmm_results/tmhmm.out
         $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --LOAD_infernal /data/trinotate_results/infernal_results/infernal.out
@@ -936,11 +848,11 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         """, language="bash")
         st.write("✔️Generate the CPB transcriptome annotation report")
         st.code("""
-        $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --report -E 1e-5 > /data/trinotate_results/trinotate_annotation_report/trinotate_annotation_report.xls
+        $TRINOTATE_HOME/Trinotate --db /data/trinotate_results/trinotate_sqlite_database/myTrinotate.sqlite --report -E 1e-5 > /data/trinotate_results/trinotate_annotation_report/trinotate_annotation_report.xlsx
         """, language="bash")
         st.write("✔️Extract GO assignments for the predicted CPB protein sequences")
         st.code("""
-        docker run -it --user 0:0 --name GO_extraction -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data -e GO_EXTRACTION_SCRIPT=/usr/local/src/Trinotate/util trinityrnaseq/trinotate /bin/bash # remember to run docker stop and docker rm after running the GO extraction process, otherwise it is going to consume resources
+        docker run -it --user 0:0 --name GO_extraction -v /media/raid/Wee/WeeYeZhi/output:/data -e GO_EXTRACTION_SCRIPT=/usr/local/src/Trinotate/util trinityrnaseq/trinotate /bin/bash # remember to run docker stop and docker rm after running the GO extraction process, otherwise it is going to consume resources
         $GO_EXTRACTION_SCRIPT/extract_GO_assignments_from_Trinotate_xls.pl --Trinotate_xls /data/trinotate_results/trinotate_annotation_report/trinotate_annotation_report.xls -G --include_ancestral_terms > /data/trinotate_results/GO_annotation_results/GO_annotation.txt
         """, language="bash")
         st.markdown("[Visit Trinotate GitHub Wikipedia](https://github.com/Trinotate/Trinotate/wiki)")
@@ -958,6 +870,9 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         st.markdown("[How to solve the issue of getting an empty output results file/columns](https://github.com/Trinotate/Trinotate.github.io/issues/70)")
         st.markdown("[Learn how to run Trinotate to annotate transcripts](https://bioinformaticsworkbook.org/dataAnalysis/RNA-Seq/annotating-transcripts.html#gsc.tab=0)")
         st.markdown("[Read how to run TMHMM using the TMHMM Server](https://medium.com/@snippetsbio/tmhmm-server-usage-and-result-analysis-in-3-simple-steps-4a37edfead39)")
+        st.markdown("[Read how to run the whole DESeq2 pipeline](https://docs.hpc.ufs.ac.za/training/transcriptomics_tutorial/transcriptomics_tutorial_1/)")
+        st.markdown("[Read how to run interproscan to annotate protein sequences](https://interproscan-docs.readthedocs.io/en/v5/HowToRun.html)")
+        st.markdown("[Read how to pull interproscan docker image from DockerHub](https://hub.docker.com/r/interpro/interproscan)")
 
         st.write("###")
 
@@ -1022,6 +937,20 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
 
         st.write("###")
 
+        st.write("Alternatively, you can follow the Trinity pipeline and run the run_DE_analysis.pl script to perform DEG analysis (considering all the 4 larva replicates and 4 adult replicates)")
+        st.write("✔️convert abundance estimates into matrices by using the abundance_estimates_to_matrix.pl script")
+        st.code("""
+        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method RSEM --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map --out_prefix Trinity --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/RSEM_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS_transrate.list > /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/abundance_estimates_to_matrix_after_cdhitest_trinity_NCBI_FCS_transrate_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run DEG by using the trinity per script, run_DE_analysis.pl")
+        st.code("""
+        R --version # ensure R is installed within the Linux environment first before you run the script
+        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/run_DE_analysis.pl --matrix /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/Trinity.gene.counts.matrix --method DESeq2 --samples_file /media/raid/Wee/WeeYeZhi/output/run_DE_analysis.pl_results/samples_for_DEG_analysis.txt --reference_sample larva --output /media/raid/Wee/WeeYeZhi/output/run_DE_analysis.pl_results 2> error_output_run_DE_analysis.log &
+        """, language="bash")
+        st.write("✔️extract and cluster differentially expressed transcripts")
+        st.code("""
+        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/analyze_diff_expr.pl --matrix /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/Trinity.gene.TMM.EXPR.matrix -P 1e-3 -C 2 --output DEG --samples /media/raid/Wee/WeeYeZhi/output/run_DE_analysis.pl_results/samples_for_DEG_analysis.txt 2> error_output_analyze_diff_expr.log & # make sure to run this command within the same directory containing the results of run_DE_analysis.pl script
+        """, language="bash")
         st.markdown("[Visit DESeq2 Bioconductor Page](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)")
         st.markdown("[Visit DESeq2 GitHub Page](https://github.com/thelovelab/DESeq2)")
         st.markdown("[Visit DESeq2 Tutorial Manual 1](https://lashlock.github.io/compbio/R_presentation.html)")
@@ -1054,30 +983,6 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         st.write("❗Run these 3 analysis, 'drawing PCA plot', 'inspecting size factor', 'drawing dispersion plot' to double check the quality of the RNA-seq data")
         st.write("❗PCA is your QC/overview tool; heatmaps and volcanoes are for showing off the real DEGs.")
         st.write("❗PCA is typically performed on the expression data (counts or normalized counts) as shown in the 'analysisObject' dataframe, not on the results of differential gene expression as shown in the 'resOrdered_unique'.")
-        st.write("---")
-
-        st.write("**4. Install eggNOG-mapper to perform functional annotation (orthology-based functional annotation) of novel genome sequence of C. cramerella**")
-        st.write("✔️create & activate the 'eggnogmapper' conda environment")
-        st.code("""
-               conda create -n eggnogmapper
-               conda activate eggnogmapper
-        """, language="bash")
-        st.write("✔️install eggnog-mapper")
-        st.code("conda install -c bioconda eggnog-mapper", language="bash")
-        st.write("✔️install the eggnog database by running the below python script")
-        st.code("download_eggnog_data.py", language="bash")
-        st.write("✔️verify the installation of eggNOG-mapper")
-        st.code("""
-        emapper.py --version # emapper.py is the main command to invoke and run eggNOG-mapper
-        emapper.py --help
-        """, language="bash")
-        st.write("✔️run eggNOG-mapper")
-        st.code("""
-        emapper.py -i braker.proteins.faa -o cramerella_annot --itype proteins --cpu 16 -m diamond # specify 'braker.proteins.faa' as input (datatype=protein), set the prefix of all the output files to be 'cramerella_annot', specify the mode to use DIAMOND to perform fast sequence alignment (if you dont specify -m, its also ok as eggNOG-mapper will use DIAMOND to perform sequene alignment by default)
-        """, language="bash")
-        st.markdown("[Visit eggNOG-mapper GitHub Page](https://github.com/eggnogdb/eggnog-mapper/wiki/eggNOG-mapper-v2.0.0-v2.0.1)")
-        st.markdown("[Read eggNOG-mapper Publication](https://academic.oup.com/mbe/article/34/8/2115/3782716?login=false)")
-        st.markdown("[Read latest eggNOG-mapper Publication](https://pubmed.ncbi.nlm.nih.gov/30418610/)")
 
 # Phase 3: Molecular Docking and Dynamics Simulation
 if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
