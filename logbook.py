@@ -19,7 +19,7 @@ current_dir = Path(__file__).parent if "__file__" in locals() else Path.cwd()
 fastqc_raw_RNA_seq_file = current_dir / "assets" / "fastqc_raw_RNA_seq.sh"
 fastqc_trimmed_RNA_seq_file = current_dir / "assets" / "fastqc_trimmed_RNA_seq.sh"
 gzip_file = current_dir / "assets" / "gzip.sh"
-deseq2rmd_file = current_dir / "assets" / "deseq2.Rmd"
+deseq2rmd_file = current_dir / "assets" / "Multivariate_Statistical_Analysis_of_DEG_Results_Between_CPB_Larva_and_Adult.Rmd"
 gromacs_file = current_dir / "assets" / "Gromacs_codes.txt"
 generate_busco_plot_python_script = current_dir / "assets" / "generate_plot.py"
 generate_busco_plot_Rscript = current_dir / "assets" / "busco_figure.R"
@@ -876,47 +876,21 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
 
         st.write("###")
 
-        st.write("**3. Perform differential expression gene (DEG) analysis using R**")
-        st.write("✔️install BiocManager in RStudio") #BiocManager is the official R package that is used to install Bioconductor packages, manage Bioconductor versions, & handle dependencies correctly between CRAN & Bioconductor
-        st.code("""if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")""", language="r")
-        st.write("✔️install DESeq2, biomaRt, rtracklayer, and GenomicFeatures via BiocManager")
+        st.write("**3. Perform differential expression gene (DEG) analysis by running the run_DE_analysis.pl (trinity utility perl script) (considering all the 4 larva replicates and 4 adult replicates)**")
+        st.write("✔️convert abundance estimates into matrices by using the abundance_estimates_to_matrix.pl script")
         st.code("""
-        BiocManager::install("DESeq2") # perform DEG analysis
-        BiocManager::install("biomaRt") # perform gene annotation & ID conversion
-        BiocManager::install("rtracklayer") # work with genomic ranges and annotations (like GTF)
-        BiocManager::install("GenomicFeatures") # work with genomic ranges and annotations (like GTF)
-        """, language="r")
-        st.write("✔️install tidyverse and ggrepel via CRAN")
+        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method RSEM --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map --out_prefix Trinity --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/RSEM_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS_transrate.list > /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/abundance_estimates_to_matrix_after_cdhitest_trinity_NCBI_FCS_transrate_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run DEG by using the trinity per script, run_DE_analysis.pl")
         st.code("""
-        install.packages("tidyverse") # manipulate data
-        install.packages("ggrepel") # visualize data
-        """, language="r")
-        st.write("✔️verify the installation of R packages by checking and recording its package version")
+        R --version # ensure R is installed within the Linux environment first before you run the script
+        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/run_DE_analysis.pl --matrix /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/Trinity.gene.counts.matrix --method DESeq2 --samples_file /media/raid/Wee/WeeYeZhi/output/run_DE_analysis.pl_results/samples_for_DEG_analysis.txt --reference_sample larva --output /media/raid/Wee/WeeYeZhi/output/run_DE_analysis.pl_results 2> error_output_run_DE_analysis.log &
+        """, language="bash")
+        st.write("✔️extract and cluster differentially expressed transcripts")
         st.code("""
-        packageVersion("DESeq2")
-        packageVersion("biomaRt")
-        packageVersion("rtracklayer")
-        packageVersion("GenomicFeatures")
-        packageVersion("tidyverse")
-        packageVersion("dplyr")
-        packageVersion("stringr")
-        packageVersion("ggplot2")
-        packageVersion("ggrepel")
-        """, language="r")
-        st.write("✔️load all the installed R libraries into RStudio")
-        st.code("""
-        library(DESeq2)
-        library(biomaRt)
-        library(rtracklayer)
-        library(GenomicFeatures)
-        library(tidyverse)
-        library(dplyr)
-        library(stringr)
-        library(ggplot2)
-        library(ggrepel)
-        """, language="r")
-        st.write("✔️create a R markdown script in RStudio to run DEG analysis automatically")
+        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/analyze_diff_expr.pl --matrix /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/Trinity.gene.TMM.EXPR.matrix -P 1e-3 -C 2 --output DEG --samples /media/raid/Wee/WeeYeZhi/output/run_DE_analysis.pl_results/samples_for_DEG_analysis.txt 2> error_output_analyze_diff_expr.log & # make sure to run this command within the same directory containing the results of run_DE_analysis.pl script
+        """, language="bash")
+        st.write("✔️create a R markdown script in RStudio to draw all the 4 plots, namely, volcano plot, hierarchical clustering heatmap, PCA plot and MA plot automatically")
         # ----LOAD DESeq2 R SCRIPT----
         # Check if the file exists before reading
         if deseq2rmd_file.exists():
@@ -932,25 +906,8 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
             )
         else:
             st.error(f"{deseq2rmd_file.name} does not exist.")
-        st.write("✔️create heatmap plot and perform hierarchical clustering analysis using Morpheus (if you dont want to code)")
+        st.write("✔️Alternatively, you can also create heatmap plot and perform hierarchical clustering analysis using Morpheus (if you dont want to code)")
         st.markdown("[Visit Morpheus Broad Webpage](https://software.broadinstitute.org/morpheus/)")
-
-        st.write("###")
-
-        st.write("Alternatively, you can follow the Trinity pipeline and run the run_DE_analysis.pl script to perform DEG analysis (considering all the 4 larva replicates and 4 adult replicates)")
-        st.write("✔️convert abundance estimates into matrices by using the abundance_estimates_to_matrix.pl script")
-        st.code("""
-        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method RSEM --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map --out_prefix Trinity --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/RSEM_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS_transrate.list > /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/abundance_estimates_to_matrix_after_cdhitest_trinity_NCBI_FCS_transrate_output.log 2>&1 &
-        """, language="bash")
-        st.write("✔️run DEG by using the trinity per script, run_DE_analysis.pl")
-        st.code("""
-        R --version # ensure R is installed within the Linux environment first before you run the script
-        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/run_DE_analysis.pl --matrix /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/Trinity.gene.counts.matrix --method DESeq2 --samples_file /media/raid/Wee/WeeYeZhi/output/run_DE_analysis.pl_results/samples_for_DEG_analysis.txt --reference_sample larva --output /media/raid/Wee/WeeYeZhi/output/run_DE_analysis.pl_results 2> error_output_run_DE_analysis.log &
-        """, language="bash")
-        st.write("✔️extract and cluster differentially expressed transcripts")
-        st.code("""
-        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/analyze_diff_expr.pl --matrix /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/Trinity.gene.TMM.EXPR.matrix -P 1e-3 -C 2 --output DEG --samples /media/raid/Wee/WeeYeZhi/output/run_DE_analysis.pl_results/samples_for_DEG_analysis.txt 2> error_output_analyze_diff_expr.log & # make sure to run this command within the same directory containing the results of run_DE_analysis.pl script
-        """, language="bash")
         st.markdown("[Visit DESeq2 Bioconductor Page](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)")
         st.markdown("[Visit DESeq2 GitHub Page](https://github.com/thelovelab/DESeq2)")
         st.markdown("[Visit DESeq2 Tutorial Manual 1](https://lashlock.github.io/compbio/R_presentation.html)")
@@ -975,6 +932,7 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         st.markdown("[IDEP GitHub Page](https://github.com/gexijin/idepGolem)")
 
         st.write("---")
+
         st.write("❗Bear in mind that the p-adjusted values provided by the DEG results will help to verify whether the particular gene is really differentially expressed or it's just a false positive result")
         st.write("❗Decide whether or not you need to accept null hypothesis or reject null hypothesis/accept alternative hypothesis after interpreting the DEG results")
         st.write("❗If there is a significance difference in the gene expression level between the two developmental stages where p-value < 0.05 (at 95% statistical significance level), then null hypothesis is rejected/ alternative hypothesis is accepted")
