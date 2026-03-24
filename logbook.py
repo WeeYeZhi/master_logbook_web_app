@@ -39,6 +39,7 @@ bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS = current_dir / "assets" / "bowt
 generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS = current_dir / "assets" /"generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS.sh"
 bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate = current_dir / "assets" / "bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate.sh"
 generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS_transrate = current_dir / "assets" / "generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS_transrate.sh"
+extract_TM_regions = current_dir / "assets" / "TM1_to_TM7_extraction.py"
 
 # ---- HEADER SECTION ----
 with st.container():
@@ -327,6 +328,53 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.markdown("[Download list of adapter sequences contained within the Illumina paired end read to run trimmomatic for adapter removal purposes](https://github.com/usadellab/Trimmomatic/tree/main/adapters)")
         st.markdown("[Read how to create adapter files to perform adapter removal via trimmomatic](https://www.biostars.org/p/250425/)")
 
+        st.write("###")
+
+        st.write("Run Trinity to assemble all the Illumina paired-end reads for each sample")
+        st.code("""
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR11266554/SRR11266554.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR11266554 > /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR11266554/SRR11266554_output.log 2>&1 & 
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR11266555/SRR11266555.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR11266555 > /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR11266555/SRR11266555_output.log 2>&1 &
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR11266556/SRR11266556.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR11266556 > /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR11266556/SRR11266556_output.log 2>&1 &
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690969/SRR9690969.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690969 > /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690969/SRR9690969_output.log 2>&1 &
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690970/SRR9690970.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690970 > /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690970/SRR9690970_output.log 2>&1 &
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690971/SRR9690971.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690971 > /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690971/SRR9690971_output.log 2>&1 &
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690972/SRR9690972.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690972 > /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690972/SRR9690972_output.log 2>&1 &
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690973/SRR9690973.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690973 > /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690973/SRR9690973_output.log 2>&1 &
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690974/SRR9690974.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690974 > /media/raid/Wee/WeeYeZhi/output/trinity_assembly_for_each_sample/trinity_SRR9690974/SRR9690974_output.log 2>&1 &
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("Build a customized diamond-indexed primates and rodent database to be used for running BLASTx for each sample of Illumina paired-end reads to check which sample has high percentage of primates and rodents")
+        st.write("✔️download the protein fasta files of primate and rodents")
+        st.code("""
+        wget -O primates.fasta.gz "https://rest.uniprot.org/uniprotkb/stream?compressed=true&format=fasta&query=(taxonomy_id:9443)"
+        wget -O rodents.fasta.gz "https://rest.uniprot.org/uniprotkb/stream?compressed=true&format=fasta&query=(taxonomy_id:9989)"
+        """, language="bash")
+        st.write("✔️unzip the protein fasta files, tag the fasta headers with PRIMATE and RODENT, and merge the two protein fasta files together")
+        st.code("""
+        gunzip primates.fasta.gz
+        gunzip rodents.fasta.gz
+        sed 's/^>/\>PRIMATE|/' primates.fasta > primates.tagged.fasta
+        sed 's/^>/\>RODENT|/' rodents.fasta  > rodents.tagged.fasta
+        cat primates.tagged.fasta rodents.tagged.fasta > primate_rodent.dmnd.fasta
+        """, language="bash")
+        st.write("✔️build the diamond database")
+        st.code("""
+        diamond makedb --in primate_rodent.dmnd.fasta --db primate_rodent_db --threads 16 # name the diamond database as primate_rodent_db.dmnd
+        """, language="bash")
+        st.write("✔️run DIAMOND BLASTx against the customized protein database (containing only primates and rodents protein sequences) for each sample")
+        st.code("""
+        docker run --user 1000:1000 -d --name blastx_SRR11266554_tabular_results_against_primate_rodent_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/blastx_against_primate_rodent_db_results/primate_rodent_db.dmnd -q /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz -o /data/blastx_against_primate_rodent_db_results/SRR11266554/blastx_SRR11266554_against_primate_rodent.outfmt6 --outfmt 6 --fast --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_SRR11266554_against_primate_rodent_results" 
+        docker run --user 1000:1000 -d --name blastx_SRR11266555_tabular_results_against_primate_rodent_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/blastx_against_primate_rodent_db_results/primate_rodent_db.dmnd -q /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz -o /data/blastx_against_primate_rodent_db_results/SRR11266555/blastx_SRR11266555_against_primate_rodent.outfmt6 --outfmt 6 --fast --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_SRR11266555_against_primate_rodent_results" 
+        docker run --user 1000:1000 -d --name blastx_SRR11266556_tabular_results_against_primate_rodent_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/blastx_against_primate_rodent_db_results/primate_rodent_db.dmnd -q /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz -o /data/blastx_against_primate_rodent_db_results/SRR11266556/blastx_SRR11266556_against_primate_rodent.outfmt6 --outfmt 6 --fast --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_SRR11266556_against_primate_rodent_results" 
+        docker run --user 1000:1000 -d --name blastx_SRR9690969_tabular_results_against_primate_rodent_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/blastx_against_primate_rodent_db_results/primate_rodent_db.dmnd -q /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz -o /data/blastx_against_primate_rodent_db_results/SRR9690969/blastx_SRR9690969_against_primate_rodent.outfmt6 --outfmt 6 --fast --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_SRR9690969_against_primate_rodent_results" 
+        docker run --user 1000:1000 -d --name blastx_SRR9690970_tabular_results_against_primate_rodent_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/blastx_against_primate_rodent_db_results/primate_rodent_db.dmnd -q /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz -o /data/blastx_against_primate_rodent_db_results/SRR9690970/blastx_SRR9690970_against_primate_rodent.outfmt6 --outfmt 6 --fast --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_SRR9690970_against_primate_rodent_results" 
+        docker run --user 1000:1000 -d --name blastx_SRR9690971_tabular_results_against_primate_rodent_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/blastx_against_primate_rodent_db_results/primate_rodent_db.dmnd -q /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz -o /data/blastx_against_primate_rodent_db_results/SRR9690971/blastx_SRR9690971_against_primate_rodent.outfmt6 --outfmt 6 --fast --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_SRR9690971_against_primate_rodent_results" 
+        docker run --user 1000:1000 -d --name blastx_SRR9690972_tabular_results_against_primate_rodent_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/blastx_against_primate_rodent_db_results/primate_rodent_db.dmnd -q /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz -o /data/blastx_against_primate_rodent_db_results/SRR9690972/blastx_SRR9690972_against_primate_rodent.outfmt6 --outfmt 6 --fast --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_SRR9690972_against_primate_rodent_results" 
+        docker run --user 1000:1000 -d --name blastx_SRR9690973_tabular_results_against_primate_rodent_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/blastx_against_primate_rodent_db_results/primate_rodent_db.dmnd -q /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz -o /data/blastx_against_primate_rodent_db_results/SRR9690973/blastx_SRR9690973_against_primate_rodent.outfmt6 --outfmt 6 --fast --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_SRR9690973_against_primate_rodent_results" 
+        docker run --user 1000:1000 -d --name blastx_SRR9690974_tabular_results_against_primate_rodent_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastx -d /data/blastx_against_primate_rodent_db_results/primate_rodent_db.dmnd -q /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz -o /data/blastx_against_primate_rodent_db_results/SRR9690974/blastx_SRR9690974_against_primate_rodent.outfmt6 --outfmt 6 --fast --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastx_SRR9690974_against_primate_rodent_results" 
+        """, language="bash")
         st.write("###")
 
         st.write("**8. Cluster highly similar transcripts together to remove redundant and duplicated transcripts from the Trinity assembly via CD-HIT-EST**")
@@ -659,6 +707,16 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         docker run --rm trinityrnaseq/transdecoder which hmmsearch
         docker run --rm trinityrnaseq/transdecoder which TransDecoder.Predict
         """, language="bash")
+        st.write("✔️download and index the HMM profile database to run hmmsearch")
+        st.code("""
+        wget https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz # download the main HMM profile database for hmmsearch from the official EBI FTP server
+        gunzip Pfam-A.hmm.gz # uncompress the file
+        docker run --user 1000:1000 -d --name hmmpress -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "hmmpress /data/transdecoder_results/hmmsearch_results/Pfam-A.hmm"
+        """, language="bash")
+        st.write("✔️extract the long open reading frames (ORFs) from the CPB transcriptome assembly")
+        st.code("""
+        docker run --user 1000:1000 -d --name ORF_extraction -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "TransDecoder.LongOrfs -S -t /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --output_dir /data/transdecoder_results/transdecoder_ORF_extraction_results"
+        """, language="bash")
         st.write("✔️download the already preformatted BLAST NCBI NR database file (NCBI non-redundant protein database) and decompress each preformatted file by using the update_blastdb.pl script")
         st.code("""
         conda create -n blast
@@ -697,16 +755,6 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
             )
         else:
             st.error(f"{swissprot_fasta_file.name} does not exist.")
-        st.write("✔️download and index the HMM profile database to run hmmsearch")
-        st.code("""
-        wget https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz # download the main HMM profile database for hmmsearch from the official EBI FTP server
-        gunzip Pfam-A.hmm.gz # uncompress the file
-        docker run --user 1000:1000 -d --name hmmpress -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "hmmpress /data/transdecoder_results/hmmsearch_results/Pfam-A.hmm"
-        """, language="bash")
-        st.write("✔️extract the long open reading frames (ORFs) from the CPB transcriptome assembly")
-        st.code("""
-        docker run --user 1000:1000 -d --name ORF_extraction -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "TransDecoder.LongOrfs -S -t /data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --output_dir /data/transdecoder_results/transdecoder_ORF_extraction_results"
-        """, language="bash")
         st.write("✔️run NCBI BLASTp to blast the protein sequences predicted from the CPB transcriptome assembly against the SwissProt protein database")
         st.code("""
         docker run --user 1000:1000 -d --name blastp_search_against_swissprot_output_tabular -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data trinityrnaseq/transdecoder /bin/bash -c "blastp -query /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.fasta.transdecoder_dir/longest_orfs.pep -db /data/transdecoder_results/make_swissprot_database/uniprot_sprot -max_target_seqs 1 -outfmt 6 -evalue 1e-5 -num_threads 16 > /data/transdecoder_results/ncbi_blastp_against_swissprot_results/blastp.outfmt6"
@@ -793,7 +841,7 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         md5sum -c interproscan-data-5.76-107.0.tar.gz.md5 # verify whether the download is complete to make sure the download inteproscan database file is not corrupted
         tar -pxzf interproscan-data-5.76-107.0.tar.gz # extract the downloaded interproscan database to interproscan-5.76-107.0/data
         sed '/^>/! s/*//g' /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep > /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed_for_interproscan.fasta.transdecoder.pep # remove all the asterisk signs (which represent stop codons inside the fasta sequence lines) before running interproscan since interproscan expects the input protein file to only include known amino acid letters
-        docker run --user 1000:1000 -d --name interproscan -v /media/raid/Wee/WeeYeZhi/output:/data -v /media/raid/Wee/WeeYeZhi/output/trinotate_results/interproscan_results/interproscan_database/interproscan-5.76-107.0/data:/opt/interproscan/data interpro/interproscan:5.76-107.0 --input /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed_for_interproscan.fasta.transdecoder.pep --seqtype p --formats TSV,XML --cpu 16 --tempdir /data/trinotate_results/interproscan_results/interproscan_temp_dir --output-dir /data/trinotate_results/interproscan_results
+        docker run --user 1000:1000 -d --name interproscan -v /media/raid/Wee/WeeYeZhi/output:/data -v /media/raid/Wee/WeeYeZhi/output/trinotate_results/interproscan_results/interproscan_database/interproscan-5.76-107.0/data:/opt/interproscan/data interpro/interproscan:5.76-107.0 --input /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed_for_interproscan.fasta.transdecoder.pep --seqtype p --formats TSV,XML --cpu 16 --goterms --iprlookup --pathways --tempdir /data/trinotate_results/interproscan_results/interproscan_temp_dir --output-dir /data/trinotate_results/interproscan_results
         """, language="bash")
         st.write("✔️create an isolated conda environment called signalp6, activate the conda environment, install the gzipped file of SignalP6 at https://services.healthtech.dtu.dk/services/SignalP-6.0/, verify the installation and run SignalP6 to predict the signal peptide molecules of the predicted CPB protein sequences")
         st.code("""
@@ -855,6 +903,7 @@ if selected == "Phase 2: Transcriptomic and Structural-Based Analysis":
         docker run -it --user 0:0 --name GO_extraction -v /media/raid/Wee/WeeYeZhi/output:/data -e GO_EXTRACTION_SCRIPT=/usr/local/src/Trinotate/util trinityrnaseq/trinotate /bin/bash # remember to run docker stop and docker rm after running the GO extraction process, otherwise it is going to consume resources
         $GO_EXTRACTION_SCRIPT/extract_GO_assignments_from_Trinotate_xls.pl --Trinotate_xls /data/trinotate_results/trinotate_annotation_report/trinotate_annotation_report.xls -G --include_ancestral_terms > /data/trinotate_results/GO_annotation_results/GO_annotation.txt
         """, language="bash")
+        st.markdown("[Read how to run DIAMOND BLASTx and BLASTp](https://github.com/bbuchfink/diamond/wiki/3.-Command-line-options)")
         st.markdown("[Visit Trinotate GitHub Wikipedia](https://github.com/Trinotate/Trinotate/wiki)")
         st.markdown("[Read how to load the results into the Trinotate SQLite Database](https://github.com/griffithlab/rnaseq_tutorial/wiki/Trinotate-Functional-Annotation)")
         st.markdown("[Read how to cite Trinotate and all of the other tools](https://github.com/Trinotate/Trinotate/wiki/Lit-References)")
@@ -948,8 +997,236 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.write("---")
         st.header("Phase 3: Molecular Docking and Dynamics Simulation 🖥️🧪")
         st.write("###")
-        st.write("Use both AlphaFold3 & ColabFold server to model the selected 3D developmental protein structures and superimpose the two structures with UCSF ChimeraX & compare their quality metrics in the form of table. To ensure compliance with AlphaFold3 server terms and usage, only use the results of AlphaFold3 server for structural analysis and structural comparison. Use ColabFold server for docking later")
+
+        st.write("**1. Build a customized diamond-indexed Plutella xylostella octopamine receptor database to be used for running BLASTp to blastp the CPB transcriptome assembly against the customized protein database to detect & identify the presence of octopamine receptor amino acid sequences harbouring within the CPB transcriptome**")
+        st.write("✔️download the protein fasta files of OAMB, OctB1, OctB2, OctB3, and TAR-OctR of Plutella xylostella from NCBI protein database")
+        st.code("""
+        wget -O Px_octopamine_receptors.fasta "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=XP_048486473.1,XP_011557485.1,XP_011568733.1,XP_011556023.1,XP_048485348.1&rettype=fasta&retmode=text"
+        """, language="bash")
+        st.write("✔️check the downloaded protein fasta file content")
+        st.code("""
+        grep ">" Px_octopamine_receptors.fasta 
+        head -n 100 Px_octopamine_receptors.fasta
+        """, language="bash")
+        st.write("✔️build the diamond database")
+        st.code("""
+        diamond makedb --in Px_octopamine_receptors.fasta --db Px_octopamine_receptor_db --threads 16 
+        """, language="bash")
+        st.write("✔️check the version of diamond and blastp used in the trinityrnaseq/trinotate docker container")
+        st.code("""
+        docker run --rm trinityrnaseq/trinotate diamond --version
+        docker run --rm trinityrnaseq/trinotate blastp --version
+        """, language="bash")
+        st.write("✔️run DIAMOND BLASTp of the CPB transcriptome assembly against the customized protein database containing only Plutella xylostella octopamine receptor sequences")
+        st.code("""
+        docker run --user 1000:1000 -d --name blastp_CPB_transcriptome_tabular_results_against_PxOAR_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastp -d /data/blastp_against_PxOAR_db_results/Px_octopamine_receptor_db.dmnd -q /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep -o /data/blastp_against_PxOAR_db_results/blastp_CPB_transcriptome_tabular_results_against_PxOAR_database.outfmt6 --outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastp_CPB_transcriptome_tabular_results_against_PxOAR_database" 
+       """, language="bash")
+
+
         st.write("###")
+
+        st.write("**2. Extract the filtered CPB octopamine receptor sequences from the predicted CPB peptide sequences via SeqKit**")
+        st.write("✔️create an ID list of the filtered CPB octopamine receptor sequences")
+        st.code("""
+        echo -e "TRINITY_DN108405_c0_g1_i3.p1\nTRINITY_DN114314_c1_g1_i1.p1\nTRINITY_DN219751_c0_g1_i1.p1\nTRINITY_DN22425_c0_g1_i3.p1" > CPB_octopamine_receptor_id.txt # navigate into the working directory, /media/raid/Wee/WeeYeZhi/output/blastp_against_PxOAR_db_results, and run the command to save the file inside this working directory
+        """, language="bash")
+        st.write("✔️extract the filtered CPB octopamine receptor sequences")
+        st.code("""
+        seqkit grep -f /media/raid/Wee/WeeYeZhi/output/blastp_against_PxOAR_db_results/CPB_octopamine_receptor_id.txt /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep > /media/raid/Wee/WeeYeZhi/output/blastp_against_PxOAR_db_results/filtered_CPB_octopamine_receptors.fasta
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**3. Run TMHMM to predict the transmembrane domains of the filtered CPB octopamine receptor sequences to check whether the CPB octopamine receptor sequences have 7 transmembrane domains of GPCR. Retain only those with 7 transmembrane helices (TMHs) for downstream analysis**")
+        st.code("""
+        cd /media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin # navigate into this working directory before you run tmhmm
+        export PATH="/media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin:$PATH" # note that the export of the PATH environment variable to the tmhmm executable file is just temporary and will only take effect for the current terminal session
+        which tmhmm # double check the system can access the tmhmm executable file correctly after exporting the PATH variable 
+        tmhmm /media/raid/Wee/WeeYeZhi/output/blastp_against_PxOAR_db_results/filtered_CPB_octopamine_receptors.fasta > /media/raid/Wee/WeeYeZhi/output/blastp_against_PxOAR_db_results/tmhmm_results/tmhmm_CPB_octopamine_receptors.out
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**4. Detect the presence of DRY and NPxxY motifs present within the filtered CPB octopamine receptor**")
+        st.code("""
+        seqkit locate -p "DRY" /media/raid/Wee/WeeYeZhi/output/blastp_against_PxOAR_db_results/filtered_CPB_octopamine_receptors.fasta > DRY_motif_list_CPB_octopamine_receptors.txt # search for the DRY (Asp–Arg–Tyr) amino acid portion that is often conserved among Class A (Rhodopsin-like) GPCRs & check whether the DRY motif is located at the end of the TM3 region
+        seqkit locate -r -p "NP..Y" /media/raid/Wee/WeeYeZhi/output/blastp_against_PxOAR_db_results/filtered_CPB_octopamine_receptors.fasta > NPxxY_motif_list_CPB_octopamine_receptors.txt # search for the NPxxY (Asn-Pro-x-x-Tyr) amino acid portion that is often conserved among Class A (Rhodopsin-like) GPCRs & check whether the NPxxy motif is located within the TM7 region of the receptor. x within the "NPxxY" can be any amino acids
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**5. Build a customized diamond-indexed octopamine beta 2 receptor database to be used for running BLASTp to blastp the CPB octopamine beta 2 receptor against the customized protein database to compute the similarity percentage**")
+        st.write("✔️download the protein fasta files of PxOctβ2R, VdOctβ2R, DmOctβ2R, AmOctβ2R, TcOctβ2R, PrOctβ2R, CsOctβ2R, BmOctβ2R, and NlOctβ2R from the NCBI protein database")
+        st.code("""
+        wget -O octopamine_beta2_receptors.fasta "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=XP_011568733.1,XP_022664697.1,NP_001034049.1,XP_396348.4,NP_001280501.1,XP_022116353.1,AEO89318.1,NP_001171666.1,ASA47149.1&rettype=fasta&retmode=text"
+        """, language="bash")
+        st.write("✔️check the downloaded protein fasta file content")
+        st.code("""
+        grep ">" octopamine_beta2_receptors.fasta 
+        head -n 100 octopamine_beta2_receptors.fasta
+        """, language="bash")
+        st.write("✔️extract the CPB octopamine beta 2 receptor")
+        st.code("""
+        seqkit grep -p "TRINITY_DN22425_c0_g1_i3.p1" /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep > /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/CPB_OctB2R_TRINITY_DN22425_c0_g1_i3_p1.fasta
+        """, language="bash")
+        st.write("✔️build the diamond database")
+        st.code("""
+        diamond makedb --in octopamine_beta2_receptors.fasta --db octopamine_beta2_receptor_db --threads 16 
+        """, language="bash")
+        st.write("✔️run DIAMOND BLASTp of the CPB octopamine beta 2 receptor against the customized protein database containing PxOctβ2R, VdOctβ2R, DmOctβ2R, AmOctβ2R, TcOctβ2R, PrOctβ2R, CsOctβ2R, BmOctβ2R, and NlOctβ2R")
+        st.code("""
+        docker run --user 1000:1000 -d --name blastp_CPB_octopamine_beta2_receptor_tabular_results_against_beta2_receptor_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastp -d /data/blastp_CPB_beta2_receptor_against_beta2_receptor_database_results/octopamine_beta2_receptor_db.dmnd -q /data/MSA_octopamine_beta2_receptors/CPB_OctB2R_TRINITY_DN22425_c0_g1_i3_p1.fasta -o /data/blastp_CPB_beta2_receptor_against_beta2_receptor_database_results/blastp_CPB_beta2_receptor_against_beta2_receptor_database.outfmt6 --outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --threads 16 --evalue 1e-5 --tmpdir /data/tmp_dir/blastp_CPB_beta2_receptor_against_beta2_receptor_database" 
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**6. Perform multiple sequence alignment (MSA) to align the CPB octopamine beta 2 receptor sequence with the octopamine beta 2 receptor sequences of Apis mellifera, Drosophila melanogaster, Tribolium castaneum, Varroa destructor, Pieris rapae, Chilo suppressalis, Bombyx mori, and Nilaparvata lugens via MUSCLE**")
+        st.write("✔️create a conda environment named 'muscle', activate the conda environment, and install muscle via Bioconda")
+        st.code("""
+        conda create -n muscle
+        conda activate muscle
+        conda install bioconda::muscle
+        muscle --version
+        """, language="bash")
+        st.write("✔️download the protein fasta files of PxOctβ2R, VdOctβ2R, DmOctβ2R, AmOctβ2R, TcOctβ2R, PrOctβ2R, CsOctβ2R, BmOctβ2R, and NlOctβ2R from the NCBI protein database")
+        st.code("""
+        wget -O octopamine_beta2_receptors.fasta "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=XP_011568733.1,XP_022664697.1,NP_001034049.1,XP_396348.4,NP_001280501.1,XP_022116353.1,AEO89318.1,NP_001171666.1,ASA47149.1&rettype=fasta&retmode=text"
+        """, language="bash")
+        st.write("✔️extract the CPB octopamine beta 2 receptor sequence from the CPB peptide sequences (previously predicted by TransDecoder) via SeqKit")
+        st.code("""
+        seqkit grep -p "TRINITY_DN22425_c0_g1_i3.p1" /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep > /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/CPB_OctB2R_TRINITY_DN22425_c0_g1_i3_p1.fasta
+        """, language="bash")
+        st.write("✔️concatenate the CPB octopamine beta 2 receptor sequence with the other insect OctB2R sequences")
+        st.code("""
+        cat /media/raid/Wee/WeeYeZhi/output/blastp_CPB_beta2_receptor_against_beta2_receptor_database_results/octopamine_beta2_receptors.fasta /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/CPB_OctB2R_TRINITY_DN22425_c0_g1_i3_p1.fasta > /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/combined_octopamine_beta2_receptors.fasta
+        """, language="bash")
+        st.write("✔️rename the FASTA sequence headers")
+        st.code("""
+        sed 's/^>XP_396348.4.*/>AmOct\u03B22R/; s/^>NP_001034049.1.*/>DmOct\u03B22R/; s/^>NP_001280501.1.*/>TcOct\u03B22R/; s/^>XP_011568733.1.*/>PxOct\u03B22R/; s/^>XP_022664697.1.*/>VdOct\u03B22R/; s/^>TRINITY_DN22425_c0_g1_i3.p1.*/>CcOct\u03B22R/; s/^>XP_022116353.1.*/>PrOct\u03B22R/; s/^>AEO89318.1.*/>CsOct\u03B22R/; s/^>NP_001171666.1.*/>BmOct\u03B22R/; s/^>ASA47149.1.*/>NlOct\u03B22R/' /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/combined_octopamine_beta2_receptors.fasta > /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/renamed_combined_octopamine_beta2_receptors.fasta
+        """, language="bash")
+        st.write("✔️run MSA via MUSCLE")
+        st.code("""
+        nohup muscle -align /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/renamed_combined_octopamine_beta2_receptors.fasta -output /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/MSA_between_CPB_and_other_insects_OctB2R_results.aln -threads 16 -consiters 2 -refineiters 100 > /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/MSA_between_CPB_and_other_insects_OctB2R_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run TMHMM to predict the transmembrane domains of the all the octopamine beta 2 receptor sequences to check whether they have 7 transmembrane domains of GPCR. Retain only those with 7 transmembrane helices (TMHs) for downstream analysis**")
+        st.code("""
+        cd /media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin # navigate into this working directory before you run tmhmm
+        export PATH="/media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin:$PATH" # note that the export of the PATH environment variable to the tmhmm executable file is just temporary and will only take effect for the current terminal session
+        which tmhmm # double check the system can access the tmhmm executable file correctly after exporting the PATH variable 
+        tmhmm /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/renamed_combined_octopamine_beta2_receptors.fasta > /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/tmhmm_octopamine_beta2_receptors_results/tmhmm_octopamine_beta2_receptors_results.out
+        """, language="bash")
+        st.markdown("[Visit MUSCLE GitHub Page](https://github.com/rcedgar/muscle?tab=readme-ov-file)")
+        st.markdown("[Visit MUSCLE GitHub Manual Page](https://drive5.com/muscle5/manual/commands.html)")
+
+        st.write("###")
+
+        st.write("**7. Construct a phylogenetic tree to cluster and verify the identity of the detected CPB octopamine receptor subtypes**")
+        st.write("✔️download all the 41 representative members of the different octopamine receptors (OARs) subtypes from Lepidoptera, Diptera, Coleoptera, Hymenoptera, Hemiptera, Primates, and Mesostigmata orders")
+        st.code("""
+        wget -O representative_octopamine_receptors.fasta "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=AFX62896.1,XP_022116353.1,XP_022123444.1,AEQ33589.1,AEO89318.1,AGV79326.1,AIC75370.1,AFG26689.1,BAD11157.1,NP_001171666.1,XP_004922133.2,NP_001091748.1,XP_048485348.1,XP_011568733.1,XP_048486473.1,NP_001034049.1,NP_651057.1,NP_001034043.2,NP_650754.2,NP_732541.1,NP_001280501.1,NP_001280505.1,XP_015839170.1,NP_001280520.1,XP_396348.4,XP_397139.3,XP_006557730.1,NP_001011565.1,CCO13925.1,XP_001122075.3,ASA47149.1,XP_022664697.1,NP_000675.1,NP_000015.2,NP_000016.1,NP_000671.2,NP_000670.1,NP_000669.1,NP_000672.3,NP_000674.2,NP_000673.2&rettype=fasta&retmode=text"
+        grep -c ">" representative_octopamine_receptors.fasta # count and make sure that you've downloaded 33 OARs from the NCBI protein database
+        """, language="bash")
+        st.write("✔️extract the TyrOctR and OctB2R receptor sequences of CPB")
+        st.code("""
+        seqkit grep -p "TRINITY_DN219751_c0_g1_i1.p1" -p "TRINITY_DN22425_c0_g1_i3.p1" /media/raid/Wee/WeeYeZhi/output/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep > /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/extracted_CPB_octopamine_receptor_sequences.fasta
+        """, language="bash")
+        st.write("✔️concatenate both the CPB OARs and its representative OARs together")
+        st.code("""
+        cat representative_octopamine_receptors.fasta extracted_CPB_octopamine_receptor_sequences.fasta > combined_CPB_and_representative_OARs_sequences.fasta
+        """, language="bash")
+        st.write("✔️rename the FASTA sequence headers")
+        st.code("""
+        sed 's/^>AFX62896.1.*/>AFX62896.1/; s/^>XP_022116353.1.*/>XP_022116353.1/; s/^>XP_022123444.1.*/>XP_022123444.1/; s/^>AEQ33589.1.*/>AEQ33589.1/; s/^>AEO89318.1.*/>AEO89318.1/; s/^>AGV79326.1.*/>AGV79326.1/; s/^>AIC75370.1.*/>AIC75370.1/; s/^>AFG26689.1.*/>AFG26689.1/; s/^>BAD11157.1.*/>BAD11157.1/; s/^>NP_001171666.1.*/>NP_001171666.1/; s/^>XP_004922133.2.*/>XP_004922133.2/; s/^>NP_001091748.1.*/>NP_001091748.1/; s/^>XP_048485348.1.*/>XP_048485348.1/; s/^>XP_011568733.1.*/>XP_011568733.1/; s/^>XP_048486473.1.*/>XP_048486473.1/; s/^>NP_001034049.1.*/>NP_001034049.1/; s/^>NP_651057.1.*/>NP_651057.1/; s/^>NP_001034043.2.*/>NP_001034043.2/; s/^>NP_650754.2.*/>NP_650754.2/; s/^>NP_732541.1.*/>NP_732541.1/; s/^>NP_001280501.1.*/>NP_001280501.1/; s/^>NP_001280505.1.*/>NP_001280505.1/; s/^>XP_015839170.1.*/>XP_015839170.1/; s/^>NP_001280520.1.*/>NP_001280520.1/; s/^>XP_396348.4.*/>XP_396348.4/; s/^>XP_397139.3.*/>XP_397139.3/; s/^>XP_006557730.1.*/>XP_006557730.1/; s/^>NP_001011565.1.*/>NP_001011565.1/; s/^>CCO13925.1.*/>CCO13925.1/; s/^>XP_001122075.3.*/>XP_001122075.3/; s/^>ASA47149.1.*/>ASA47149.1/; s/^>XP_022664697.1.*/>XP_022664697.1/; s/^>NP_000671.2.*/>NP_000671.2/; s/^>NP_000670.1.*/>NP_000670.1/; s/^>NP_000669.1.*/>NP_000669.1/; s/^>NP_000672.3.*/>NP_000672.3/; s/^>NP_000674.2.*/>NP_000674.2/; s/^>NP_000673.2.*/>NP_000673.2/; s/^>NP_000675.1.*/>NP_000675.1/; s/^>NP_000015.2.*/>NP_000015.2/; s/^>NP_000016.1.*/>NP_000016.1/' /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/combined_CPB_and_representative_OARs_sequences.fasta > /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/renamed_combined_CPB_and_representative_OARs_sequences.fasta
+        """, language="bash")
+        st.write("✔️upload the protein fasta file, 'renamed_combined_CPB_and_representative_OARs_sequences.fasta' into the DeepTMHMM 1.0 Web Server to predict the transmembrane domains of the all the 43 octopamine receptor sequences, to check whether they have 7 transmembrane domains of GPCR. Retain only those with 7 transmembrane helices (TMHs) for downstream analysis. Download the resulting .gff3 file from the DeepTMHMM Web Server and use the python script below to extract all the 7 TMs. Input all the 7 TMs into the MEGA 11 software to construct the phylogenetic tree.**")
+        st.write("")
+        # ----LOAD TM EXTRACTION PYTHON SCRIPT----
+        # Check if the file exists before reading
+        if extract_TM_regions.exists():
+            with open(extract_TM_regions, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download TM Extraction Python Script",
+                data=script_byte,
+                file_name=extract_TM_regions.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{extract_TM_regions.name} does not exist.")
+        st.write("✔️rename the FASTA sequence headers of the extracted TM1-TM7 regions")
+        st.code("""
+        sed 's/^>AFX62896.1_TM1-7.*/>PrTyrOctR(AFX62896.1)/; s/^>XP_022116353.1_TM1-7.*/>PrOctbeta2R(XP_022116353.1)/; s/^>XP_022123444.1_TM1-7.*/>PrOctbeta1R(XP_022123444.1)/; s/^>AEQ33589.1_TM1-7.*/>CsOctalpha1R(AEQ33589.1)/; s/^>AEO89318.1_TM1-7.*/>CsOctbeta2R(AEO89318.1)/; s/^>AGV79326.1_TM1-7.*/>CsOctbeta1R(AGV79326.1)/; s/^>AIC75370.1_TM1-7.*/>CsOctalpha2R(AIC75370.1)/; s/^>AFG26689.1_TM1-7.*/>CsTyrOctR(AFG26689.1)/; s/^>BAD11157.1_TM1-7.*/>BmTyrOctR(BAD11157.1)/; s/^>NP_001171666.1_TM1-7.*/>BmOctbeta2R(NP_001171666.1)/; s/^>XP_004922133.2_TM1-7.*/>BmOctbeta1R(XP_004922133.2)/; s/^>NP_001091748.1_TM1-7.*/>BmOctalpha1R(NP_001091748.1)/; s/^>XP_048485348.1_TM1-7.*/>PxTyrOctR(XP_048485348.1)/; s/^>XP_011568733.1_TM1-7.*/>PxOctbeta2R(XP_011568733.1)/; s/^>XP_048486473.1_TM1-7.*/>PxOAMB(XP_048486473.1)/; s/^>NP_001034049.1_TM1-7.*/>DmOctbeta2R(NP_001034049.1)/; s/^>NP_651057.1_TM1-7.*/>DmOctbeta1R(NP_651057.1)/; s/^>NP_001034043.2_TM1-7.*/>DmOctbeta3R(NP_001034043.2)/; s/^>NP_650754.2_TM1-7.*/>DmOctalpha2R(NP_650754.2)/; s/^>NP_732541.1_TM1-7.*/>DmOctalpha1R(NP_732541.1)/; s/^>NP_001280501.1_TM1-7.*/>TcOctbeta2R(NP_001280501.1)/; s/^>NP_001280505.1_TM1-7.*/>TcOctbeta3R(NP_001280505.1)/; s/^>XP_015839170.1_TM1-7.*/>TcOctalpha2R(XP_015839170.1)/; s/^>NP_001280520.1_TM1-7.*/>TcOctalpha1R(NP_001280520.1)/; s/^>XP_396348.4_TM1-7.*/>AmOctbeta2R(XP_396348.4)/; s/^>XP_397139.3_TM1-7.*/>AmOctbeta1R(XP_397139.3)/; s/^>XP_006557730.1_TM1-7.*/>AmOctbeta3R(XP_006557730.1)/; s/^>NP_001011565.1_TM1-7.*/>AmOctalpha1R(NP_001011565.1)/; s/^>CCO13925.1_TM1-7.*/>AmOctbeta4R(CCO13925.1)/; s/^>XP_001122075.3_TM1-7.*/>AmOctalpha2R(XP_001122075.3)/; s/^>ASA47149.1_TM1-7.*/>NiOctbeta2R(ASA47149.1)/; s/^>TRINITY_DN219751_c0_g1_i1.p1_TM1-7.*/>CcTyrOctR(TRINITY_DN219751_c0_g1_i1.p1)/; s/^>TRINITY_DN22425_c0_g1_i3.p1_TM1-7.*/>CcOctbeta2R(TRINITY_DN22425_c0_g1_i3.p1)/; s/^>XP_022664697.1_TM1-7.*/>VdOctbeta2R(XP_022664697.1)/; s/^>NP_000675.1_TM1-7.*/>HsOctbeta1AR(NP_000675.1)/; s/^>NP_000015.2_TM1-7.*/>HsOctbeta2AR(NP_000015.2)/; s/^>NP_000016.1_TM1-7.*/>HsOctbeta3AR(NP_000016.1)/; s/^>NP_000671.2_TM1-7.*/>HsOctalpha1AAR(NP_000671.2)/; s/^>NP_000670.1_TM1-7.*/>HsOctalpha1BAR(NP_000670.1)/; s/^>NP_000669.1_TM1-7.*/>HsOctalpha1DAR(NP_000669.1)/; s/^>NP_000672.3_TM1-7.*/>HsOctalpha2AAR(NP_000672.3)/; s/^>NP_000674.2_TM1-7.*/>HsOctalpha2CAR(NP_000674.2)/; s/^>NP_000673.2_TM1-7.*/>HsOctalpha2BAR(NP_000673.2)/;' /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/extracted_TM1-7_output.fasta > /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/renamed_extracted_TM1-7_output.fasta
+        """, language="bash")
+        st.write("✔️run MSA again to align all the extracted TM1-TM7 regions across the species to get the MSA alignment fasta file (.fasta) to be used for phylogenetic tree construction")
+        st.code("""
+        nohup muscle -align /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/renamed_extracted_TM1-7_output.fasta -output /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/MSA_extracted_TM1-7_output.fasta -threads 16 -consiters 2 -refineiters 100 > /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/MSA_extracted_TM1-7_output.log 2>&1 &
+        """, language="bash")
+
+
+        st.write("###")
+
+        st.write("**8. Get the octopamine receptor sequences of Varroa destructor for MSA**")
+        st.write("✔️download the protein fasta file of Varroa destructor from Vdes_3.0 (GCF_002443255.2)")
+        st.write("✔️download all of the currently available reference octopamine receptor classes of Drosophila melanogaster (OAMB, alpha-2, beta-1, beta-2, beta-3 & TAR-OctR) from NCBI protein and UniProt SwissProt database")
+        st.code("""
+        wget -O Drosophila_melanogaster_octopamine_receptors.fasta "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=NP_732541.1,NP_001034049.1,NP_651057.1,NP_001034043.2,NP_650754.2&rettype=fasta&retmode=text"
+        """, language="bash")
+        st.write("✔️check the downloaded protein fasta file content")
+        st.code("""
+        grep ">" Drosophila_melanogaster_octopamine_receptors.fasta
+        """, language="bash")
+        st.write("✔️build the diamond database")
+        st.code("""
+        diamond makedb --in Drosophila_melanogaster_octopamine_receptors.fasta --db Dm_octopamine_receptor_db --threads 16 
+        """, language="bash")
+        st.write("✔️run DIAMOND BLASTp of the Varroa destructor protein sequences against the a customized protein database containing all the Drosophila melanogaster octopamine receptor protein classes")
+        st.code("""
+        docker run --user 1000:1000 -d --name blastp_Vd_protein_tabular_results_against_DmOAR_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastp -d /data/blastp_Vd_protein_against_DmOAR_db_results/Dm_octopamine_receptor_db.dmnd -q /data/blastp_Vd_protein_against_DmOAR_db_results/Varroa_destructor_protein.faa -o /data/blastp_Vd_protein_against_DmOAR_db_results/blastp_Vd_protein_against_DmOAR_db.outfmt6 --outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastp_CPB_transcriptome_tabular_results_against_PxOAR_database" 
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**9. Predict the 3D structure of the CPB octopamine beta2 receptor via AlphaFold3**")
+        st.write("✔️install AlphaFold3 locally")
+        st.write("✔️install git via conda-forge")
+        st.code("""
+        conda create -n git
+        conda install conda-forge::git
+        conda activate git
+        """, language="bash")
+        st.write("✔️git clone the AlphaFold3 GitHub repository into your HPC system to obtain the AlphaFold3 source code")
+        st.code("""
+        git clone https://github.com/google-deepmind/alphafold3.git
+        """, language="bash")
+        st.write("✔️ensure that your HPC system has already installed wget and zstd for you to download & compress the required AlphaFold3 databases")
+        st.code("""
+        which wget zstd
+        """, language="bash")
+        st.write("✔️download all the required AlphaFold3 databases namely, BFD small, MGnify, PDB, PDB seqres, UniProt, UniRef90, NT, RFam, and RNACentral")
+        st.code("""
+        cd AlphaFold3
+        chmod +x fetch_databases.sh # remember to make the script executable otherwise you are going to encounter the permission denied error
+        ls -l fetch_databases.sh # double check whether the script is executable
+        nohup ./fetch_databases.sh /media/raid/Wee/WeeYeZhi/output/downloaded_alphafold3_databases > /media/raid/Wee/WeeYeZhi/output/downloaded_alphafold3_databases/downloaded_alphafold3_databases.log 2>&1 &
+        """, language = "bash")
+        st.write("✔️build the AlphaFold3 Docker container with all the right python dependencies")
+        st.code("""
+        docker build -t alphafold3 -f docker/Dockerfile . # navigate to the working directory, /media/raid/Wee/WeeYeZhi/output/cloned_alphafold3_github_repository/alphafold3 first before you run this docker build command to build the AlphaFold3 Docker Image using the instructions written inside the Dockerfile
+        """, language="bash")
+        st.markdown("[Visit the AlphaFold3's Official GitHub Page](https://github.com/google-deepmind/alphafold3)")
+        st.markdown("[Visit the AlphaFold3's GitHub Installation Page](https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md)")
+        st.markdown("[Visit the AlphaFold3's Introduction Page](https://www.ebi.ac.uk/training/online/courses/alphafold/alphafold-3-and-alphafold-server/using-the-alphafold-3-source-code/)")
+        st.markdown("[Visit the AlphaFold3's Model Parameters Page](https://github.com/google-deepmind/alphafold3?tab=readme-ov-file#obtaining-model-parameters)")
+        st.markdown("[Visit and Fill Up the AlphaFold3's Form to Apply for Model Parameters](https://docs.google.com/forms/d/e/1FAIpQLSfWZAgo1aYk0O4MuAXZj8xRQ8DafeFJnldNOnh_13qAx2ceZw/viewform)")
+        st.markdown("[Test your setup using the AlphaFold JSON file to check whether you have successfully set up AlphaFold3 on your HPC system](https://github.com/google-deepmind/alphafold3?tab=readme-ov-file#installation-and-running-your-first-prediction)")
+        st.markdown("[Check how to create an input JSON file to run AlphaFold3 3D protein structure prediction](https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md)")
+        st.write("Use both AlphaFold3 & ColabFold server to model the selected 3D developmental protein structures and superimpose the two structures with UCSF ChimeraX & compare their quality metrics in the form of table. To ensure compliance with AlphaFold3 server terms and usage, only use the results of AlphaFold3 server for structural analysis and structural comparison. Use ColabFold server for docking later")
+
+        st.write("###")
+
+        st.write("Try out the GROMICA web app to analyze the RMSD, RMSF, Hbond, SASA, and Rg of MD simulation with zero coding to produce publication-quality images")
         st.write("You can use logMD to visualize the trajectory of your protein-ligand complex easily (logMD functions the same as VMD)")
         st.write("generative AI drug design method, DrugHive")
         # ----LOAD GROMACS CODE----
