@@ -40,6 +40,11 @@ generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS = current_dir / "ass
 bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate = current_dir / "assets" / "bowtie2_mapping_after_cdhitest_trinity_NCBI_FCS_transrate.sh"
 generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS_transrate = current_dir / "assets" / "generate_mapping_statistics_after_cdhitest_trinity_NCBI_FCS_transrate.sh"
 extract_TM_regions = current_dir / "assets" / "TM1_to_TM7_extraction.py"
+original_OctB2R_phylogenetic_tree = current_dir / "assets" / "original_octopamine_receptor_phylogenetic_tree.nwk"
+rscript_for_phylogenetic_tree_reconstruction = current_dir / "assets" / "phylogenetic_tree_reconstruction_after_MEGA11.Rmd"
+test_alphafold3 = current_dir / "assets" / "fold_input.json"
+CPB_OctB2R = current_dir / "assets" / "CPB_OctB2R.json"
+
 
 # ---- HEADER SECTION ----
 with st.container():
@@ -1138,8 +1143,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.code("""
         sed 's/^>AFX62896.1.*/>AFX62896.1/; s/^>XP_022116353.1.*/>XP_022116353.1/; s/^>XP_022123444.1.*/>XP_022123444.1/; s/^>AEQ33589.1.*/>AEQ33589.1/; s/^>AEO89318.1.*/>AEO89318.1/; s/^>AGV79326.1.*/>AGV79326.1/; s/^>AIC75370.1.*/>AIC75370.1/; s/^>AFG26689.1.*/>AFG26689.1/; s/^>BAD11157.1.*/>BAD11157.1/; s/^>NP_001171666.1.*/>NP_001171666.1/; s/^>XP_004922133.2.*/>XP_004922133.2/; s/^>NP_001091748.1.*/>NP_001091748.1/; s/^>XP_048485348.1.*/>XP_048485348.1/; s/^>XP_011568733.1.*/>XP_011568733.1/; s/^>XP_048486473.1.*/>XP_048486473.1/; s/^>NP_001034049.1.*/>NP_001034049.1/; s/^>NP_651057.1.*/>NP_651057.1/; s/^>NP_001034043.2.*/>NP_001034043.2/; s/^>NP_650754.2.*/>NP_650754.2/; s/^>NP_732541.1.*/>NP_732541.1/; s/^>NP_001280501.1.*/>NP_001280501.1/; s/^>NP_001280505.1.*/>NP_001280505.1/; s/^>XP_015839170.1.*/>XP_015839170.1/; s/^>NP_001280520.1.*/>NP_001280520.1/; s/^>XP_396348.4.*/>XP_396348.4/; s/^>XP_397139.3.*/>XP_397139.3/; s/^>XP_006557730.1.*/>XP_006557730.1/; s/^>NP_001011565.1.*/>NP_001011565.1/; s/^>CCO13925.1.*/>CCO13925.1/; s/^>XP_001122075.3.*/>XP_001122075.3/; s/^>ASA47149.1.*/>ASA47149.1/; s/^>XP_022664697.1.*/>XP_022664697.1/; s/^>NP_000671.2.*/>NP_000671.2/; s/^>NP_000670.1.*/>NP_000670.1/; s/^>NP_000669.1.*/>NP_000669.1/; s/^>NP_000672.3.*/>NP_000672.3/; s/^>NP_000674.2.*/>NP_000674.2/; s/^>NP_000673.2.*/>NP_000673.2/; s/^>NP_000675.1.*/>NP_000675.1/; s/^>NP_000015.2.*/>NP_000015.2/; s/^>NP_000016.1.*/>NP_000016.1/' /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/combined_CPB_and_representative_OARs_sequences.fasta > /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/renamed_combined_CPB_and_representative_OARs_sequences.fasta
         """, language="bash")
-        st.write("✔️upload the protein fasta file, 'renamed_combined_CPB_and_representative_OARs_sequences.fasta' into the DeepTMHMM 1.0 Web Server to predict the transmembrane domains of the all the 43 octopamine receptor sequences, to check whether they have 7 transmembrane domains of GPCR. Retain only those with 7 transmembrane helices (TMHs) for downstream analysis. Download the resulting .gff3 file from the DeepTMHMM Web Server and use the python script below to extract all the 7 TMs. Input all the 7 TMs into the MEGA 11 software to construct the phylogenetic tree.**")
-        st.write("")
+        st.write("✔️upload the protein fasta file, 'renamed_combined_CPB_and_representative_OARs_sequences.fasta' into the DeepTMHMM 1.0 Web Server to predict the transmembrane domains of the all the 43 octopamine receptor sequences, to check whether they have 7 transmembrane domains of GPCR. Retain only those with 7 transmembrane helices (TMHs) for downstream analysis. Download the resulting .gff3 file from the DeepTMHMM Web Server and use the python script below to extract all the 7 TMs.**")
         # ----LOAD TM EXTRACTION PYTHON SCRIPT----
         # Check if the file exists before reading
         if extract_TM_regions.exists():
@@ -1159,44 +1163,52 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.code("""
         sed 's/^>AFX62896.1_TM1-7.*/>PrTyrOctR(AFX62896.1)/; s/^>XP_022116353.1_TM1-7.*/>PrOctbeta2R(XP_022116353.1)/; s/^>XP_022123444.1_TM1-7.*/>PrOctbeta1R(XP_022123444.1)/; s/^>AEQ33589.1_TM1-7.*/>CsOctalpha1R(AEQ33589.1)/; s/^>AEO89318.1_TM1-7.*/>CsOctbeta2R(AEO89318.1)/; s/^>AGV79326.1_TM1-7.*/>CsOctbeta1R(AGV79326.1)/; s/^>AIC75370.1_TM1-7.*/>CsOctalpha2R(AIC75370.1)/; s/^>AFG26689.1_TM1-7.*/>CsTyrOctR(AFG26689.1)/; s/^>BAD11157.1_TM1-7.*/>BmTyrOctR(BAD11157.1)/; s/^>NP_001171666.1_TM1-7.*/>BmOctbeta2R(NP_001171666.1)/; s/^>XP_004922133.2_TM1-7.*/>BmOctbeta1R(XP_004922133.2)/; s/^>NP_001091748.1_TM1-7.*/>BmOctalpha1R(NP_001091748.1)/; s/^>XP_048485348.1_TM1-7.*/>PxTyrOctR(XP_048485348.1)/; s/^>XP_011568733.1_TM1-7.*/>PxOctbeta2R(XP_011568733.1)/; s/^>XP_048486473.1_TM1-7.*/>PxOAMB(XP_048486473.1)/; s/^>NP_001034049.1_TM1-7.*/>DmOctbeta2R(NP_001034049.1)/; s/^>NP_651057.1_TM1-7.*/>DmOctbeta1R(NP_651057.1)/; s/^>NP_001034043.2_TM1-7.*/>DmOctbeta3R(NP_001034043.2)/; s/^>NP_650754.2_TM1-7.*/>DmOctalpha2R(NP_650754.2)/; s/^>NP_732541.1_TM1-7.*/>DmOctalpha1R(NP_732541.1)/; s/^>NP_001280501.1_TM1-7.*/>TcOctbeta2R(NP_001280501.1)/; s/^>NP_001280505.1_TM1-7.*/>TcOctbeta3R(NP_001280505.1)/; s/^>XP_015839170.1_TM1-7.*/>TcOctalpha2R(XP_015839170.1)/; s/^>NP_001280520.1_TM1-7.*/>TcOctalpha1R(NP_001280520.1)/; s/^>XP_396348.4_TM1-7.*/>AmOctbeta2R(XP_396348.4)/; s/^>XP_397139.3_TM1-7.*/>AmOctbeta1R(XP_397139.3)/; s/^>XP_006557730.1_TM1-7.*/>AmOctbeta3R(XP_006557730.1)/; s/^>NP_001011565.1_TM1-7.*/>AmOctalpha1R(NP_001011565.1)/; s/^>CCO13925.1_TM1-7.*/>AmOctbeta4R(CCO13925.1)/; s/^>XP_001122075.3_TM1-7.*/>AmOctalpha2R(XP_001122075.3)/; s/^>ASA47149.1_TM1-7.*/>NiOctbeta2R(ASA47149.1)/; s/^>TRINITY_DN219751_c0_g1_i1.p1_TM1-7.*/>CcTyrOctR(TRINITY_DN219751_c0_g1_i1.p1)/; s/^>TRINITY_DN22425_c0_g1_i3.p1_TM1-7.*/>CcOctbeta2R(TRINITY_DN22425_c0_g1_i3.p1)/; s/^>XP_022664697.1_TM1-7.*/>VdOctbeta2R(XP_022664697.1)/; s/^>NP_000675.1_TM1-7.*/>HsOctbeta1AR(NP_000675.1)/; s/^>NP_000015.2_TM1-7.*/>HsOctbeta2AR(NP_000015.2)/; s/^>NP_000016.1_TM1-7.*/>HsOctbeta3AR(NP_000016.1)/; s/^>NP_000671.2_TM1-7.*/>HsOctalpha1AAR(NP_000671.2)/; s/^>NP_000670.1_TM1-7.*/>HsOctalpha1BAR(NP_000670.1)/; s/^>NP_000669.1_TM1-7.*/>HsOctalpha1DAR(NP_000669.1)/; s/^>NP_000672.3_TM1-7.*/>HsOctalpha2AAR(NP_000672.3)/; s/^>NP_000674.2_TM1-7.*/>HsOctalpha2CAR(NP_000674.2)/; s/^>NP_000673.2_TM1-7.*/>HsOctalpha2BAR(NP_000673.2)/;' /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/extracted_TM1-7_output.fasta > /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/renamed_extracted_TM1-7_output.fasta
         """, language="bash")
-        st.write("✔️run MSA again to align all the extracted TM1-TM7 regions across the species to get the MSA alignment fasta file (.fasta) to be used for phylogenetic tree construction")
+        st.write("✔️run MSA again to align all the extracted TM1-TM7 regions across the species to get the MSA alignment fasta file (.fasta). Input all the 7 TMs (MSA alignment fasta file) into the MEGA 11 software to construct the phylogenetic tree")
         st.code("""
         nohup muscle -align /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/renamed_extracted_TM1-7_output.fasta -output /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/MSA_extracted_TM1-7_output.fasta -threads 16 -consiters 2 -refineiters 100 > /media/raid/Wee/WeeYeZhi/output/phylogenetic_tree_construction_results/MSA_between_CPB_and_representative_OARs_results/MSA_extracted_TM1-7_output.log 2>&1 &
         """, language="bash")
+        st.write("Below is kindly attached with the phylogenetic tree newick file (using the original tree, not bootstrap consensus tree) which is used as an input to reconstruct the phylogenetic tree using ape v5.8.1 and ggtree v3.16.3 via R")
+        # ----LOAD THE ORIGINAL PHYLOGENETIC TREE NEWICK FILE----
+        # Check if the file exists before reading
+        if original_OctB2R_phylogenetic_tree.exists():
+            with open(original_OctB2R_phylogenetic_tree, "rb") as script_file:
+                script_byte = script_file.read()
 
+            # Add download button
+            st.download_button(
+                label="Download Original Phylogenetic Tree Newick File",
+                data=script_byte,
+                file_name=original_OctB2R_phylogenetic_tree.name,  # Extract just the file name
+                mime="text/plain",  # MIME type for plain text
+            )
+        else:
+            st.error(f"{original_OctB2R_phylogenetic_tree.name} does not exist.")
+        # ----LOAD THE PHYLOGENETIC TREE RECONSTRUCTION RSCRIPT----
+        # Check if the file exists before reading
+        if rscript_for_phylogenetic_tree_reconstruction.exists():
+            with open(rscript_for_phylogenetic_tree_reconstruction, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Octopamine Receptors Phylogenetic Tree Reconstruction Rscript",
+                data=script_byte,
+                file_name=rscript_for_phylogenetic_tree_reconstruction.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{rscript_for_phylogenetic_tree_reconstruction.name} does not exist.")
 
         st.write("###")
 
-        st.write("**8. Get the octopamine receptor sequences of Varroa destructor for MSA**")
-        st.write("✔️download the protein fasta file of Varroa destructor from Vdes_3.0 (GCF_002443255.2)")
-        st.write("✔️download all of the currently available reference octopamine receptor classes of Drosophila melanogaster (OAMB, alpha-2, beta-1, beta-2, beta-3 & TAR-OctR) from NCBI protein and UniProt SwissProt database")
-        st.code("""
-        wget -O Drosophila_melanogaster_octopamine_receptors.fasta "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=NP_732541.1,NP_001034049.1,NP_651057.1,NP_001034043.2,NP_650754.2&rettype=fasta&retmode=text"
-        """, language="bash")
-        st.write("✔️check the downloaded protein fasta file content")
-        st.code("""
-        grep ">" Drosophila_melanogaster_octopamine_receptors.fasta
-        """, language="bash")
-        st.write("✔️build the diamond database")
-        st.code("""
-        diamond makedb --in Drosophila_melanogaster_octopamine_receptors.fasta --db Dm_octopamine_receptor_db --threads 16 
-        """, language="bash")
-        st.write("✔️run DIAMOND BLASTp of the Varroa destructor protein sequences against the a customized protein database containing all the Drosophila melanogaster octopamine receptor protein classes")
-        st.code("""
-        docker run --user 1000:1000 -d --name blastp_Vd_protein_tabular_results_against_DmOAR_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastp -d /data/blastp_Vd_protein_against_DmOAR_db_results/Dm_octopamine_receptor_db.dmnd -q /data/blastp_Vd_protein_against_DmOAR_db_results/Varroa_destructor_protein.faa -o /data/blastp_Vd_protein_against_DmOAR_db_results/blastp_Vd_protein_against_DmOAR_db.outfmt6 --outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastp_CPB_transcriptome_tabular_results_against_PxOAR_database" 
-        """, language="bash")
-
-        st.write("###")
-
-        st.write("**9. Predict the 3D structure of the CPB octopamine beta2 receptor via AlphaFold3**")
-        st.write("✔️install AlphaFold3 locally")
+        st.write("**8. Predict the 3D structure of the CPB octopamine beta2 receptor via AlphaFold3**")
         st.write("✔️install git via conda-forge")
         st.code("""
         conda create -n git
         conda install conda-forge::git
         conda activate git
         """, language="bash")
-        st.write("✔️git clone the AlphaFold3 GitHub repository into your HPC system to obtain the AlphaFold3 source code")
+        st.write("✔️git clone the AlphaFold3 GitHub repository into your HPC system to obtain the AlphaFold3 source code and install AlphaFold3 locally")
         st.code("""
         git clone https://github.com/google-deepmind/alphafold3.git
         """, language="bash")
@@ -1215,14 +1227,56 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.code("""
         docker build -t alphafold3 -f docker/Dockerfile . # navigate to the working directory, /media/raid/Wee/WeeYeZhi/output/cloned_alphafold3_github_repository/alphafold3 first before you run this docker build command to build the AlphaFold3 Docker Image using the instructions written inside the Dockerfile
         """, language="bash")
+        st.write("✔️display all the available flags of run_alphafold.py")
+        st.code("""
+        docker run alphafold3 python run_alphafold.py --helpfull
+        """, language="bash")
+        st.write("✔️ask your research institution/lab representative to help apply for the AlphaFold3 model parameters by filling in the application form attached below. Download the model parameters into the desired model_dir after you have successfully received it from Google Deepmind AlphaFold3")
+        st.markdown("[Visit and Fill Up the AlphaFold3's Form to Apply for Model Parameters](https://docs.google.com/forms/d/e/1FAIpQLSfWZAgo1aYk0O4MuAXZj8xRQ8DafeFJnldNOnh_13qAx2ceZw/viewform)")
+        st.write("✔️test your setup using the provided AlphaFold3 JSON file to check whether you have successfully set up AlphaFold3 on your HPC system")
+        st.code("""
+        docker run --user 1000:1000 -d --name alphafold3_testing -v /media/raid/Wee/WeeYeZhi/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/models:/root/models -v /media/raid/Wee/WeeYeZhi/databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/fold_input.json --model_dir=/root/models --output_dir=/root/af_output
+        """, language="bash")
+        # ----LOAD ALPHAFOLD3 TESTING JSON FILE----
+        # Check if the file exists before reading
+        if test_alphafold3.exists():
+            with open(test_alphafold3, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download AlphaFold3 Testing JSON File",
+                data=script_byte,
+                file_name=test_alphafold3.name,  # Extract just the file name
+                mime="application/json",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{test_alphafold3.name} does not exist.")
+        st.write("✔️prepare the input JSON file for the CPB octopamine beta 2 receptor and run AlphaFold3 to predict the 3D receptor structure")
+        st.code("""
+        docker run --user 1000:1000 -d --name alphafold3_prediction_of_CPB_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/models:/root/models -v /media/raid/Wee/WeeYeZhi/databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/fold_input.json --model_dir=/root/models --output_dir=/root/af_output
+        """, language="bash")
+        # ----LOAD THE CPB OCTOPAMINE BETA 2 RECEPTOR JSON FILE----
+        # Check if the file exists before reading
+        if CPB_OctB2R.exists():
+            with open(CPB_OctB2R, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download CPB_OctB2R JSON File",
+                data=script_byte,
+                file_name=CPB_OctB2R.name,  # Extract just the file name
+                mime="application/json",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{CPB_OctB2R.name} does not exist.")
         st.markdown("[Visit the AlphaFold3's Official GitHub Page](https://github.com/google-deepmind/alphafold3)")
         st.markdown("[Visit the AlphaFold3's GitHub Installation Page](https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md)")
         st.markdown("[Visit the AlphaFold3's Introduction Page](https://www.ebi.ac.uk/training/online/courses/alphafold/alphafold-3-and-alphafold-server/using-the-alphafold-3-source-code/)")
         st.markdown("[Visit the AlphaFold3's Model Parameters Page](https://github.com/google-deepmind/alphafold3?tab=readme-ov-file#obtaining-model-parameters)")
-        st.markdown("[Visit and Fill Up the AlphaFold3's Form to Apply for Model Parameters](https://docs.google.com/forms/d/e/1FAIpQLSfWZAgo1aYk0O4MuAXZj8xRQ8DafeFJnldNOnh_13qAx2ceZw/viewform)")
         st.markdown("[Test your setup using the AlphaFold JSON file to check whether you have successfully set up AlphaFold3 on your HPC system](https://github.com/google-deepmind/alphafold3?tab=readme-ov-file#installation-and-running-your-first-prediction)")
         st.markdown("[Check how to create an input JSON file to run AlphaFold3 3D protein structure prediction](https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md)")
-        st.write("Use both AlphaFold3 & ColabFold server to model the selected 3D developmental protein structures and superimpose the two structures with UCSF ChimeraX & compare their quality metrics in the form of table. To ensure compliance with AlphaFold3 server terms and usage, only use the results of AlphaFold3 server for structural analysis and structural comparison. Use ColabFold server for docking later")
 
         st.write("###")
 
