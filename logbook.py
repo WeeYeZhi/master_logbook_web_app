@@ -44,7 +44,9 @@ original_OctB2R_phylogenetic_tree = current_dir / "assets" / "original_octopamin
 rscript_for_phylogenetic_tree_reconstruction = current_dir / "assets" / "phylogenetic_tree_reconstruction_after_MEGA11.Rmd"
 test_alphafold3 = current_dir / "assets" / "fold_input.json"
 CPB_OctB2R = current_dir / "assets" / "CPB_OctB2R.json"
-
+ligands = current_dir / "assets" / "ligands.smi"
+ligand_batch_preparation_script = current_dir / "assets" / "batch_preparation_of_ligands.sh"
+autodock4_ligand_batch_preparation_script = current_dir / "assets" / "prepare_ligand4.py"
 
 # ---- HEADER SECTION ----
 with st.container():
@@ -1221,7 +1223,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         cd AlphaFold3
         chmod +x fetch_databases.sh # remember to make the script executable otherwise you are going to encounter the permission denied error
         ls -l fetch_databases.sh # double check whether the script is executable
-        nohup ./fetch_databases.sh /media/raid/Wee/WeeYeZhi/output/downloaded_alphafold3_databases > /media/raid/Wee/WeeYeZhi/output/downloaded_alphafold3_databases/downloaded_alphafold3_databases.log 2>&1 &
+        nohup ./fetch_databases.sh /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases > /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases/downloaded_alphafold3_public_databases.log 2>&1 &
         """, language = "bash")
         st.write("✔️build the AlphaFold3 Docker container with all the right python dependencies")
         st.code("""
@@ -1233,9 +1235,13 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         """, language="bash")
         st.write("✔️ask your research institution/lab representative to help apply for the AlphaFold3 model parameters by filling in the application form attached below. Download the model parameters into the desired model_dir after you have successfully received it from Google Deepmind AlphaFold3")
         st.markdown("[Visit and Fill Up the AlphaFold3's Form to Apply for Model Parameters](https://docs.google.com/forms/d/e/1FAIpQLSfWZAgo1aYk0O4MuAXZj8xRQ8DafeFJnldNOnh_13qAx2ceZw/viewform)")
+        st.write("✔️unzip the alphafold3 model parameters file after you received it from Google")
+        st.code("""
+        zstd -d --keep af3.bin.zst
+        """)
         st.write("✔️test your setup using the provided AlphaFold3 JSON file to check whether you have successfully set up AlphaFold3 on your HPC system")
         st.code("""
-        docker run --user 1000:1000 -d --name alphafold3_testing -v /media/raid/Wee/WeeYeZhi/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/models:/root/models -v /media/raid/Wee/WeeYeZhi/databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/fold_input.json --model_dir=/root/models --output_dir=/root/af_output
+        docker run --user 0:0 -d --name alphafold3_testing -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/testing/fold_input.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/testing
         """, language="bash")
         # ----LOAD ALPHAFOLD3 TESTING JSON FILE----
         # Check if the file exists before reading
@@ -1254,7 +1260,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
             st.error(f"{test_alphafold3.name} does not exist.")
         st.write("✔️prepare the input JSON file for the CPB octopamine beta 2 receptor and run AlphaFold3 to predict the 3D receptor structure")
         st.code("""
-        docker run --user 1000:1000 -d --name alphafold3_prediction_of_CPB_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/models:/root/models -v /media/raid/Wee/WeeYeZhi/databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/fold_input.json --model_dir=/root/models --output_dir=/root/af_output
+        docker run --user 0:0 -d --name alphafold3_prediction_of_CPB_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/CPB_octopamine_beta2_receptor/CPB_OctB2R.json --model_dir=/root/models --output_dir=/root/af_output/CPB_octopamine_beta2_receptor
         """, language="bash")
         # ----LOAD THE CPB OCTOPAMINE BETA 2 RECEPTOR JSON FILE----
         # Check if the file exists before reading
@@ -1272,7 +1278,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         else:
             st.error(f"{CPB_OctB2R.name} does not exist.")
         st.markdown("[Visit the AlphaFold3's Official GitHub Page](https://github.com/google-deepmind/alphafold3)")
-        st.markdown("[Visit the AlphaFold3's GitHub Installation Page](https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md)")
+        st.markdown("[Read how to install and run your first AlphaFold3 prediction (tutorial)](https://github.com/google-deepmind/alphafold3/blob/main/docs/installation.md)")
         st.markdown("[Visit the AlphaFold3's Introduction Page](https://www.ebi.ac.uk/training/online/courses/alphafold/alphafold-3-and-alphafold-server/using-the-alphafold-3-source-code/)")
         st.markdown("[Visit the AlphaFold3's Model Parameters Page](https://github.com/google-deepmind/alphafold3?tab=readme-ov-file#obtaining-model-parameters)")
         st.markdown("[Test your setup using the AlphaFold JSON file to check whether you have successfully set up AlphaFold3 on your HPC system](https://github.com/google-deepmind/alphafold3?tab=readme-ov-file#installation-and-running-your-first-prediction)")
@@ -1280,6 +1286,131 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
+        st.write("**9. Prepare the list of ligands using Gypsum-DL**")
+        st.write("✔️install the latest version of Gypsum-DL via the Python Package Index (PyPI) website using the following command")
+        st.code("""
+        conda create -n gypsum-dl
+        conda activate gypsum-dl
+        conda install conda-forge::pip
+        pip install gypsum-dl # pillow v12.2.0, dimorphite-dl v2.0.2, gypsum-dl v1.3.0, loguru v0.7.3, molvs v0.1.1, mpi4py v4.1.1, numpy v2.4.4, rdkit v2025.9.6, scipy v1.17.1, & six v1.17.0
+        gypsum-dl --help
+        """, language="bash")
+        st.write("✔️install the latest version of OpenBabel via CMake compilation (compile OpenBabel on your own)")
+        st.code("""
+        conda create -n obabel
+        conda activate obabel
+        conda install conda-forge::cmake # install cmake
+        cd /media/raid/Wee/WeeYeZhi/output/cloned_obabel_github_source_code
+        git clone https://github.com/openbabel/openbabel.git # clone the Open Babel source code from GitHub
+        nano /media/raid/Wee/WeeYeZhi/output/cloned_obabel_github_source_code/openbabel/include/openbabel/obutil.h # edit the obutil.h file by adding the line, #include <ctime>, below the line, #include <math.h>, and save it. This is important to ensure the compilation process run smoothly and successfully
+        cd openbabel # navigate to the Open Babel source code directory
+        git checkout tags/openbabel-3-1-1 # checkout the version 3.1.1 release tag
+        mkdir build # create a build directory
+        cd build
+        cmake .. -DCMAKE_INSTALL_PREFIX=/media/raid/Wee/WeeYeZhi/output/obabel_installation -DCMAKE_BUILD_TYPE=Release # configure Open Babel for building in your build directory with your chosen install prefix
+        make -j16 # compile the source code with 16 HPC cores
+        make install # install open babel
+        export PATH=/media/raid/Wee/WeeYeZhi/output/obabel_installation/bin:$PATH # add openbabel to your PATH to run it easily after succesfully installing OpenBabel. If you do not export into PATH, you have run the command, /media/raid/Wee/WeeYeZhi/output/obabel_installation/bin/obabel every single time when you want to run OpenBabel
+        obabel -H # output the usage information to test whether open babel has been successfully installed
+        obabel -V # output its version number
+        rm -rf openbabel # you can delete all the open babel source code files after you have successfully installed Open Babel to your designated directory to save space
+        """)
+        st.write("✔️prepare the input file containing all the 18 SMILES strings of ligands with the PubChem ID, 26451, 18526103, 76145148, 19606232, 1480785, 26752, 577782, 255273, 1001, 36324, 2726, 2803, 36326, 439570, 4184, 4436, 5775, and 8969 from the PubChem database")
+        # ----LOAD THE LIGAND SMILES STRING FILE----
+        # Check if the file exists before reading
+        if ligands.exists():
+            with open(ligands, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Ligand SMILES String File (.smi)",
+                data=script_byte,
+                file_name=ligands.name,  # Extract just the file name
+                mime="text/plain",  # MIME type for plain text
+            )
+        else:
+            st.error(f"{ligands.name} does not exist.")
+        st.write("✔️run Gypsum-DL to generate the 3D molecular structures of ligands from SMILES format to SDF and PDB. Check all potential ionization, tautomeric, chiral, cis/trans isomeric, and ring-conformational forms at a pH range between 6.5 and 7.5 (The whole Gypsum-DL pipeline desalt all molecules, ionize all molecules, generate tautomers for all molecules, apply Durrant-lab filters to all molecules, enumerate all possible enantiomers for all molecules, enumerate all possible cis-trans isomers for all molecules, convert all molecules to 3D structures, generate several conformers of molecules with non-aromatic rings (boat vs chair), minimize all 3D molecular structures, make PDB output files, and save all molecules)")
+        st.code("""
+        nohup gypsum-dl --source /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/ligands.smi --output_folder /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/gypsumdl_results --job_manager multiprocessing --num_processors 16 --max_variants_per_compound 5 --thoroughness 3 --min_ph 6.5 --max_ph 7.5 --pka_precision 1 --use_durrant_lab_filters --separate_output_files >  /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/gypsumdl_results/gypsumdl_results.log 2>&1 & # dont use the flag, --add_pdb_output, because the bond order information of ligands get lost after converting the ligands to PDB format, so you better omit this flag and use the generated default SDF files and later use OpenBabel to split and convert the SDF files into MOL2 format. 
+        """, language="python")
+        st.write("✔️split each SDF file of ligand (generated by Gypsum-DL) into multiple separate files of ligand variants (due to having different tautomers, ionization states, & cis-trans isomers) via OpenBabel")
+        st.code("""
+        obabel ../gypsumdl_results/1-_4-chlorophenyl_imidazolidin-2-one__input1.sdf -O PubChem_26451_variant.sdf -m 
+        obabel ../gypsumdl_results/1-_4-bromophenyl_imidazolidin-2-one__input2.sdf -O PubChem_18526103_variant.sdf -m 
+        obabel ../gypsumdl_results/1-_4-ethoxyphenyl_imidazolidin-2-one__input3.sdf -O PubChem_76145148_variant.sdf -m 
+        obabel ../gypsumdl_results/1-_4-ethylphenyl_imidazolidin-2-one__input4.sdf -O PubChem_19606232_variant.sdf -m 
+        obabel ../gypsumdl_results/1-_4-fluorophenyl_imidazolidin-2-one__input5.sdf -O PubChem_1480785_variant.sdf -m 
+        obabel ../gypsumdl_results/1-_4-methoxyphenyl_imidazolidin-2-one__input6.sdf -O PubChem_26752_variant.sdf -m 
+        obabel ../gypsumdl_results/1-_4-methylphenyl_imidazolidin-2-one__input7.sdf -O PubChem_577782_variant.sdf -m 
+        obabel ../gypsumdl_results/1-phenylimidazolidin-2-one__input8.sdf -O PubChem_255273_variant.sdf -m 
+        obabel ../gypsumdl_results/2-phenylethylamine__input9.sdf -O PubChem_1001_variant.sdf -m 
+        obabel ../gypsumdl_results/amitraz__input10.sdf -O PubChem_36324_variant.sdf -m 
+        obabel ../gypsumdl_results/chlorpromazine__input11.sdf -O PubChem_2726_variant.sdf -m 
+        obabel ../gypsumdl_results/clonidine__input12.sdf -O PubChem_2803_variant.sdf -m 
+        obabel ../gypsumdl_results/DPMF__input13.sdf -O PubChem_36326_variant.sdf -m 
+        obabel ../gypsumdl_results/L-carvone__input14.sdf -O PubChem_439570_variant.sdf -m 
+        obabel ../gypsumdl_results/mianserin__input15.sdf -O PubChem_4184_variant.sdf -m 
+        obabel ../gypsumdl_results/naphazoline__input16.sdf -O PubChem_4436_variant.sdf -m 
+        obabel ../gypsumdl_results/phentolamine__input17.sdf -O PubChem_5775_variant.sdf -m 
+        obabel ../gypsumdl_results/yohimbine__input18.sdf -O PubChem_8969_variant.sdf -m 
+        """, language="bash")
+        st.write("✔️convert all the 84 SDF files of ligands from the .sdf format to .mol2 format via OpenBabel")
+        st.code("""
+        obabel *.sdf -omol2 -m
+        """, language="bash")
+        st.write("✔️perform batch preparation of ligands using the prepare_ligand4.py package of AutoDock MGL Tools to convert all the 84 ligands from PDB format to PDBQT format")
+        st.code("""
+        tar -xvf mgltools_x86_64Linux2_1.5.7p1.tar.gz # download the mgltools_x86_64Linux2_1.5.7p1.tar.gz file from https://ccsb.scripps.edu/mgltools/downloads/ and unzip it to install AutoDock MGL Tools via Linux
+        tar -xvf MGLToolsPckgs.tar.gz # look for MGLToolsPckgs.tar.gz and unzip it
+        navigate to autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py
+        navigate to autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py # just in case if you want to use it to prepare protein in batch later
+        """, language="bash")
+        # ----LOAD AUTODOCK4 prepare_ligand4.py SCRIPT----
+        # Check if the file exists before reading
+        if autodock4_ligand_batch_preparation_script.exists():
+            with open(autodock4_ligand_batch_preparation_script, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download AutoDock4 prepare_ligand4.py script",
+                data=script_byte,
+                file_name=autodock4_ligand_batch_preparation_script.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{autodock4_ligand_batch_preparation_script.name} does not exist.")
+        # ----LOAD THE LIGAND BATCH PREPARATION BASH SCRIPT----
+        # Check if the file exists before reading
+        if ligand_batch_preparation_script.exists():
+            with open(ligand_batch_preparation_script, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Ligand Batch Preparation Bash Script",
+                data=script_byte,
+                file_name=ligand_batch_preparation_script.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{ligand_batch_preparation_script.name} does not exist.")
+        st.markdown("[Visit Gypsum-DL official PyPi Installation Page](https://pypi.org/project/gypsum-dl/)")
+        st.markdown("[Visit Gypsum-DL official GitHub Page](https://github.com/durrantlab/gypsum_dl)")
+        st.markdown("[Visit OpenBabel official Tutorial Page](https://openbabel.org/docs/Command-line_tools/babel.html)")
+        st.markdown("[Read how to install OpenBabel in Linux Ubuntu](https://stackoverflow.com/questions/75814835/install-open-babel-in-ubuntu#:~:text=1%20Answer,sudo%20make%20install)")
+        st.markdown("[Read how to perform batch preparation of ligands for docking via AutoDock Vina](https://www.researchgate.net/post/Batch_Ligand_Preparation_on_Autodock_Vina)")
+        st.markdown("[Visit the official AutoDock website](https://autodock.scripps.edu/)")
+        st.markdown("[Read the useful resources of AutoDock4 and AutoDock Vina](https://autodock.scripps.edu/resources/)")
+        st.markdown("[Watch YouTube video to learn how to perform batch preparation of ligands](https://www.youtube.com/watch?v=_Blz2DxSAtQ&t=44s)")
+
+        st.write("###")
+
+        st.markdown("[Read how to install and run AutoDock Vina](https://autodock-vina.readthedocs.io/en/latest/installation.html)")
+
+        st.write("Gibbs free energy of a chemical reaction is normally calculated to check whether the chemical reaction can take place naturally (whether the reaction is considered spontaneous). If the Gibbs free energy is negative, then it means that the chemical reaction is considered spontaneous and the chemical reaction is considered exergonic (release free energy). The second law of thermodynamics states that the entropy of the universe is always positive. Entropy is the measure of disorder of the system, where increasing the volume, temperature (Kelvin), and number of moles of particles will increase the disorderness/randomness (entropy) of the system. Entropy is the nature's way to spread/disperse energy throughout the space to achieve an energitically favourable system")
         st.write("Try out the GROMICA web app to analyze the RMSD, RMSF, Hbond, SASA, and Rg of MD simulation with zero coding to produce publication-quality images")
         st.write("You can use logMD to visualize the trajectory of your protein-ligand complex easily (logMD functions the same as VMD)")
         st.write("generative AI drug design method, DrugHive")
