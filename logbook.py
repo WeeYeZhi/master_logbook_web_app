@@ -47,6 +47,9 @@ CPB_OctB2R = current_dir / "assets" / "CPB_OctB2R.json"
 ligands = current_dir / "assets" / "ligands.smi"
 ligand_batch_preparation_script = current_dir / "assets" / "batch_preparation_of_ligands.sh"
 autodock4_ligand_batch_preparation_script = current_dir / "assets" / "prepare_ligand4.py"
+galaxyrefine_usage_information_file = current_dir / "assets" / "galaxyrefine_README.md"
+qmeanbrane_manual = current_dir / "assets" / "qmeanbrane_interpretation_manual.txt"
+prosa2003_manual = current_dir / "assets" / "prosa2003_manual.pdf"
 
 # ---- HEADER SECTION ----
 with st.container():
@@ -1029,7 +1032,6 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         docker run --user 1000:1000 -d --name blastp_CPB_transcriptome_tabular_results_against_PxOAR_database -v /media/raid/Wee/WeeYeZhi/output:/data trinityrnaseq/trinotate /bin/bash -c "diamond blastp -d /data/blastp_against_PxOAR_db_results/Px_octopamine_receptor_db.dmnd -q /data/transdecoder_results/transdecoder_ORF_extraction_results/good.modified_clean.trimmed.fasta.transdecoder.pep -o /data/blastp_against_PxOAR_db_results/blastp_CPB_transcriptome_tabular_results_against_PxOAR_database.outfmt6 --outfmt 6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore --sensitive --threads 16 --max-target-seqs 1 --evalue 1e-5 --tmpdir /data/tmp_dir/blastp_CPB_transcriptome_tabular_results_against_PxOAR_database" 
        """, language="bash")
 
-
         st.write("###")
 
         st.write("**2. Extract the filtered CPB octopamine receptor sequences from the predicted CPB peptide sequences via SeqKit**")
@@ -1111,7 +1113,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.code("""
         sed 's/^>XP_396348.4.*/>AmOct\u03B22R/; s/^>NP_001034049.1.*/>DmOct\u03B22R/; s/^>NP_001280501.1.*/>TcOct\u03B22R/; s/^>XP_011568733.1.*/>PxOct\u03B22R/; s/^>XP_022664697.1.*/>VdOct\u03B22R/; s/^>TRINITY_DN22425_c0_g1_i3.p1.*/>CcOct\u03B22R/; s/^>XP_022116353.1.*/>PrOct\u03B22R/; s/^>AEO89318.1.*/>CsOct\u03B22R/; s/^>NP_001171666.1.*/>BmOct\u03B22R/; s/^>ASA47149.1.*/>NlOct\u03B22R/' /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/combined_octopamine_beta2_receptors.fasta > /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/renamed_combined_octopamine_beta2_receptors.fasta
         """, language="bash")
-        st.write("✔️run MSA via MUSCLE")
+        st.write("✔️run MSA via MUSCLE and view the MSA results (.aln) via JalView")
         st.code("""
         nohup muscle -align /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/renamed_combined_octopamine_beta2_receptors.fasta -output /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/MSA_between_CPB_and_other_insects_OctB2R_results.aln -threads 16 -consiters 2 -refineiters 100 > /media/raid/Wee/WeeYeZhi/output/MSA_octopamine_beta2_receptors/MSA_between_CPB_and_other_insects_OctB2R_output.log 2>&1 &
         """, language="bash")
@@ -1203,7 +1205,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**8. Predict the 3D structure of the CPB octopamine beta2 receptor via AlphaFold3**")
+        st.write("**8. Predict the 3D structure of the CPB octopamine beta2 receptor via AlphaFold3 (run AlphaFold3 locally)**")
         st.write("✔️install git via conda-forge")
         st.code("""
         conda create -n git
@@ -1258,9 +1260,12 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
             )
         else:
             st.error(f"{test_alphafold3.name} does not exist.")
-        st.write("✔️prepare the input JSON file for the CPB octopamine beta 2 receptor and run AlphaFold3 to predict the 3D receptor structure")
+        st.write("✔️prepare the input JSON file for the CPB octopamine beta 2 receptor and other insect octopamine beta 2 receptors (Plutella xylostella, Pieris rapae, Bombyx mori). Run AlphaFold3 to predict the 3D receptor structure (use 5 different random seeds and perform a multi-seed prediction to predict 5 independent AlphaFold3 structures and choose the best AlphaFold3 structure with the highest ranking score for downstream docking or perform an ensemble docking to dock a ligand to five independent AlphaFold3-predicted structures. Compute the RMSD values between the best AlphaFold3-predicted structure with the highest ranking score and other 4 best model seed structures, if their RMSD values are very similar to each other, you can just choose the best AlphaFold3 structure with the highest ranking score for downstream docking. Check whether the key binding residues are aligned and whether the side chains are stable)")
         st.code("""
-        docker run --user 0:0 -d --name alphafold3_prediction_of_CPB_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/CPB_octopamine_beta2_receptor/CPB_OctB2R.json --model_dir=/root/models --output_dir=/root/af_output/CPB_octopamine_beta2_receptor
+        docker run --user 0:0 -d --name alphafold3_prediction_of_CPB_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/CPB_octopamine_beta2_receptor/CPB_OctB2R.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/CPB_octopamine_beta2_receptor
+        docker run --user 0:0 -d --name alphafold3_prediction_of_Px_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/Px_octopamine_beta2_receptor/Px_OctB2R.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/Px_octopamine_beta2_receptor
+        docker run --user 0:0 -d --name alphafold3_prediction_of_Pr_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/Pr_octopamine_beta2_receptor/Pr_OctB2R.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/Pr_octopamine_beta2_receptor
+        docker run --user 0:0 -d --name alphafold3_prediction_of_Bm_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/Bm_octopamine_beta2_receptor/Bm_OctB2R.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/Bm_octopamine_beta2_receptor
         """, language="bash")
         # ----LOAD THE CPB OCTOPAMINE BETA 2 RECEPTOR JSON FILE----
         # Check if the file exists before reading
@@ -1286,7 +1291,28 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**9. Prepare the list of ligands using Gypsum-DL**")
+        st.write("**9. Predict the 3D structure of the CPB octopamine beta 2 receptor via Swiss Model webserver**")
+        st.write("✔️use G3M4F8.1.A as the template to perform homology modelling of the CPB octopamine beta 2 receptor since Swiss Model webserver itself identified G3M4F8.1.A has the highest coverage of 0.9795, GMQE score of 0.8396, sequence identity percentage of 86.91")
+        st.markdown("[Visit Swiss Model webserver](https://swissmodel.expasy.org/interactive)")
+
+        st.write("###")
+
+        st.write("**10. Predict the 3D structure of the CPB octopamine beta 2 receptor via GPCR-I-TASSER webserver**")
+        st.markdown("[Visit GPCR-I-TASSER webserver](https://aideepmed.com/GPCR-I-TASSER/)")
+        st.markdown("[Read how to interpret the GPCR-I-TASSER results to know how to explain the C-score, TM-score, RMSD, No of decoys, and cluster density of the predicted structure](https://aideepmed.com/GPCR-I-TASSER/output/G1856/cscore.txt)")
+
+        st.write("###")
+
+        st.write("**11. Color the best ranked AlphaFold3-predicted CPB octopamine beta 2 receptor by pLDDT score and save it using UCSF ChimeraX**")
+        st.code("""
+        cd C:\\Users\\USER\\Documents\\Master_of_Science_in_Systems_Biology_GRA\\Experimental_results\\alphafold3_prediction_results\\output\\CPB_octopamine_beta2_receptor\\five_top_ranked_AlphaFold3_models # change to this working directory first in UCSF ChimeraX
+        open CPB_OctB2R_seed-1_sample-2_model.cif # load the AlphaFold3-predicted CPBOctB2R structure in .cif format. Remember to load the structure in .cif format, not the .pdb format that you converted using OpenBabel, otherwise the command won't work
+        color bfactor palette alphafold # color the AlphaFold3-predicted CPBOctB2R structure based on the AlphaFold3 pLDDT score
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**12. Prepare the list of ligands using Gypsum-DL**")
         st.write("✔️install the latest version of Gypsum-DL via the Python Package Index (PyPI) website using the following command")
         st.code("""
         conda create -n gypsum-dl
@@ -1312,7 +1338,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         make install # install open babel
         export PATH=/media/raid/Wee/WeeYeZhi/output/obabel_installation/bin:$PATH # add openbabel to your PATH to run it easily after succesfully installing OpenBabel. If you do not export into PATH, you have run the command, /media/raid/Wee/WeeYeZhi/output/obabel_installation/bin/obabel every single time when you want to run OpenBabel
         obabel -H # output the usage information to test whether open babel has been successfully installed
-        obabel -V # output its version number
+        obabel -V # output its version number (you are using OpenBabel v3.1.0)
         rm -rf openbabel # you can delete all the open babel source code files after you have successfully installed Open Babel to your designated directory to save space
         """)
         st.write("✔️prepare the input file containing all the 18 SMILES strings of ligands with the PubChem ID, 26451, 18526103, 76145148, 19606232, 1480785, 26752, 577782, 255273, 1001, 36324, 2726, 2803, 36326, 439570, 4184, 4436, 5775, and 8969 from the PubChem database")
@@ -1337,7 +1363,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         """, language="python")
         st.write("✔️split each SDF file of ligand (generated by Gypsum-DL) into multiple separate files of ligand variants (due to having different tautomers, ionization states, & cis-trans isomers) via OpenBabel")
         st.code("""
-        obabel ../gypsumdl_results/1-_4-chlorophenyl_imidazolidin-2-one__input1.sdf -O PubChem_26451_variant.sdf -m 
+        obabel ../gypsumdl_results/1-_4-chlorophenyl_imidazolidin-2-one__input1.sdf -O PubChem_26451_variant.sdf -m # navigate the working directory, /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/openbabel_results, before you run all these list of obabel commands for splitting.
         obabel ../gypsumdl_results/1-_4-bromophenyl_imidazolidin-2-one__input2.sdf -O PubChem_18526103_variant.sdf -m 
         obabel ../gypsumdl_results/1-_4-ethoxyphenyl_imidazolidin-2-one__input3.sdf -O PubChem_76145148_variant.sdf -m 
         obabel ../gypsumdl_results/1-_4-ethylphenyl_imidazolidin-2-one__input4.sdf -O PubChem_19606232_variant.sdf -m 
@@ -1366,6 +1392,8 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         tar -xvf MGLToolsPckgs.tar.gz # look for MGLToolsPckgs.tar.gz and unzip it
         navigate to autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py
         navigate to autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py # just in case if you want to use it to prepare protein in batch later
+        /media/raid/Wee/WeeYeZhi/output/autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/bin/pythonsh /media/raid/Wee/WeeYeZhi/output/autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py -h # output the command-line usage. remember to use the MGLTools internal Python interpreter (pythonsh) instead of using the HPC system's python when you run the prepare_ligand4.py python script
+        bash /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/ligand_batch_preparation_script/batch_preparation_of_ligands.sh # run this bash script to perform batch preparation of ligands by adding polar hydrogens,adding Gasteiger charges, and removing non-polar hydrogens from the ligands
         """, language="bash")
         # ----LOAD AUTODOCK4 prepare_ligand4.py SCRIPT----
         # Check if the file exists before reading
@@ -1405,6 +1433,420 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.markdown("[Visit the official AutoDock website](https://autodock.scripps.edu/)")
         st.markdown("[Read the useful resources of AutoDock4 and AutoDock Vina](https://autodock.scripps.edu/resources/)")
         st.markdown("[Watch YouTube video to learn how to perform batch preparation of ligands](https://www.youtube.com/watch?v=_Blz2DxSAtQ&t=44s)")
+
+        st.write("###")
+
+        st.write("**13. Run TMHMM to predict the transmembrane domains of the inactivate state of the human B2-adrenergic GPCR sequence with PDB ID 2RH1**")
+        st.code("""
+        cd /media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin # navigate into this working directory before you run tmhmm
+        export PATH="/media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin:$PATH" # note that the export of the PATH environment variable to the tmhmm executable file is just temporary and will only take effect for the current terminal session
+        which tmhmm # double check the system can access the tmhmm executable file correctly after exporting the PATH variable 
+        tmhmm /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/rcsb_pdb_2RH1.fasta > /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/tmhmm_results/tmhmm_2RH1.out
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**14. Perform structural superimposition between the human B2-adrenergic receptor (2RH1) and the AlphaFold3-predicted CPB octopamine receptor (seed1sample2) using UCSF ChimeraX**")
+        st.write("✔️install gpcrmining python package via pip and obtain the class A GPCR human beta 2 adrenergic receptor sequence to get the mapping between the GPCR generic residues and UniProt numbering system residues")
+        st.code("""
+        conda create -n gpcrmining
+        conda activate gpcrmining
+        conda install conda-forge::pip
+        pip install gpcrmining # successfully installed certifi-2026.2.25 charset_normalizer-3.4.7 click-8.3.2 gpcrmining-0.2.0 idna-3.11 numpy-2.4.4 pandas-3.0.2 python-dateutil-2.9.0.post0 requests-2.33.1 six-1.17.0 urllib3-2.6.3
+        python -m gpcrmining.gpcrdb -n adrb2_human -d /media/raid/Wee/WeeYeZhi/output/gpcrmining_results/2RH1
+        """, language="bash")
+        st.write("✔️perform structural superimposition between ADRB2_HUMAN (P07550) and 2RH1 to identify the superimposed ligand binding residues of 2RH1 since 2RH1 is a type of ADRB2_HUMAN receptor (human beta 2 adrenergic receptor)")
+        st.code("""
+        pwd # print the current working directory of UCSF ChimeraX to check your file location now
+        cd C:\\Users\\USER\\Documents\\Master_of_Science_in_Systems_Biology_GRA\\Experimental_results\\ligand_binding_site_identification_results # navigate into the desired working directory containing the predicted 3D protein structures
+        open AF-P07550-F1-model_v6.pdb # load the ADRB2_HUMAN (P07550) AlphaFold structure which uses the UniProt numbering system that follow the GPCRdb UniProt numbering system converted by gpcrmining python package
+        open 2RH1.pdb # load the 2RH1 structure into the UCSF ChimeraX interface and it will become your first loaded structure (labelled as #1)
+        select #2; hide sel target a # select your second loaded protein structure (#1) and hide all of its atom and stick representation
+        select clear # clear your current selection
+        matchmaker #2 to #1 # perform structural superimposition to structurally superimpose 2RH1 (labelled as #2) to the human beta 2 adrenergic receptor (ADRB2_HUMAN) (P07550) as the reference structure (labelled as #1) to identify the ligand binding residues of 2RH1 that superimpose with the residues of P07550 (W109,D113,V114,V117,F193,Y199,S203,S204,S207,W286,F289,F290,N293,Y308,N312,Y316). In this case, #1 is the reference structure.
+        select #1/A:109,113,114,117,193,199,203,204,207,286,289,290,293,308,312,316; show sel target ab # select the ligand binding residues of ADRB2_HUMAN (P07550) and show them in atom and bond (stick) representation
+        manually hover your mouse over each of the ligand binding residue of ADRB2_HUMAN (P07550) and record down the superimposed ligand binding residue of 2RH1
+        select #2/A:116,120,121,124,200,206,210,211,214,421,424,425,428,443,447,451; show sel target ab # select the ligand binding residues of 2RH1 and show them in atom and bond (stick) representation
+        select #1/A; cartoon hide sel # hide the cartoon representation of structure #1
+        select #2/A; cartoon hide sel # hide the cartoon representation of structure #2
+        select #1/A:109,113,114,117,193,199,203,204,207,286,289,290,293,308,312,316; label sel text "{0.name} {0.number}{0.insertion_code}" # label the amino acid residue with three-letter codes
+        select #2/A:116,120,121,124,200,206,210,211,214,421,424,425,428,443,447,451; label sel text "{0.name} {0.number}{0.insertion_code}"
+        ui mousemode right "move label" # change the mouse setting so that you can right click the amino acid residue label and move them to arrange properly
+        save "C:/Users/USER/Documents/Master_of_Science_in_Systems_Biology_GRA/Experimental_results/ligand_binding_site_identification_results/superimposition between ligand binding residues of ADRB2_HUMAN and 2RH1.cxs"
+        """, language="bash")
+        st.write("✔️perform structural superimposition between 2RH1 and AlphaFold3-predicted CPB octopamine beta 2 receptor to identify the ligand binding residues of the AlphaFold3-predicted CPB octopamine beta 2 receptor")
+        st.code("""
+        pwd # print the current working directory of UCSF ChimeraX to check your file location now
+        cd C:\\Users\\USER\\Documents\\Master_of_Science_in_Systems_Biology_GRA\\Experimental_results\\ligand_binding_site_identification_results # navigate into the desired working directory containing the predicted 3D protein structures
+        open 2RH1.pdb (This will become your #1 structure)
+        open CPB_OctB2R_seed-1_sample-2_model.pdb (This will become your #2 structure)
+        select #1; hide sel target a # select your first loaded protein structure (#1) and hide all of its atom and stick representation
+        matchmaker #2 to #1 # perform structural superimposition to structurally superimpose the AlphaFold3-predicted CPB octopamine beta 2 receptor (labelled as #2) to 2RH1 as the reference structure (labelled as #1) to identify the ligand binding residues of AlphaFold3-predicted CPB octopamine beta 2 receptor that superimpose with the residues of 2RH1 (W116,D120,D121,V124,F200,Y206,S210,S211,S214,W421,F424,F425,N428,Y443,N447,Y451). In this case, #1 is the reference structure.
+        select #1/A:116,120,121,124,200,206,210,211,214,421,424,425,428,443,447,451; show sel target ab # select the ligand binding residues of 2RH1 and show them in atom and bond (stick) representation
+        manually hover your mouse over each of the ligand binding residue of 2RH1 and record down the superimposed ligand binding residue of the AlphaFold3-predicted CPB octopamine beta 2 receptor
+        select #2/A:105,109,110,113,188,194,198,199,202,290,293,294,297,313,317,321; show sel target ab # select the ligand binding residues of CPB OctB2R and show them in atom and bond (stick) representation
+        select #1/A; cartoon hide sel # hide the cartoon representation of structure #1
+        select #2/A; cartoon hide sel # hide the cartoon representation of structure #2
+        select #1/A:116,120,121,124,200,206,210,211,214,421,424,425,428,443,447,451; label sel text "{0.name} {0.number}{0.insertion_code}"
+        select #2/A:105,109,110,113,188,194,198,199,202,290,293,294,297,313,317,321; label sel text "{0.name} {0.number}{0.insertion_code}"
+        ui mousemode right "move label" # change the mouse setting so that you can right click the amino acid residue label and move them to arrange properly
+        save "C:/Users/USER/Documents/Master_of_Science_in_Systems_Biology_GRA/Experimental_results/ligand_binding_site_identification_results/superimposition between ligand binding residues of 2RH1 and CPB OctB2R.cxs"
+        """, language="bash")
+        st.write("✔️perform pairwise structural superimposition between the ligand binding site of refined, energy-minimized AlphaFold3-predicted CPB octopamine beta 2 receptor (seed1sample2) and the ligand binding site of other refined, energy-minimized AlphaFold3-predicted PxOctB2R (Px_OctB2R_seed-3_sample-3_model.pdb), AlphaFold3-predicted PrOctB2R (Pr_OctB2R_seed-1_sample-3_model.pdb), AlphaFold3-predicted BmOctB2R (Bm_OctB2R_seed-1_sample-2_model.pdb), and CsOctB2R (AF-G3M4F8-F1-model_v6.pdb) (already deposited in UniProt database) respectively to investigate whether the AlphaFold3-predicted CPB octopamine beta 2 receptor structure is similar in other insects with the same taxonomy Lepidopteran order")
+        st.code("""
+        pwd # print the current working directory of UCSF ChimeraX to check your file location now
+        cd C:\\Users\\USER\\Documents\\Master_of_Science_in_Systems_Biology_GRA\\Experimental_results\\yasara_energy_minimization_results # navigate into the desired working directory containing the predicted 3D protein structures
+        open alphafold3_prediction\\energy_minimized_alphafold3_predicted_CPB_octopamine_beta2_receptor.pdb # this will become your #1 structure
+        open PxOctB2R\\em_PxOctB2R_model.pdb # this will become your #2 structure
+        open PrOctB2R\\em_PrOctB2R_model.pdb # this will become your #3 structure
+        open BmOctB2R\\em_BmOctB2R_model.pdb # this will become your #4 structure
+        open CsOctB2R\\em_CsOctB2R_model.pdb # this will become your #5 structure
+        matchmaker #2-5 to #1 # superimpose all the #2, #3, #4, and #5 structures with the CPB octopamine beta 2 receptor (reference structure #1)
+        select #1/A:105,109,110,113,188,194,198,199,202,290,293,294,297,313,317,321; show sel target ab # select the ligand binding residues of CPB OctB2R and show them in atom and bond (stick) representation
+        select #2/A:100,104,105,108,183,189,193,194,197,282,285,286,289,306,310,314; show sel target ab # select the ligand binding residues of PxOctB2R and show them in atom and bond (stick) representation
+        select #3/A:104,108,109,112,185,191,195,196,199,286,289,290,293,309,313,317; show sel target ab # select the ligand binding residues of PrOctB2R and show them in atom and bond (stick) representation
+        select #4/A:111,115,116,119,192,198,202,203,206,293,296,297,300,316,320,324; show sel target ab # select the ligand binding residues of BmOctB2R and show them in atom and bond (stick) representation
+        select #5/A:113,117,118,121,194,200,204,205,208,295,298,299,302,318,322,326; show sel target ab # select the ligand binding residues of CsOctB2R and show them in atom and bond (stick) representation
+        select #1/A; cartoon hide sel # hide the cartoon representation of structure #1
+        select #2/A; cartoon hide sel # hide the cartoon representation of structure #2
+        select #3/A; cartoon hide sel # hide the cartoon representation of structure #3
+        select #4/A; cartoon hide sel # hide the cartoon representation of structure #4
+        select #5/A; cartoon hide sel # hide the cartoon representation of structure #5
+        delete H # delete all the hydrogen atoms attached the residues to simplify the ligand binding site representation otherwise the superposed ligand binding site is going to look very crowded and complex
+        select #1/A:105 | #2/A:100 | #3/A:104 | #4/A:111 | #5/A:113; 2dlabel create gpcr328 text "3.28x28" # collectively label the residues across 5 insect octopamine beta 2 receptors as 3.28x28
+        2dlabel change gpcr328 size 12 # change the size of the label to 12. After changing the size of the label, you can change the 'right mouse' setting in UCSF ChimeraX GUI Interface to use the right click function to move and arrange the label around
+        select #1/A:109 | #2/A:104 | #3/A:108 | #4/A:115 | #5/A:117; 2dlabel create gpcr332 text "3.32x32"
+        2dlabel change gpcr332 size 12
+        select #1/A:110 | #2/A:105 | #3/A:109 | #4/A:116 | #5/A:118; 2dlabel create gpcr333 text "3.33x33"
+        2dlabel change gpcr333 size 12
+        select #1/A:113 | #2/A:108 | #3/A:112 | #4/A:119 | #5/A:121; 2dlabel create gpcr336 text "3.36x36"
+        2dlabel change gpcr336 size 12
+        select #1/A:188 | #2/A:183 | #3/A:185 | #4/A:192 | #5/A:194; 2dlabel create gpcr4552 text "45.52x52"
+        2dlabel change gpcr4552 size 12
+        select #1/A:194 | #2/A:189 | #3/A:191 | #4/A:198 | #5/A:200; 2dlabel create gpcr539 text "5.38x39"
+        2dlabel change gpcr539 size 12
+        select #1/A:198 | #2/A:193 | #3/A:195 | #4/A:202 | #5/A:204; 2dlabel create gpcr543 text "5.42x43"
+        2dlabel change gpcr543 size 12
+        select #1/A:199 | #2/A:194 | #3/A:196 | #4/A:203 | #5/A:205; 2dlabel create gpcr544 text "5.43x44"
+        2dlabel change gpcr544 size 12
+        select #1/A:202 | #2/A:197 | #3/A:199 | #4/A:206 | #5/A:208; 2dlabel create gpcr546 text "5.46x461"
+        2dlabel change gpcr546 size 12
+        select #1/A:290 | #2/A:282 | #3/A:286 | #4/A:293 | #5/A:295; 2dlabel create gpcr648 text "6.48x48"
+        2dlabel change gpcr648 size 12
+        select #1/A:293 | #2/A:285 | #3/A:289 | #4/A:296 | #5/A:298; 2dlabel create gpcr651 text "6.51x51"
+        2dlabel change gpcr651 size 12
+        select #1/A:294 | #2/A:286 | #3/A:290 | #4/A:297 | #5/A:299; 2dlabel create gpcr652 text "6.52x52"
+        2dlabel change gpcr652 size 12
+        select #1/A:297 | #2/A:289 | #3/A:293 | #4/A:300 | #5/A:302; 2dlabel create gpcr655 text "6.55x55"
+        2dlabel change gpcr655 size 12
+        select #1/A:313 | #2/A:306 | #3/A:309 | #4/A:316 | #5/A:318; 2dlabel create gpcr734 text "7.35x34"
+        2dlabel change gpcr734 size 12
+        select #1/A:317 | #2/A:310 | #3/A:313 | #4/A:320 | #5/A:322; 2dlabel create gpcr738 text "7.39x38"
+        2dlabel change gpcr738 size 12
+        select #1/A:321 | #2/A:314 | #3/A:317 | #4/A:324 | #5/A:326; 2dlabel create gpcr742 text "7.43x42"
+        2dlabel change gpcr742 size 12
+        name site1 #1/A:105,109,110,113,188,194,198,199,202,290,293,294,297,313,317,321 # name the ligand binding site of CPB OctB2R as site1
+        name site2 #2/A:100,104,105,108,183,189,193,194,197,282,285,286,289,306,310,314 # name the ligand binding site of PxOctB2R as site2
+        name site3 #3/A:104,108,109,112,185,191,195,196,199,286,289,290,293,309,313,317 # name the ligand binding site of PrOctB2R as site3
+        name site4 #4/A:111,115,116,119,192,198,202,203,206,293,296,297,300,316,320,324 # name the ligand binding site of BmOctB2R as site4
+        name site5 #5/A:113,117,118,121,194,200,204,205,208,295,298,299,302,318,322,326 # name the ligand binding site of CsOctB2R as site5
+        matchmaker site2 to site1 # perform pairwise structural superposition between the ligand binding residues of CPB OctB2R and other insect species OctB2R (superpose only on the ligand binding site itself, not on the whole structure itself)
+        matchmaker site3 to site1
+        matchmaker site4 to site1
+        matchmaker site5 to site1
+        preset "overall look" "publication 1 (silhouettes)"
+        select clear # remember to clear selection before rendering and saving the image
+        save "C:/Users/USER/Documents/Master_of_Science_in_Systems_Biology_GRA/Experimental_results/ligand_binding_site_identification_results/superimposed ligand binding site of CPB octopamine beta 2 receptor with other insect OctB2R.cxs"
+        """, language="bash")
+        st.markdown("[Visit the GPCRdb generic residue numbering (PDB) section to assign the GPCRdb generic numbers, and Ballesteros-Weinstein numbering to your input PDB GPCR structure. Remember to download the pymol script (pymol_view_generic_numbers.pml) to view the assigned generic numbers via PyMol to double check your identified ligand binding residues](https://gpcrdb.org/structure/generic_numbering_index)")
+        st.markdown("[Visit the GitHub page of gpcrmining python package](https://github.com/drorlab/GPCR-mining)")
+        st.markdown("[Visit the GPCRdb website to view the list of ligand binding residues of 2RH1](https://gpcrdb.org/interaction/2RH1)")
+
+        st.write("###")
+
+        st.write("**15. Perform pairwise sequence alignment between the CPB octopamine beta 2 receptor and 2RH1 via MUSCLE to identify whether the conserved motifs and seven transmembrane helices are conserved and aligned well to each other (to convince reviewer why you use 2RH1 (a type of ADRB2_HUMAN receptor) as the template when it comes to predicting the ligand binding site of CcOctB2R). Perform structural superimposition between the CPB octopamine beta 2 receptor and 2RH1 via UCSF ChimeraX to compute the refined RMSD value**")
+        st.write("✔️concatenate the CPB octopamine beta 2 receptor FASTA sequence with the 2RH1 FASTA sequence")
+        st.code("""
+        cat CPB_OctB2R_TRINITY_DN22425_c0_g1_i3_p1.fasta rcsb_pdb_2RH1.fasta > combined_CCOctB2R_and_2RH1_sequence.fasta # navigate to the working directory, /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template before you run this command
+        """, language="bash")
+        st.write("✔️rename the FASTA sequence headers")
+        st.code("""
+        sed 's/^>TRINITY_DN22425_c0_g1_i3.p1.*/>CcOct\u03B22R/; s/^>2RH1.*/>2RH1/' /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template/combined_CCOctB2R_and_2RH1_sequence.fasta > /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template/renamed_combined_CCOctB2R_and_2RH1_sequence.fasta
+        """, language="bash")
+        st.write("✔️run MSA via MUSCLE and view the MSA results (.aln) via JalView")
+        st.code("""
+        nohup muscle -align /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template/renamed_combined_CCOctB2R_and_2RH1_sequence.fasta -output /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template.aln -threads 16 -consiters 2 -refineiters 100 > /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template_output.log 2>&1 &
+        """, language="bash")
+        st.write("✔️run TMHMM to predict the transmembrane domains of the all the octopamine beta 2 receptor sequences to check whether they have 7 transmembrane domains of GPCR. Retain only those with 7 transmembrane helices (TMHs) for downstream analysis**")
+        st.code("""
+        cd /media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin # navigate into this working directory before you run tmhmm
+        export PATH="/media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin:$PATH" # note that the export of the PATH environment variable to the tmhmm executable file is just temporary and will only take effect for the current terminal session
+        which tmhmm # double check the system can access the tmhmm executable file correctly after exporting the PATH variable 
+        tmhmm /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template/renamed_combined_CCOctB2R_and_2RH1_sequence.fasta > /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template/tmhmm_results/tmhmm_CPB_octopamine_beta2_receptors_and_2RH1_results.out
+        """, language="bash")
+        st.code("""
+        pwd # print the current working directory of UCSF ChimeraX to check your file location now
+        cd C:\\Users\\USER\\Documents\\Master_of_Science_in_Systems_Biology_GRA\\Experimental_results\\ligand_binding_site_identification_results\\superimposition_between_energy_minimized_AlphaFold3_predicted_CPB_octopamine_beta2_receptor_and_2RH1 # navigate into the desired working directory containing the predicted 3D protein structures
+        open 2RH1.pdb (This will become your #1 structure)
+        open energy_minimized_.pdb (This will become your #2 structure)
+        select #1; hide sel target a # select your first loaded protein structure (#1) and hide all of its atom and stick representation
+        matchmaker #2 to #1 # perform structural superimposition to structurally superimpose the AlphaFold3-predicted CPB octopamine beta 2 receptor (labelled as #2) to 2RH1 as the reference structure (labelled as #1) to identify the ligand binding residues of AlphaFold3-predicted CPB octopamine beta 2 receptor that superimpose with the residues of 2RH1 (W116,D120,D121,V124,F200,Y206,S210,S211,S214,W421,F424,F425,N428,Y443,N447,Y451). In this case, #1 is the reference structure.
+        select #1/A:116,120,121,124,200,206,210,211,214,421,424,425,428,443,447,451; show sel target ab # select the ligand binding residues of 2RH1 and show them in atom and bond (stick) representation
+        manually hover your mouse over each of the ligand binding residue of 2RH1 and record down the superimposed ligand binding residue of the AlphaFold3-predicted CPB octopamine beta 2 receptor
+        select #2/A:105,109,110,113,188,194,198,199,202,290,293,294,297,313,317,321; show sel target ab # select the ligand binding residues of CPB OctB2R and show them in atom and bond (stick) representation
+        select #1/A; cartoon hide sel # hide the cartoon representation of structure #1
+        select #2/A; cartoon hide sel # hide the cartoon representation of structure #2
+        select #1/A:116,120,121,124,200,206,210,211,214,421,424,425,428,443,447,451; label sel text "{0.name} {0.number}{0.insertion_code}"
+        select #2/A:105,109,110,113,188,194,198,199,202,290,293,294,297,313,317,321; label sel text "{0.name} {0.number}{0.insertion_code}"
+        ui mousemode right "move label" # change the mouse setting so that you can right click the amino acid residue label and move them to arrange properly
+        save "C:/Users/USER/Documents/Master_of_Science_in_Systems_Biology_GRA/Experimental_results/ligand_binding_site_identification_results/superimposition between ligand binding residues of 2RH1 and CPB OctB2R.cxs"
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**16. install GalaxyRefine and run it locally to refine the structure of the AlphaFold3-predicted, SwissModel-predicted, and GPCR-I-TASSER-predicted CPB octopamine beta 2 receptor respectively. After finished running GalaxyRefine, view the results in UCSF ChimeraX and extract the first structure (delete the other 4 structures) for downstream protein structure evaluation.**")
+        st.code("""
+        navigate to /media/raid/Wee/WeeYeZhi/output/galaxyrefine_installation
+        fill up the galaxyweb software request form at https://galaxy.seoklab.org/request_softwares.html to request for the GalaxyRefine software installation files & download the software installation files inside the installation directory, /media/raid/Wee/WeeYeZhi/output/galaxyrefine_installation
+        unzip GalaxyRefine.zip
+        cd GalaxyRefine-master/
+        export GALAXY_HOME=/media/raid/Wee/WeeYeZhi/output/galaxyrefine_installation/GalaxyRefine-master # set the environment variable for GALAXY_HOME 
+        export PATH=$GALAXY_HOME/bin:$PATH
+        chmod +x $GALAXY_HOME/bin/*
+        $GALAXY_HOME/bin/GalaxyRefine -h # output the usage information of GalaxyRefine
+        mkdir /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results
+        nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output/CPB_octopamine_beta2_receptor/CPB_OctB2R/five_top_ranked_AlphaFold3_model/CPB_OctB2R_seed-1_sample-2_model.pdb -t GalaxyRefine_CPBOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/galaxyrefine_CPBOctB2R_results.log 2>&1 & # refine the AlphaFold3-predicted CPB octopamine beta 2 receptor
+        nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/swissmodel_prediction_results/swissmodel_predicted_CPB_octopamine_beta2_receptor.pdb -t GalaxyRefine_SwissModel_Predicted_CPBOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/galaxyrefine_swissmodel_predicted_CPBOctB2R_results.log 2>&1 & # refine the SwissModel-predicted CPB octopamine beta 2 receptor
+        nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/gpcritasser_prediction_results/gpcritasser_predicted_CPB_octopamine_beta2_receptor.pdb -t GalaxyRefine_GPCRITASSER_Predicted_CPBOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/galaxyrefine_GPCRITASSER_predicted_CPBOctB2R_results.log 2>&1 & # refine the GPCRItasser-predicted CPB octopamine beta 2 receptor
+        nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/AF-G3M4F8-F1-model_v6.pdb -t GalaxyRefine_CsOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/GalaxyRefine_CsOctB2R/galaxyrefine_CsOctB2R_results.log 2>&1 & # refine the Chilo suppressalis octopamine beta 2 receptor
+        nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/Bm_OctB2R_seed-1_sample-2_model.pdb -t GalaxyRefine_BmOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/GalaxyRefine_BmOctB2R/galaxyrefine_BmOctB2R_results.log 2>&1 & # refine the Bombyx mori octopamine beta 2 receptor
+        nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/Pr_OctB2R_seed-1_sample-3_model.pdb -t GalaxyRefine_PrOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/GalaxyRefine_PrOctB2R/galaxyrefine_PrOctB2R_results.log 2>&1 & # refine the Pieris rapae octopamine beta 2 receptor
+        nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/Px_OctB2R_seed-3_sample-3_model.pdb -t GalaxyRefine_PxOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/GalaxyRefine_PxOctB2R/galaxyrefine_PxOctB2R_results.log 2>&1 & # refine the Plutella xylostella octopamine beta 2 receptor
+        """, language="bash")
+        # ----LOAD THE GALAXYREFINE USAGE INFORMATION FILE----
+        # Check if the file exists before reading
+        if galaxyrefine_usage_information_file.exists():
+            with open(galaxyrefine_usage_information_file, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download The GalaxyRefine Usage Information File",
+                data=script_byte,
+                file_name=galaxyrefine_usage_information_file.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{galaxyrefine_usage_information_file.name} does not exist.")
+
+        st.write("###")
+
+        st.write("**17. run Yasara energy minimization of the Galaxy-refined AlphaFold3-predicted, SwissModel-predicted, and GPCR-I-TASSER-predicted CPB octopamine beta 2 receptor respectively via YASARA webserver and download Yasara View to view and save the YASARA-energy minimized CPB octopamine beta 2 receptor model in .PDB format**")
+        st.markdown("[Visit YASARA energy minimization webserver](https://www.yasara.org/minimizationserver.htm)")
+        st.markdown("[Visit YASARA tutorial](https://ceberndsen.github.io/YASARA-guide/file-types-and-how-to-work-with-them-in-yasara.html)")
+        st.markdown("[Visit YASARA View webpage to download YASARA View](https://www.yasara.org/viewdl.htm)")
+        st.markdown("[Read to understand the PDB file format](https://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#ATOM)")
+
+        st.write("###")
+
+        st.write("**18. perform 3D protein structure evaluation to evaluate the 3D structure of the CPB octopamine beta 2 receptor predicted by AlphaFold3, Swiss Model, and GPCR-I-TASSER respectively via SAVESserver, ProSA2003, MolProbity, and QMEANBrane**")
+        st.write("✔️install ProSa2003 (since the ProSA-Web server is closed temporarily due to attack by hackers)")
+        st.code("""
+        install ProSa2003 via Window # choose the ProSa2003 (Win XP/2000)
+        check your email and copy the academic license key into the LicenseDB file and save the LicenseDB file (without any file extension) in the .\ProSaData\LicenseDB\. working directory
+        unzip prosa2003.zip # download the prosa2003.zip file and unzip it
+        double click the Setup.exe to download the Window version of ProSA2003
+        """, language="bash")
+        st.write("✔️compute the zscore of the energy minimized AlphaFold3-predicted CPB octopamine beta 2 receptor via ProSa2003")
+        st.code("""
+        init zscore # after you open the ProSA2003 application, run this command to begin computing the Z-score of the predicted CPB octopamine beta 2 receptor
+        read pdb energy_minimized_alphafold3_predicted_CPB_octopamine_beta2_receptor.pdb AlphaFold3_predicted_CPB_octopamine_beta2_receptor # remember to move the file, energy_minimized_alphafold3_predicted_CPB_octopamine_beta2_receptor.pdb into the ProSA installation PDB directory, /mnt/c/prosa_installation/ProSa2003/PDB. In this case, name the receptor as AlphaFold3_predicted_CPB_octopamine_beta2_receptor
+        zscore AlphaFold3_predicted_CPB_octopamine_beta2_receptor AlphaFold3_predicted_CPB_octopamine_beta2_receptor_zscore # compute the Z-score of the CPB octopamine beta 2 receptor and save it. All the files will be saved in the working directory, /mnt/c/prosa_installation/ProSa2003
+        analyse energy AlphaFold3_predicted_CPB_octopamine_beta2_receptor # calculate the energy of AlphaFold3_predicted_CPB_octopamine_beta2_receptor
+        plot # display the energy graph of AlphaFold3_predicted_CPB_octopamine_beta2_receptor
+        export plot AlphaFold3_predicted_CPB_octopamine_beta2_receptor_plot # export a postscript file called obj1_plot.ps and save it. All the files will be saved in the working directory, /mnt/c/prosa_installation/ProSa2003
+        sudo apt install ghostscript # install ghostscript to handle the postscript file
+        ps2pdf AlphaFold3_predicted_CPB_octopamine_beta2_receptor_plot.ps AlphaFold3_predicted_CPB_octopamine_beta2_receptor_plot.pdf # convert the postscript file to pdf version to view the plot
+        """, language="bash")
+        st.write("✔️compute the zscore of the energy minimized SwissModel-predicted CPB octopamine beta 2 receptor via ProSa2003")
+        st.code("""
+        
+        """)
+        st.write("✔️compute the zscore of the energy minimized GPCR-I-TASSER-predicted CPB octopamine beta 2 receptor via ProSa2003")
+        st.code("""
+        
+        """, language="bash")
+        st.write("✔️use the Microsoft Excel advanced filter function to filter the DALI web server results table by the Z-score (from largest to smallest) first, followed by percentage of sequence identity (%id) (from largest to smallest), and rmsd columns (from smallest to largest)")
+        st.markdown("[Visit DALI web server](http://ekhidna2.biocenter.helsinki.fi/dali/)")
+        st.markdown("[Visit SAVESserver v6.1 webpage](https://saves.mbi.ucla.edu/)")
+        st.markdown("[Visit MolProbity](http://molprobity.biochem.duke.edu/)")
+        st.markdown("[Visit Swiss Model 3D Protein Structure Assessment](https://swissmodel.expasy.org/assess)")
+        st.markdown("[Visit Swiss Model QMEAN (Qualitative Model Energy Analysis) to run QMEANBrane](https://swissmodel.expasy.org/qmean/)")
+        st.markdown("[Visit ProSA2003 download page](https://www.came.sbg.ac.at/prosa.php)")
+        # ----LOAD ProSa2003 manual----
+        # Check if the file exists before reading
+        if prosa2003_manual.exists():
+            with open(prosa2003_manual, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download ProSa2003 manual to know how to run the standalone version of ProSa2003 using command lines (since ProSa web server has been temporarily shut down)",
+                data=script_byte,
+                file_name=prosa2003_manual.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{prosa2003_manual.name} does not exist.")
+        # ----LOAD QMEANBrane interpretation manual----
+        # Check if the file exists before reading
+        if qmeanbrane_manual.exists():
+            with open(qmeanbrane_manual, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download QMEANBrane manual to interpret QMEANBrane results",
+                data=script_byte,
+                file_name=qmeanbrane_manual.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{qmeanbrane_manual.name} does not exist.")
+
+        st.write("###")
+
+        st.write("**19. Run GROMACS**")
+        st.write("✔️check whether the NVIDIA GPU driver is set up and properly configured")
+        st.code("""
+        gmx mdrun -version # check whether GROMACS build was compiled with GPU support by checking the line, GPU support:
+        nvidia-smi # check the NVIDIA GPU driver version and CUDA version. Check whether the NVIDIA Driver is installed, check whether GPU is detected, and check whether the CUDA runtime exists. The driver version of the NVIDIA GPU is 575.57.08 and CUDA version is 12.9. 
+        nvcc --version # check the version of the CUDA compiler to check whether the CUDA toolkit is fully installed. The version of the NVIDIA CUDA compiler driver is 12.9.r12.9. CUDA is the backend of NVIDIA GPU driver that allows GROMACS to communicate with and utilize the NVIDIA GPU driver
+        modinfo nvidia | grep -w version # check the version of the NVIDIA GPU driver. The driver version is 575.57.08
+        """, language="bash")
+        st.write("✔️build GPU-enabled GROMACS from source code and configure GROMACS to utilize GPU while running")
+        st.code("""
+        wget ftp://ftp.gromacs.org/gromacs/gromacs-2026.2.tar.gz # navigate to the working directory, /media/raid/Wee/WeeYeZhi/output/GPU_enabled_GROMACS_installation, followed by downloading the source code of GROMACS
+        sudo apt-get install cmake build-essential snap gcc-11 g++-11 libopenmpi-dev # download the dependencies required for building GROMACS to run GROMACS using GPU
+        tar -xvzf gromacs-2026.2.tar.gz # extract the downloaded GROMACS folder
+        cd gromacs-2026.2
+        mkdir build
+        cd build
+        cmake .. -DGMX_GPU=CUDA -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DGMX_BUILD_OWN_FFTW=ON -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-12.9 # tell GROMACS that it is a CUDA configured GPU & build GROMACS on GPU. Remember to mention the GPU configuration using the -DGMX_GPU tag, mention the C and C++ compilers used by the GROMACS to build the C files using the -DCMAKE-C_COMPILER & -DCMAKE_CXX_COMPILER tag, mention the build protocol that should be used by GROMACS to build the GROMACS on GPU using the -DGMX_BUILD_OWN=ON tag, mention the CUDA toolkit path using the -DCUDA_TOOLKIT_ROOT_DIR tag. Run the command, which nvcc, to check the path of your system's CUDA toolkit. The -DGMX_GPU=CUDA tag builds GROMACS with NVIDIA GPU support enabled
+        grep GMX_GPU CMakeCache.txt # look for the line, GMX_GPU:STRING-CUDA to verify that CMake has successfully detected CUDA and configured GROMACS for NVIDIA GPU support
+        nohup make -j$(nproc) > build_GPU_enabled_GROMACS.log 2>&1 & # compile all the C files of GROMACS by using all the CPU cores simultaneously during compilation
+        sudo make install # install the newly compiled GROMACS 
+        source /usr/local/gromacs/bin/GMXRC # activate the newly compiled gromacs. You need to activate the newly compiled GROMACS everytime you open the new terminal session
+        which gmx # check which GROMACS installation is active
+        gmx mdrun -version # verify whether the GPU support has been successfully enabled. check whether GROMACS successfully detected and compiled with NVIDIA GPU CUDA support
+        nvidia-smi # During MD simulation, monitor GPU utilization. Check the utilization percentage of GPU using another Ubuntu terminal session while you are running the GROMACS mdrun program at the background (to run energy minimization, MD simulation, and calculation) to see whether GROMACS is run using GPU. If you see there's a certain utilization percentage of GPU, then it means that you have successfully run GROMACS using GPU instead of using the default CPU
+        """, language="bash")
+        st.markdown("[Visit Official GROMACS Download Page](https://manual.gromacs.org/current/download.html)")
+        st.markdown("[Visit Official GROMACS Installation Guide Page to build a GPU-enabled GROMACS](https://manual.gromacs.org/current/install-guide/index.html)")
+        st.markdown("[Watch YouTube video to learn how to build a GPU-enabled GROMACS. Note that the -DGMX_BUILD_OWN_FFTW=ON is the correct tag instead of specifying the outdated tag, -DGMX_BUILD_OWN=ON](https://www.youtube.com/watch?v=If1D2BIYgFg&t=1s)")
+        st.write("Note: Read the two publications, 'A beginner's guide to molecular dynamics simulations and the identification of cross-correlation networks for enzyme engineering' and 'Introductory tutorials for simulating protein dynamics with GROMACS' to understand how to run MD simulation")
+
+        st.write("###")
+
+        st.write("**20. run MD simulation of the CPB OctB2R-lipid bilayer complex via GROMACS for 100 ns first, followed by extending the MD simulation to 500 ns and to 1000 ns**")
+        st.write("✔️invoke the grompp and mdrun programme to run energy minimization of the receptor-lipid bilayer complex system to lower the overall potential energy of the system by removing overlapping atoms, steric clashes, suboptimal hydrogen bonding, and bad contacts")
+        st.code("""
+        nohup gmx grompp -f step6.0_minimization.mdp -c step5_input.gro -r step5_input.gro -p topol.top -o em.tpr > em_tpr.log 2>&1 & # navigate to the working directory, /media/raid/Wee/WeeYeZhi/output/charmmgui_results/charmm-gui-7882792398/gromacs, before you run the command
+        nohup gmx mdrun -deffnm em -nb gpu > em_mdrun.log 2>&1 & # run the calculation for non-bonded atomic interactions, PME electrostatic interactions, bonded interactions, and coordinate update/integration on GPU to accelerate the overall MD simulation process
+        gmx energy -f em.edr -o potential.xvg # execute the energy command to extract the potential energy (as a function of energy minimization step) of the system from the generated binary energy file (.edr). Select 13 (Potential) and 0 (to terminate input). Based on the potential energy plot, you will notice that the potential energy of the system drops dramatically in the first few steps as water molecules rearrange to optimize hydrogen bonding
+        """, language="bash")
+        st.write("Note: The receptor-lipid bilayer complex system was energy-minimized using the steepest descent method under positional and dihedral restraints. Positional restraint force constants of 4000, 2000, and 1000 kJ mol⁻¹ nm⁻² were applied to protein backbone atoms, protein side-chain atoms, and lipid molecules, respectively, while dihedral restraints were applied with a force constant of 1000 kJ mol⁻¹. This is to prevent both the protein and lipid bilayer membrane from distorting too much while bad steric clashes are removed. The maximum energy minimization step was set as 5000 and the energy minimization process stops when the maximum force reaches 1000 kJ mol⁻¹ nm−1. The neighbour list, van der Waals, and electrostatic cutoff were all set as 1.2 nm. Under periodic boundary conditions, the long-range electrostatic interactions were calculated using the Particle Mesh Ewald (PME) method with a real-space cutoff of 1.2nm. The LINCS method was used to constrain hydrogen-containing bonds since hydrogen atoms tend to vibrate very rapidly.")
+
+        st.write("###")
+
+        st.write("✔️invoke the grompp and mdrun programme to run NVT and NPT equilibration of the receptor-lipid bilayer complex system to bring the whole system to a stable temperature and pressure")
+        st.code("""
+        nohup gmx grompp -f step6.1_equilibration.mdp -c em.gro -r em.gro -p topol.top -n index.ndx -o step6.1.tpr > step6.1_tpr.log 2>&1 & # run first NVT equilibration
+        nohup gmx mdrun -s step6.1.tpr -deffnm step6.1 -nb gpu -pme gpu -bonded gpu -update gpu > step6.1_mdrun.log 2>&1 &
+        nohup gmx grompp -f step6.2_equilibration.mdp -c step6.1.gro -r step6.1.gro -t step6.1.cpt -p topol.top -n index.ndx -o step6.2.tpr > step6.2_tpr.log 2>&1 & # run second NVT equilibration
+        nohup gmx mdrun -s step6.2.tpr -deffnm step6.2 -nb gpu -pme gpu -bonded gpu -update gpu > step6.2_mdrun.log 2>&1 &
+        gmx energy -f step6.2.edr -o temperature_step6.2.xvg # extract the temperature of the system during NVT equilibration to plot a graph of system temperature against time. Select 17 (temperature) and 0 (to terminate input) 
+        nohup gmx grompp -f step6.3_equilibration.mdp -c step6.2.gro -r step6.2.gro -t step6.2.cpt -p topol.top -n index.ndx -o step6.3.tpr > step6.3_tpr.log 2>&1 & # run first NPT equilibration
+        nohup gmx mdrun -s step6.3.tpr -deffnm step6.3 -nb gpu -pme gpu -bonded gpu -update gpu > step6.3_mdrun.log 2>&1 &
+        nohup gmx grompp -f step6.4_equilibration.mdp -c step6.3.gro -r step6.3.gro -t step6.3.cpt -p topol.top -n index.ndx -o step6.4.tpr > step6.4_tpr.log 2>&1 & # run second NPT equilibration
+        nohup gmx mdrun -s step6.4.tpr -deffnm step6.4 -nb gpu -pme gpu -bonded gpu -update gpu > step6.4_mdrun.log 2>&1 &
+        nohup gmx grompp -f step6.5_equilibration.mdp -c step6.4.gro -r step6.4.gro -t step6.4.cpt -p topol.top -n index.ndx -o step6.5.tpr > step6.5_tpr.log 2>&1 & # run third NPT equilibration
+        nohup gmx mdrun -s step6.5.tpr -deffnm step6.5 -nb gpu -pme gpu -bonded gpu -update gpu > step6.5_mdrun.log 2>&1 &
+        nohup gmx grompp -f step6.6_equilibration.mdp -c step6.5.gro -r step6.5.gro -t step6.5.cpt -p topol.top -n index.ndx -o step6.6.tpr > step6.6_tpr.log 2>&1 & # run fourth NPT equilibration
+        nohup gmx mdrun -s step6.6.tpr -deffnm step6.6 -nb gpu -pme gpu -bonded gpu -update gpu > step6.6_mdrun.log 2>&1 &
+        gmx energy -f step6.6.edr -o pressure_step6.6.xvg # extract the pressure of the system during NPT equilibration to plot a graph of system pressure against time. Select 18 (pressure) and 0 (to terminate input)
+        """, language="bash")
+        st.write("Note: Following energy minimization, the insect receptor–lipid bilayer complex system was subjected to a six-step equilibration protocol consisting of initial NVT and subsequent NPT equilibration phases using GROMACS. The first two equilibration stages were performed under the canonical ensemble (NVT) for 125 ps each using a 1 fs integration timestep, whereas the subsequent four stages were conducted under the isothermal–isobaric ensemble (NPT) with semiisotropic pressure coupling. The first NPT stage employed a 1 fs timestep for 125 ps, followed by three additional NPT stages performed with a 2 fs timestep for 500 ps each, resulting in a total equilibration time of 1.875 ns. Temperature was maintained at 300 K using the velocity-rescale thermostat with separate coupling groups defined for the solute, membrane, and solvent components. Pressure equilibration was carried out using the stochastic cell-rescale barostat with semiisotropic coupling at 1 bar and a compressibility of 4.5 × 10⁻⁵ bar⁻¹. Long-range electrostatic interactions were calculated using the Particle Mesh Ewald (PME) method under periodic boundary conditions with a real-space cutoff of 1.2 nm, while van der Waals interactions were treated using a force-switch cutoff scheme between 1.0 and 1.2 nm. Hydrogen-containing bonds were constrained using the LINCS algorithm. During equilibration, positional restraints on protein backbone atoms, protein side chains, lipid molecules, and dihedral angles were gradually reduced across the six equilibration stages to allow progressive relaxation and stabilization of the membrane protein system prior to the production molecular dynamics simulation. The six-stage NVT and NPT equilibration protocol was performed to gradually relax and stabilize the insect receptor–lipid bilayer complex system prior to production molecular dynamics simulation. Initial NVT equilibration allowed the system temperature to stabilize while maintaining a constant volume, whereas subsequent NPT equilibration enabled pressure and system density adjustment under semiisotropic conditions suitable for membrane systems. The gradual reduction of positional and dihedral restraints across the six equilibration stages minimized structural distortion, prevented membrane instability, and allowed progressive adaptation of the protein, lipid bilayer, water molecules, and ions toward thermodynamically stable conditions.")
+        st.write("Note: The energy command is executed during the NVT equilibration to monitor temperature of the system whereas the energy command is executed during the NPT equilibration to monitor the pressure, density, box dimension, and potential energy of the system throughout the trajectory")
+
+        st.write("###")
+
+        st.write("✔️run the MD production simulation for 100 ns first, followed by extending the MD simulation to 500 ns and to 1000 ns")
+        st.code("""
+        nohup gmx grompp -f step7_production.mdp -c step6.6.gro -t step6.6.cpt -p topol.top -n index.ndx -o md_100ns.tpr > step7.0_tpr.log 2>&1 & # generate the portable binary run input file:
+        nohup gmx mdrun -s md_100ns.tpr -deffnm md_100ns -nb gpu -pme gpu -bonded gpu -update gpu > step7.0_100ns_mdrun.log 2>&1 & # run the 100 ns production simulation with GPU acceleration
+        nohup gmx convert-tpr -s md_100ns.tpr -extend 400000 -o md_500ns.tpr > extend_400000_mdrun.log 2>&1 & # extend the simulation from 100 ns → 500 ns
+        nohup gmx mdrun -s md_500ns.tpr -deffnm md_500ns -cpi md_100ns.cpt -noappend -nb gpu -pme gpu -bonded gpu -update gpu > step7.0_500ns_mdrun.log 2>&1 & # continue running the simulation up to 500 ns with GPU acceleration (to preserve the atom's velocities, thermostat state, barostat state, random seeds, and trajectory continuity)
+        nohup gmx convert-tpr -s md_500ns.tpr -extend 500000 -o md_1000ns.tpr > extend_500000_mdrun.log 2>&1 & # extend the simulation from 500 ns → 1000 ns
+        nohup gmx mdrun -s md_1000ns.tpr -deffnm md_1000ns -cpi md_500ns.cpt -noappend -nb gpu -pme gpu -bonded gpu -update gpu > step7.0_1000ns_mdrun.log 2>&1 & # continue running the simulation up to 1000 ns with GPU acceleration
+        gmx trjcat -f md_100ns.xtc md_500ns.xtc md_1000ns.xtc -o md_full_1000ns.xtc # concatenate trajectories together
+        gmx eneconv -f md_100ns.edr md_500ns.edr md_1000ns.edr -o md_full_1000ns.edr # concatenate energy files together
+        gmx trjconv -s md_100ns.tpr -f md_full_1000ns.xtc -o md_reimage.xtc -pbc mol -ur compact -center # Select group for centering: Protein & Select group for output: System. Under periodic boundary conditions, when molecules cross the box boundaries, the protein may look split, the lipid may look split, and the water may appear discontinuous, but physically this is nothing wrong as it is just visualization artifact. Hence, the goal of reimaging is to reconstruct the whole molecule, center the protein, and keep the membrane visually intact
+        gmx trjconv -s md_100ns.tpr -f md_reimage.xtc -o protein_fit.xtc -fit rot+trans # Select group for least squares fit: Backbone & Select group for output: Protein. Even after reimaging, the protein may still rotate and the whole system may still drift, which interferes with the downstream RMSD analysis. The goal of fitting is to remove global rotation and global translation while preserving the internal conformational motions. Fitting to backbone removes overall drifting, box movement, and rotational artifacts while preserving biologically meaningful motions
+        gmx trjconv -s md_100ns.tpr -f step6.6.gro -o protein.gro -pbc mol -ur compact -center # Select for both centering and output: Protein. Extract the protein-only coordinate and .tpr files
+        gmx convert-tpr -s md_100ns.tpr -o protein.tpr # Select for group to be written out: Protein to extract protein-only atoms, protein-only topology information, protein-only coordinates, and protein groups. The protein.tpr file can be used for subsequent visualization and analysis
+        watch -n 1 nvidia-smi # monitor the GPU usage (monitor GPU utilization, VRAM usage, temperature, and power draw)
+        """, language="bash")
+        st.write("Note: Following equilibration, a 100 ns production molecular dynamics simulation of the insect receptor–lipid bilayer complex system was performed using GROMACS with a 2 fs integration timestep under periodic boundary conditions. Temperature was maintained at 300 K using the velocity-rescale thermostat, while pressure was maintained at 1 bar using the semiisotropic stochastic cell-rescale barostat suitable for membrane systems. Long-range electrostatic interactions were calculated using the Particle Mesh Ewald (PME) method with a real-space cutoff of 1.2 nm, whereas van der Waals interactions were treated using a force-switch cutoff scheme between 1.0 and 1.2 nm. Hydrogen-containing bonds were constrained using the LINCS algorithm. The production simulation was subsequently extended to 500 ns and 1000 ns using checkpoint continuation to preserve system velocities and simulation states for long-timescale conformational analysis.")
+        st.write("Note: The gmx convert-tpr -extend does not restart from zero, erase your previous trajectory, randomize velocities again, or create a new independent simulation, but instead it only modifies the total allowed runtime stored inside the .tpr file")
+
+        st.write("###")
+
+        st.write("✔️analyze the MD simulation of the CPB OctB2R-lipid bilayer complex system using XMGrace and GNU Plot. RMSD: Is the protein stable? RMSF: Which residues fluctuate the most? Hbond: Are stabilizing interactions maintained? DSSP: Does secondary structure remain stable? PCA: What are the dominant large-scale motions?")
+        st.write("✔️calculate RMSD to investigate how much did the protein structure deviate from the reference structure over time to determine structural stability, equilibration quality, large conformational changes, and simulation convergence")
+        st.code("""
+        gmx rms -s protein.tpr -f protein_fit.xtc -tu ns -o rmsd.xvg # Select group for least squares fit: Backbone and Select group for RMSD calculation: Backbone (Choose backbone because backbone represents the overall protein fold and it is less noisy than the side chains)
+        """, language="bash")
+        st.write("✔️calculate RMSF to investigate how much each residue fluctuates during the simulation to identify flexible regions, stable regions, loops, terminal flexibility, and potentially functional motions (Normally, loops have high RMSF, termini has high RMSF, and helices/core has low RMSF)")
+        st.code("""
+        gmx rmsf -s protein.tpr -f protein_fit.xtc -res -o rmsf.xvg # Select group: C-alpha (using C-alpha gives residue-level flexibility, reduces side chain noise, and easier biological interpretation.)
+        """, language="bash")
+        st.write("✔️count the total number of hydrogen bonds formed (since hydrogen bonds help stabilize secondary structure, ligand binding, protein binding, and membrane protein conformations. Stable hydrogen bond numbers usually indicates stable protein fold and preserved secondary structure)")
+        st.code("""
+        gmx hbond -s protein.tpr -f protein_fit.xtc -num hb_bb.xvg # count the total number of backbone hydrogen bonds (intraprotein backbone Hbonds and secondary structure stability). Select MainChain+H for both groups
+        gmx hbond -s protein.tpr -f protein_fit.xtc -num hb_all.xvg # count the total number of protein hydrogen bonds. Select Protein for both groups.
+        """, language="bash")
+        st.write("✔️assign secondary structure elements (alpha helices, beta sheets, turns, coils) in proteins based on hydrogen bonding patterns via Dictionary of Protein Secondary Structure (DSSP), providing a time evolution of secondary structure throughout a specified trajectory. Calculate the average fluctuation statistics of secondary structure content. This is to investigate whether the helices remain stable, any unfolding process occurs, and any secondary structure transition happens, which is very important for membrane proteins")
+        st.code("""
+        gmx dssp -h # output the usage manual of the GROMACS-installed DSSP
+        gmx dssp -s protein.tpr -f protein_fit.xtc -tu ns -hmode dssp -o dssp.dat -num num.xvg
+        gmx analyze -f num.xvg # calculate the average and error estimates of the assigned secondary structure elements throughout the trajectory
+        """, language="bash")
+        st.write("✔️compute the covariance matrix and eigenvectors with eigenvalues to investigate how atoms move during the simulation, either they move upwards together (positive covariance) or one moves upward and one moves downward (negative covariance) during the simulation to perform PCA analysis to determine the dominant collective atomic motions. PCA does not prove biological mechanism automatically or prove protein activation directly, instead it only reveals the dominant collective motions")
+        st.code("""
+        gmx covar -s protein.tpr -f protein_fit.xtc -o eigenval.xvg -v eigenvec.trr -av average.pdb # Select a group for covariance analysis: Backbone. In this instance, average.pdb is the average structure during simulation, eigenval.xvg is the importance of each motion, and eigenvec.trr is the direction of motion
+        """, language="bash")
+        st.write("✔️visualize the dominant motions by projecting the trajectories motion onto PC1 and PC2, followed by extracting the extreme conformations (the largest conformational changes/dominant motion) to investigate what does the protein actually do along these motions and how much does the protein move along a particular motion direction. Large projection indicates strong conformational change while small projection indicates little movement. PC1 (eigenvector 1) is the largest motion while PC2 (eigenvector 2) is the second largest motion")
+        st.code("""
+        gmx anaeig -v eigenvec.trr -s protein.tpr -f protein_fit.xtc -first 1 -last 2 -extr extreme.pdb -proj proj.xvg # Select backbone. In this instance, the proj.xvg is the projection of trajectory along PC1/PC2 whereas the extreme.pdb file is the extreme conformation/motion
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("✔️extract only the stable, equilibrated portion of the trajectory based on the previous RMSD results for clustering and extraction of the top 3 representative protein conformation to be used for downstream ensemble docking")
+        st.code("""
+        gmx trjconv -s protein.tpr -f protein_fit.xtc -b 800000 -e 1000000 -skip 5 -o last200ns.xtc # suppose the last 200ns are stable trajectory.
+        """, language="bash")
+        st.write("Note: Specifying the tag, -skip 5, to skip frames reduces redundancy, speeds clustering, and usually preserves major conformational states since clustering a full 1000ns trajectory can be computationally heavy")
+        st.write("Note: The early unstable frames may create clusters representing relaxation artifacts, non-equilibrated states, unrealistic pocket geometries since you dont want unstable starting conformations, equilibration artifacts, membrane adaptation structures,, and distorted early states. Stable region clustering gives equilibrated receptor conformations, more reliable binding pockets, more physically meaningful states, and less noise in clustering. Instead of clustering the entire unstable trajectory blindly, this is often preferable for ensemble docking.")
+
+        st.write("###")
+
+        st.write("✔️perform RMSD-based GROMOS clustering analysis using a cutoff of 1.75 Å on Cα atoms to cluster structurally similar protein conformations with similar RMSD values together to identify the dominant receptor conformations throughout the MD trajectory. The three most populated clusters were selected as representative structures for subsequent ensemble molecular docking analyses.")
+        st.code("""
+        gmx cluster -s protein.tpr -f protein_fit.xtc -method gromos -cutoff 0.175 -o clusters.xpm -g cluster.log -cl cluster_centers.pdb -dist rmsd_dist.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph.
+        """, language="bash")
+        st.write("Note: Using representative MD-derived protein conformations helps account for protein flexibility, which improves docking realism")
 
         st.write("###")
 
@@ -1655,6 +2097,10 @@ if selected == "Additional Notes":
         st.code("""
         du -h --max-depth=1 /media/raid/ | sort -rh | head -n 10 # you can safely run this command within a created isolated conda environment as a non-root user
         """, language="bash")
+
+        st.write("###")
+
+        st.write("30. Use the keyboard shortcut, Ctrl + Y, to remove a specific line of code within the PyCharm IDE and use the keyboard shortcut, Ctrl + C and Ctrl + V, to copy and paste the line of code in PyCharm IDE")
 
         st.write("###")
 
