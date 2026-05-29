@@ -50,6 +50,7 @@ autodock4_ligand_batch_preparation_script = current_dir / "assets" / "prepare_li
 galaxyrefine_usage_information_file = current_dir / "assets" / "galaxyrefine_README.md"
 qmeanbrane_manual = current_dir / "assets" / "qmeanbrane_interpretation_manual.txt"
 prosa2003_manual = current_dir / "assets" / "prosa2003_manual.pdf"
+gpcritasser_cscore = current_dir / "assets" / "cscore_of_GPCR-I-TASSER-predicted_CcOctB2R.txt"
 
 # ---- HEADER SECTION ----
 with st.container():
@@ -1241,6 +1242,11 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.code("""
         zstd -d --keep af3.bin.zst
         """)
+        st.write("✔️check the installed AlphaFold3 version")
+        st.code("""
+        docker run --rm -it alphafold3 bash
+        git describe --tags # The version of the AlphaFold3 that you are using is AlphaFold3 v3.0.1-127-g608edb6
+        """, language="bash")
         st.write("✔️test your setup using the provided AlphaFold3 JSON file to check whether you have successfully set up AlphaFold3 on your HPC system")
         st.code("""
         docker run --user 0:0 -d --name alphafold3_testing -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/testing/fold_input.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/testing
@@ -1298,6 +1304,21 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.write("###")
 
         st.write("**10. Predict the 3D structure of the CPB octopamine beta 2 receptor via GPCR-I-TASSER webserver**")
+        # ----LOAD GCPR-I-TASSER results interpretation manual----
+        # Check if the file exists before reading
+        if gpcritasser_cscore.exists():
+            with open(gpcritasser_cscore, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download GPCR-I-TASSER results interpretation manual to interpret GPCR-I-TASSER of CcOctB2R results",
+                data=script_byte,
+                file_name=gpcritasser_cscore.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{gpcritasser_cscore.name} does not exist.")
         st.markdown("[Visit GPCR-I-TASSER webserver](https://aideepmed.com/GPCR-I-TASSER/)")
         st.markdown("[Read how to interpret the GPCR-I-TASSER results to know how to explain the C-score, TM-score, RMSD, No of decoys, and cluster density of the predicted structure](https://aideepmed.com/GPCR-I-TASSER/output/G1856/cscore.txt)")
 
@@ -1313,6 +1334,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.write("###")
 
         st.write("**12. Prepare the list of ligands using Gypsum-DL**")
+        st.write("✔️filter the ligands based on their insecticide-likeness properties via http://pesticides.cau.edu.cn/APPi.")
         st.write("✔️install the latest version of Gypsum-DL via the Python Package Index (PyPI) website using the following command")
         st.code("""
         conda create -n gypsum-dl
@@ -1341,7 +1363,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         obabel -V # output its version number (you are using OpenBabel v3.1.0)
         rm -rf openbabel # you can delete all the open babel source code files after you have successfully installed Open Babel to your designated directory to save space
         """)
-        st.write("✔️prepare the input file containing all the 18 SMILES strings of ligands with the PubChem ID, 26451, 18526103, 76145148, 19606232, 1480785, 26752, 577782, 255273, 1001, 36324, 2726, 2803, 36326, 439570, 4184, 4436, 5775, and 8969 from the PubChem database")
+        st.write("✔️prepare the input file containing all the 18 SMILES strings of ligands with the PubChem ID, 4581, 36324, 36326, 26451, 18526103, 76145148, 19606232, 1480785, 26752, 577782, 255273, 2726, 4184, 5775, and 8969 from the PubChem database")
         # ----LOAD THE LIGAND SMILES STRING FILE----
         # Check if the file exists before reading
         if ligands.exists():
@@ -1359,11 +1381,11 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
             st.error(f"{ligands.name} does not exist.")
         st.write("✔️run Gypsum-DL to generate the 3D molecular structures of ligands from SMILES format to SDF and PDB. Check all potential ionization, tautomeric, chiral, cis/trans isomeric, and ring-conformational forms at a pH range between 6.5 and 7.5 (The whole Gypsum-DL pipeline desalt all molecules, ionize all molecules, generate tautomers for all molecules, apply Durrant-lab filters to all molecules, enumerate all possible enantiomers for all molecules, enumerate all possible cis-trans isomers for all molecules, convert all molecules to 3D structures, generate several conformers of molecules with non-aromatic rings (boat vs chair), minimize all 3D molecular structures, make PDB output files, and save all molecules)")
         st.code("""
-        nohup gypsum-dl --source /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/ligands.smi --output_folder /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/gypsumdl_results --job_manager multiprocessing --num_processors 16 --max_variants_per_compound 5 --thoroughness 3 --min_ph 6.5 --max_ph 7.5 --pka_precision 1 --use_durrant_lab_filters --separate_output_files >  /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/gypsumdl_results/gypsumdl_results.log 2>&1 & # dont use the flag, --add_pdb_output, because the bond order information of ligands get lost after converting the ligands to PDB format, so you better omit this flag and use the generated default SDF files and later use OpenBabel to split and convert the SDF files into MOL2 format. 
+        nohup gypsum-dl --source /media/raid/Wee/WeeYeZhi/output/latest_ligand_preparation_results/ligands.smi --output_folder /media/raid/Wee/WeeYeZhi/output/latest_ligand_preparation_results/gypsumdl_results --job_manager multiprocessing --num_processors 16 --max_variants_per_compound 5 --thoroughness 3 --min_ph 6.5 --max_ph 7.5 --pka_precision 1 --use_durrant_lab_filters --separate_output_files >  /media/raid/Wee/WeeYeZhi/output/latest_ligand_preparation_results/gypsumdl_results/gypsumdl_results.log 2>&1 & # dont use the flag, --add_pdb_output, because the bond order information of ligands get lost after converting the ligands to PDB format, so you better omit this flag and use the generated default SDF files and later use OpenBabel to split and convert the SDF files into MOL2 format. 
         """, language="python")
         st.write("✔️split each SDF file of ligand (generated by Gypsum-DL) into multiple separate files of ligand variants (due to having different tautomers, ionization states, & cis-trans isomers) via OpenBabel")
         st.code("""
-        obabel ../gypsumdl_results/1-_4-chlorophenyl_imidazolidin-2-one__input1.sdf -O PubChem_26451_variant.sdf -m # navigate the working directory, /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/openbabel_results, before you run all these list of obabel commands for splitting.
+        obabel ../gypsumdl_results/1-_4-chlorophenyl_imidazolidin-2-one__input1.sdf -O PubChem_26451_variant.sdf -m # navigate the working directory, /media/raid/Wee/WeeYeZhi/output/latest_ligand_preparation_results/openbabel_results, before you run all these list of obabel commands for splitting.
         obabel ../gypsumdl_results/1-_4-bromophenyl_imidazolidin-2-one__input2.sdf -O PubChem_18526103_variant.sdf -m 
         obabel ../gypsumdl_results/1-_4-ethoxyphenyl_imidazolidin-2-one__input3.sdf -O PubChem_76145148_variant.sdf -m 
         obabel ../gypsumdl_results/1-_4-ethylphenyl_imidazolidin-2-one__input4.sdf -O PubChem_19606232_variant.sdf -m 
@@ -1371,19 +1393,17 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         obabel ../gypsumdl_results/1-_4-methoxyphenyl_imidazolidin-2-one__input6.sdf -O PubChem_26752_variant.sdf -m 
         obabel ../gypsumdl_results/1-_4-methylphenyl_imidazolidin-2-one__input7.sdf -O PubChem_577782_variant.sdf -m 
         obabel ../gypsumdl_results/1-phenylimidazolidin-2-one__input8.sdf -O PubChem_255273_variant.sdf -m 
-        obabel ../gypsumdl_results/2-phenylethylamine__input9.sdf -O PubChem_1001_variant.sdf -m 
-        obabel ../gypsumdl_results/amitraz__input10.sdf -O PubChem_36324_variant.sdf -m 
-        obabel ../gypsumdl_results/chlorpromazine__input11.sdf -O PubChem_2726_variant.sdf -m 
-        obabel ../gypsumdl_results/clonidine__input12.sdf -O PubChem_2803_variant.sdf -m 
-        obabel ../gypsumdl_results/DPMF__input13.sdf -O PubChem_36326_variant.sdf -m 
-        obabel ../gypsumdl_results/L-carvone__input14.sdf -O PubChem_439570_variant.sdf -m 
-        obabel ../gypsumdl_results/mianserin__input15.sdf -O PubChem_4184_variant.sdf -m 
-        obabel ../gypsumdl_results/naphazoline__input16.sdf -O PubChem_4436_variant.sdf -m 
-        obabel ../gypsumdl_results/phentolamine__input17.sdf -O PubChem_5775_variant.sdf -m 
-        obabel ../gypsumdl_results/yohimbine__input18.sdf -O PubChem_8969_variant.sdf -m 
+        obabel ../gypsumdl_results/amitraz__input9.sdf -O PubChem_36324_variant.sdf -m 
+        obabel ../gypsumdl_results/chlorpromazine__input10.sdf -O PubChem_2726_variant.sdf -m 
+        obabel ../gypsumdl_results/DPMF__input11.sdf -O PubChem_36326_variant.sdf -m 
+        obabel ../gypsumdl_results/mianserin__input12.sdf -O PubChem_4184_variant.sdf -m 
+        obabel ../gypsumdl_results/phentolamine__input13.sdf -O PubChem_5775_variant.sdf -m 
+        obabel ../gypsumdl_results/yohimbine__input14.sdf -O PubChem_8969_variant.sdf -m 
+        obabel ../gypsumdl_results/octopamine__input15.sdf -O PubChem_4581_variant.sdf -m 
         """, language="bash")
-        st.write("✔️convert all the 84 SDF files of ligands from the .sdf format to .mol2 format via OpenBabel")
+        st.write("✔️convert all the 73 SDF files of ligands from the .sdf format to .mol2 format via OpenBabel")
         st.code("""
+        ls -l | wc -l # count the total number of SDF files (variants) generated after splitting 
         obabel *.sdf -omol2 -m
         """, language="bash")
         st.write("✔️perform batch preparation of ligands using the prepare_ligand4.py package of AutoDock MGL Tools to convert all the 84 ligands from PDB format to PDBQT format")
@@ -1393,7 +1413,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         navigate to autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py
         navigate to autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py # just in case if you want to use it to prepare protein in batch later
         /media/raid/Wee/WeeYeZhi/output/autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/bin/pythonsh /media/raid/Wee/WeeYeZhi/output/autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py -h # output the command-line usage. remember to use the MGLTools internal Python interpreter (pythonsh) instead of using the HPC system's python when you run the prepare_ligand4.py python script
-        bash /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/ligand_batch_preparation_script/batch_preparation_of_ligands.sh # run this bash script to perform batch preparation of ligands by adding polar hydrogens,adding Gasteiger charges, and removing non-polar hydrogens from the ligands
+        bash /media/raid/Wee/WeeYeZhi/output/latest_ligand_preparation_results/ligand_batch_preparation_script/batch_preparation_of_ligands.sh # run this bash script to perform batch preparation of ligands by adding polar hydrogens,adding Gasteiger charges, and removing non-polar hydrogens from the ligands
         """, language="bash")
         # ----LOAD AUTODOCK4 prepare_ligand4.py SCRIPT----
         # Check if the file exists before reading
@@ -1433,6 +1453,18 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.markdown("[Visit the official AutoDock website](https://autodock.scripps.edu/)")
         st.markdown("[Read the useful resources of AutoDock4 and AutoDock Vina](https://autodock.scripps.edu/resources/)")
         st.markdown("[Watch YouTube video to learn how to perform batch preparation of ligands](https://www.youtube.com/watch?v=_Blz2DxSAtQ&t=44s)")
+        st.write("Note: Unlike Open Babel, Gypsum-DL often generates multiple variants of each compound with differing ionization, tautomeric, chiral, cis/trans isomeric, and ring-conformational states.")
+
+        st.write("###")
+
+        st.write("**13. Filter the list of ligands based on ZINC22 filters, 3D compounds, molecular weight <= 450Da, logP<=5, only clean compound, only in stock purchase, ref and mid pH, and default charge value**")
+        st.code("""
+        curl -X GET https://cartblanche22.docking.org/smiles.txt -F smiles=@/media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/ZINC22_filter_results/one_ligand_smiles.txt -F dist=0 -F adist=0 -o /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/ZINC22_filter_results/ZINC22_filter_results.json
+        curl -X GET https://cartblanche22.docking.org/search/saveResult/22059c83-86db-4f0b-89af-b4acb89afb65.txt -o zinc_results.txt
+        curl -L "https://cartblanche.docking.org/search/saveResult/916a2d21-1286-49de-9d7d-29100dfc1f8c.txt" -o zinc_results.txt
+        """, language="bash")
+        st.markdown("[Visit ZINC22 SMILES string search database](https://cartblanche22.docking.org/search/smiles)")
+        st.markdown("[Read how to search the ZINC22 database by ZINCIDs, SMILES string, supplier code IDs, and download molecules in bulk using the curl command](https://wiki.docking.org/index.php/Zinc22:Searching)")
 
         st.write("###")
 
@@ -1669,13 +1701,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         ps2pdf AlphaFold3_predicted_CPB_octopamine_beta2_receptor_plot.ps AlphaFold3_predicted_CPB_octopamine_beta2_receptor_plot.pdf # convert the postscript file to pdf version to view the plot
         """, language="bash")
         st.write("✔️compute the zscore of the energy minimized SwissModel-predicted CPB octopamine beta 2 receptor via ProSa2003")
-        st.code("""
-        
-        """)
         st.write("✔️compute the zscore of the energy minimized GPCR-I-TASSER-predicted CPB octopamine beta 2 receptor via ProSa2003")
-        st.code("""
-        
-        """, language="bash")
         st.write("✔️use the Microsoft Excel advanced filter function to filter the DALI web server results table by the Z-score (from largest to smallest) first, followed by percentage of sequence identity (%id) (from largest to smallest), and rmsd columns (from smallest to largest)")
         st.markdown("[Visit DALI web server](http://ekhidna2.biocenter.helsinki.fi/dali/)")
         st.markdown("[Visit SAVESserver v6.1 webpage](https://saves.mbi.ucla.edu/)")
@@ -1789,11 +1815,10 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         nohup gmx mdrun -s md_500ns.tpr -deffnm md_500ns -cpi md_100ns.cpt -noappend -nb gpu -pme gpu -bonded gpu -update gpu > step7.0_500ns_mdrun.log 2>&1 & # continue running the simulation up to 500 ns with GPU acceleration (to preserve the atom's velocities, thermostat state, barostat state, random seeds, and trajectory continuity)
         nohup gmx convert-tpr -s md_500ns.tpr -extend 500000 -o md_1000ns.tpr > extend_500000_mdrun.log 2>&1 & # extend the simulation from 500 ns → 1000 ns
         nohup gmx mdrun -s md_1000ns.tpr -deffnm md_1000ns -cpi md_500ns.cpt -noappend -nb gpu -pme gpu -bonded gpu -update gpu > step7.0_1000ns_mdrun.log 2>&1 & # continue running the simulation up to 1000 ns with GPU acceleration
-        gmx trjcat -f md_100ns.xtc md_500ns.xtc md_1000ns.xtc -o md_full_1000ns.xtc # concatenate trajectories together
-        gmx eneconv -f md_100ns.edr md_500ns.edr md_1000ns.edr -o md_full_1000ns.edr # concatenate energy files together
-        gmx trjconv -s md_100ns.tpr -f md_full_1000ns.xtc -o md_reimage.xtc -pbc mol -ur compact -center # Select group for centering: Protein & Select group for output: System. Under periodic boundary conditions, when molecules cross the box boundaries, the protein may look split, the lipid may look split, and the water may appear discontinuous, but physically this is nothing wrong as it is just visualization artifact. Hence, the goal of reimaging is to reconstruct the whole molecule, center the protein, and keep the membrane visually intact
-        gmx trjconv -s md_100ns.tpr -f md_reimage.xtc -o protein_fit.xtc -fit rot+trans # Select group for least squares fit: Backbone & Select group for output: Protein. Even after reimaging, the protein may still rotate and the whole system may still drift, which interferes with the downstream RMSD analysis. The goal of fitting is to remove global rotation and global translation while preserving the internal conformational motions. Fitting to backbone removes overall drifting, box movement, and rotational artifacts while preserving biologically meaningful motions
-        gmx trjconv -s md_100ns.tpr -f step6.6.gro -o protein.gro -pbc mol -ur compact -center # Select for both centering and output: Protein. Extract the protein-only coordinate and .tpr files
+        nohup gmx trjcat -f md_100ns.xtc md_500ns.part0002.xtc md_1000ns.part0003.xtc -o md_full_1000ns.xtc > concatenate_trajectory.log 2>&1 & # concatenate trajectories together
+        nohup gmx eneconv -f md_100ns.edr md_500ns.part0002.edr md_1000ns.part0003.edr -o md_full_1000ns.edr > concatenate_energy.log 2>&1 & # concatenate energy files together
+        gmx trjconv -s md_100ns.tpr -f md_full_1000ns.xtc -o md_reimage.xtc -pbc mol -ur compact -center # Select group for centering: Protein & Select group for output: System. The md_reimage.xtc file is the corrected whole system trajectory. Under periodic boundary conditions, when molecules cross the box boundaries, the protein may look split, the lipid may look split, and the water may appear discontinuous, but physically this is nothing wrong as it is just visualization artifact. Hence, the goal of reimaging is to reconstruct the whole molecule, center the protein, and keep the membrane visually intact
+        gmx trjconv -s md_100ns.tpr -f md_reimage.xtc -o protein_fit.xtc -fit rot+trans # Select group for least squares fit: Backbone & Select group for output: Protein. The protein_fit.xtc becomes the main analysis trajectory file used for analyzing RMSD, RMSF, Hbond, PCA, clustering, and ensemble docking since it has PBC artifacts removed, protein centered, global rotation removed, and global translation removed. Even after reimaging, the protein may still rotate and the whole system may still drift, which interferes with the downstream RMSD analysis. The goal of fitting is to remove global rotation and global translation while preserving the internal conformational motions. Fitting to backbone removes overall drifting, box movement, and rotational artifacts while preserving biologically meaningful motions
         gmx convert-tpr -s md_100ns.tpr -o protein.tpr # Select for group to be written out: Protein to extract protein-only atoms, protein-only topology information, protein-only coordinates, and protein groups. The protein.tpr file can be used for subsequent visualization and analysis
         watch -n 1 nvidia-smi # monitor the GPU usage (monitor GPU utilization, VRAM usage, temperature, and power draw)
         """, language="bash")
@@ -1802,25 +1827,81 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("✔️analyze the MD simulation of the CPB OctB2R-lipid bilayer complex system using XMGrace and GNU Plot. RMSD: Is the protein stable? RMSF: Which residues fluctuate the most? Hbond: Are stabilizing interactions maintained? DSSP: Does secondary structure remain stable? PCA: What are the dominant large-scale motions?")
-        st.write("✔️calculate RMSD to investigate how much did the protein structure deviate from the reference structure over time to determine structural stability, equilibration quality, large conformational changes, and simulation convergence")
+        st.write("✔️create an index group for TM helices only, followed by extracting the topology information and MD simulation trajectory of TM helices only. Expect to observe lower RMSD values since loops no longer dominate the motion, termini no longer inflate RMSD, and only the GPCR core is measured")
         st.code("""
-        gmx rms -s protein.tpr -f protein_fit.xtc -tu ns -o rmsd.xvg # Select group for least squares fit: Backbone and Select group for RMSD calculation: Backbone (Choose backbone because backbone represents the overall protein fold and it is less noisy than the side chains)
+        gmx make_ndx -f step6.6.gro -o tm_helices.ndx # create TM index. Type, r 31-54 | r 66-87 | r 104-125 | r 146-167 | r 195-215 | r 279-298 | r 311-334, and press "Enter", followed by typing, name 17 TM_helices, to rename the newly created index group as TM_helices and position the newly created index group as 17. Type "q" to quit
+        gmx convert-tpr -s protein.tpr -n tm_helices.ndx -o tm_helices.tpr # Select 17 (TM_helices) to extract TM-only topology
+        gmx trjconv -s protein.tpr -f protein_fit.xtc -n tm_helices.ndx -o tm_helices_fit.xtc # Select 17 (TM_helices) to extract TM-only trajectory
         """, language="bash")
-        st.write("✔️calculate RMSF to investigate how much each residue fluctuates during the simulation to identify flexible regions, stable regions, loops, terminal flexibility, and potentially functional motions (Normally, loops have high RMSF, termini has high RMSF, and helices/core has low RMSF)")
+
+        st.write("###")
+
+        st.write("✔️create an index group for TM helices and two ECL residues (residue 188 & 194) only (since both are ligand binding residues), followed by extracting the topology information and MD simulation trajectory of TM helices and two ECL residues (residue 188 & 194) only. Expect to observe lower RMSD values since loops no longer dominate the motion, termini no longer inflate RMSD, and only the GPCR core is measured")
         st.code("""
+        gmx make_ndx -f step6.6.gro -o tm_helices_ecl.ndx # create TM and ECL index. Type, r 31-54 | r 66-87 | r 104-125 | r 146-167 | r 188 | r 194 | r 195-215 | r 279-298 | r 311-334, and press "Enter", followed by typing, name 17 TM_ecl_helices, to rename the newly created index group as TM_ecl_helices and position the newly created index group as 17. Type "q" to quit
+        gmx convert-tpr -s protein.tpr -n tm_helices_ecl.ndx -o tm_helices_ecl.tpr # Select 17 (TM_ecl_helices) to extract TM_ecl-only topology
+        gmx trjconv -s protein.tpr -f protein_fit.xtc -n tm_helices_ecl.ndx -o tm_helices_ecl_fit.xtc # Select 17 (TM_ecl_helices) to extract TM_ecl-only trajectory
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("✔️analyze the MD simulation of the CPB OctB2R-lipid bilayer complex system using XMGrace, VMD, and GNU Plot. RMSD: Is the protein stable? RMSF: Which residues fluctuate the most? Hbond: Are stabilizing interactions maintained? DSSP: Does secondary structure remain stable? PCA: What are the dominant large-scale motions?")
+        st.write("✔️calculate the TM-helices only's and protein's backbone RMSD to investigate how much did the protein structure deviate from the reference structure over time to determine structural stability, equilibration quality, large conformational changes, and simulation convergence. To answer questions like does the insect receptor structure maintain its structure? does the binding pocket collapse? does the transmembrane region stay stable?")
+        st.code("""
+        gmx rms -s tm_helices.tpr -f tm_helices_fit.xtc -tu ns -o tm_rmsd.xvg # Select group for least squares fit: Backbone and Select group for RMSD calculation: Backbone
+        gmx rms -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -tu ns -o tm_ecl_rmsd.xvg # Select group for least squares fit: Backbone and Select group for RMSD calculation: Backbone
+        gmx rms -s protein.tpr -f protein_fit.xtc -tu ns -o rmsd.xvg # Select group for least squares fit: Backbone and Select group for RMSD calculation: Backbone (Choose backbone because backbone represents the overall protein fold and it is less noisy than the side chains). 
+        xmgrace tm_rmsd.xvg # expect to see lower RMSD values since there are no flexible loops, C-terminus, N-terminus, intracellular loops (ICLs), and extracellular loops (ECLs). Visualize the RMSD plot inside a graphical user interface (GUI) in SCREEN mode, not in REMOTE TERMINAL mode.
+        xmgrace tm_ecl_rmsd.xvg # expect to see lower RMSD values since there are no flexible loops, C-terminus, N-terminus, intracellular loops (ICLs), and extracellular loops (ECLs). Visualize the RMSD plot inside a graphical user interface (GUI) in SCREEN mode, not in REMOTE TERMINAL mode.
+        xmgrace rmsd.xvg # expect to see large RMSD values since there are presence of flexible loops, C-terminus, N-terminus, intracellular loops (ICLs), and extracellular loops (ECLs)
+        """, language="bash")
+        st.write("✔️calculate the TM-helices only's and protein's C-alpha RMSF to investigate how much each residue fluctuates during the simulation to identify flexible regions, stable regions, loops, terminal flexibility, and potentially functional motions (Normally, loops have high RMSF, termini has high RMSF, and helices/core has low RMSF)")
+        st.code("""
+        gmx rmsf -s tm_helices.tpr -f tm_helices_fit.xtc -res -o tm_rmsf.xvg # Select group: C-alpha
+        gmx rmsf -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -res -o tm_ecl_rmsf.xvg # Select group: C-alpha
         gmx rmsf -s protein.tpr -f protein_fit.xtc -res -o rmsf.xvg # Select group: C-alpha (using C-alpha gives residue-level flexibility, reduces side chain noise, and easier biological interpretation.)
+        xmgrace tm_rmsf.xvg
+        xmgrace tm_ecl_rmsf.xvg
+        xmgrace rmsf.xvg
+        """, language="bash")
+        st.write("✔️investigate the compactness of the protein during the simulation")
+        st.code("""
+        gmx gyrate -s tm_helices.tpr -f tm_helices_fit.xtc -tu ns -o tm_rg.xvg # Select Protein
+        gmx gyrate -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -tu ns -o tm_ecl_rg.xvg # Select Protein
+        gmx gyrate -s protein.tpr -f protein_fit.xtc -tu ns -o rg.xvg # Select Protein
+        xmgrace tm_rg.xvg
+        xmgrace tm_ecl_rg.xvg
+        xmgrace rg.xvg 
+        """, language="bash")
+        st.write("✔️run sasa analysis to investigate solvent accessibility of protein")
+        st.code("""
+        gmx sasa -s tm_helices.tpr -f tm_helices_fit.xtc -tu ns -o tm_sasa.xvg # Select Protein
+        gmx sasa -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -tu ns -o tm_ecl_sasa.xvg # Select Protein 
+        gmx sasa -s protein.tpr -f protein_fit.xtc -tu ns -o sasa.xvg # Select Protein 
+        xmgrace tm_sasa.xvg
+        xmgrace tm_ecl_sasa.xvg
+        xmgrace sasa.xvg
         """, language="bash")
         st.write("✔️count the total number of hydrogen bonds formed (since hydrogen bonds help stabilize secondary structure, ligand binding, protein binding, and membrane protein conformations. Stable hydrogen bond numbers usually indicates stable protein fold and preserved secondary structure)")
         st.code("""
-        gmx hbond -s protein.tpr -f protein_fit.xtc -num hb_bb.xvg # count the total number of backbone hydrogen bonds (intraprotein backbone Hbonds and secondary structure stability). Select MainChain+H for both groups
-        gmx hbond -s protein.tpr -f protein_fit.xtc -num hb_all.xvg # count the total number of protein hydrogen bonds. Select Protein for both groups.
+        gmx hbond -s tm_helices.tpr -f tm_helices_fit.xtc -num tm_hb_bb.xvg -tu ns # Select MainChain+H for both groups
+        gmx hbond -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -num tm_ecl_hb_bb.xvg -tu ns # Select MainChain+H for both groups
+        gmx hbond -s protein.tpr -f protein_fit.xtc -num hb_bb.xvg -tu ns #  Select MainChain+H for both groups. Count the total number of backbone hydrogen bonds (intraprotein backbone Hbonds and secondary structure stability). 
+        gmx hbond -s protein.tpr -f protein_fit.xtc -num hb_all.xvg -tu ns # Select Protein for both groups. Count the total number of protein hydrogen bonds. 
+        xmgrace tm_hb_bb.xvg
+        xmgrace tm_ecl_hb_bb.xvg
+        xmgrace hb_bb.xvg
+        xmgrace hb_all.xvg
         """, language="bash")
-        st.write("✔️assign secondary structure elements (alpha helices, beta sheets, turns, coils) in proteins based on hydrogen bonding patterns via Dictionary of Protein Secondary Structure (DSSP), providing a time evolution of secondary structure throughout a specified trajectory. Calculate the average fluctuation statistics of secondary structure content. This is to investigate whether the helices remain stable, any unfolding process occurs, and any secondary structure transition happens, which is very important for membrane proteins")
+        st.write("✔️investigate the time evolution of secondary structure stability throughout the MD simulation. Calculate the average fluctuation statistics of secondary structure content. This is to investigate whether the helices remain stable, any unfolding process occurs, and any secondary structure transition happens, which is very important for membrane proteins")
         st.code("""
         gmx dssp -h # output the usage manual of the GROMACS-installed DSSP
-        gmx dssp -s protein.tpr -f protein_fit.xtc -tu ns -hmode dssp -o dssp.dat -num num.xvg
-        gmx analyze -f num.xvg # calculate the average and error estimates of the assigned secondary structure elements throughout the trajectory
+        gmx dssp -s tm_helices.tpr -f tm_helices_fit.xtc -tu ns -hmode dssp -o tm_dssp.dat -num tm_dssp_num.xvg # Select Protein. The ss.xpm file refers to the secondary structure map across time and residues. The scount.xvg file refers to the count of helix, sheet, bend, turn, loop etc over time
+        gmx analyze -f tm_dssp_num.xvg # calculate the average and error estimates of the assigned secondary structure elements throughout the trajectory
+        gmx dssp -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -tu ns -hmode dssp -o tm_ecl_dssp.dat -num tm_ecl_dssp_num.xvg # Select Protein. The ss.xpm file refers to the secondary structure map across time and residues. The scount.xvg file refers to the count of helix, sheet, bend, turn, loop etc over time
+        gmx analyze -f tm_ecl_dssp_num.xvg # calculate the average and error estimates of the assigned secondary structure elements throughout the trajectory
+        gmx dssp -s protein.tpr -f protein_fit.xtc -tu ns -hmode dssp -o dssp.dat -num dssp_num.xvg # Select Protein. The ss.xpm file refers to the secondary structure map across time and residues. The scount.xvg file refers to the count of helix, sheet, bend, turn, loop etc over time
+        gmx analyze -f dssp_num.xvg # calculate the average and error estimates of the assigned secondary structure elements throughout the trajectory
         """, language="bash")
         st.write("✔️compute the covariance matrix and eigenvectors with eigenvalues to investigate how atoms move during the simulation, either they move upwards together (positive covariance) or one moves upward and one moves downward (negative covariance) during the simulation to perform PCA analysis to determine the dominant collective atomic motions. PCA does not prove biological mechanism automatically or prove protein activation directly, instead it only reveals the dominant collective motions")
         st.code("""
@@ -1828,25 +1909,36 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         """, language="bash")
         st.write("✔️visualize the dominant motions by projecting the trajectories motion onto PC1 and PC2, followed by extracting the extreme conformations (the largest conformational changes/dominant motion) to investigate what does the protein actually do along these motions and how much does the protein move along a particular motion direction. Large projection indicates strong conformational change while small projection indicates little movement. PC1 (eigenvector 1) is the largest motion while PC2 (eigenvector 2) is the second largest motion")
         st.code("""
-        gmx anaeig -v eigenvec.trr -s protein.tpr -f protein_fit.xtc -first 1 -last 2 -extr extreme.pdb -proj proj.xvg # Select backbone. In this instance, the proj.xvg is the projection of trajectory along PC1/PC2 whereas the extreme.pdb file is the extreme conformation/motion
+        gmx anaeig -v eigenvec.trr -s protein.tpr -f protein_fit.xtc -first 1 -last 2 -extr extreme.pdb -proj proj.xvg # Select backbone. In this instance, the proj.xvg is the projection of trajectory along PC1/PC2 whereas the extreme.pdb file is the extreme conformation/motion. The proj.xvg file refers to the trajectory file projected onto PCs. The extreme1.pdb file refers to the extreme motion along PC1 (structure at maximum/minimum along PC1) whereas the extreme2.pdb file refers to the extreme motion along PC2 (structure at maximum/minimum along PC2). The two extreme.pdb files show how the protein moves in its most dominant functional direction. You can answer questions like does PC1 affect binding site? does motion open/close pocket? does ligand stabilize or restrict PC motion (you can compare between apo system PCA vs ligand bound PCA)?
+        vmd protein.tpr extreme1.pdb # visualize the protein structure via VMD
+        vmd protein.tpr extreme2.pdb
         """, language="bash")
 
         st.write("###")
 
-        st.write("✔️extract only the stable, equilibrated portion of the trajectory based on the previous RMSD results for clustering and extraction of the top 3 representative protein conformation to be used for downstream ensemble docking")
+        st.write("✔️extract the whole topology information and the whole insect transmembrane protein structure trajectory (including loops) during the period where the RMSD values of TM helix bundle reach plateau (stabilize) (since loops fluctuate naturally, loops inflate RMSD artificially, TM core reflects actual receptor stability, but after determining stability, you still keep the whole receptor, including ECLs and ICLs for biologically realistic docking).")
         st.code("""
-        gmx trjconv -s protein.tpr -f protein_fit.xtc -b 800000 -e 1000000 -skip 5 -o last200ns.xtc # suppose the last 200ns are stable trajectory.
+        gmx trjconv -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -b 600000 -e 1000000 -o stable_600_1000ns.xtc # Select Protein. The last 400ns trajectory is considered stable. In this case, the value for -b and -e are in picosecond (ps).
         """, language="bash")
-        st.write("Note: Specifying the tag, -skip 5, to skip frames reduces redundancy, speeds clustering, and usually preserves major conformational states since clustering a full 1000ns trajectory can be computationally heavy")
-        st.write("Note: The early unstable frames may create clusters representing relaxation artifacts, non-equilibrated states, unrealistic pocket geometries since you dont want unstable starting conformations, equilibration artifacts, membrane adaptation structures,, and distorted early states. Stable region clustering gives equilibrated receptor conformations, more reliable binding pockets, more physically meaningful states, and less noise in clustering. Instead of clustering the entire unstable trajectory blindly, this is often preferable for ensemble docking.")
+        st.write("Note: Specifying the tag optionally, -skip 5, to skip frames reduces redundancy, speeds clustering, and usually preserves major conformational states since clustering a full 1000ns trajectory can be computationally heavy")
+        st.write("Note: The early unstable frames may create clusters representing relaxation artifacts, non-equilibrated states, unrealistic pocket geometries since you dont want unstable starting conformations, equilibration artifacts, membrane adaptation structures,, and distorted early states. Clustering of stable region gives equilibrated receptor conformations, more reliable binding pockets, more physically meaningful states, and less noise in clustering. Instead of clustering the entire unstable trajectory blindly, this is often preferable for ensemble docking.")
 
         st.write("###")
 
-        st.write("✔️perform RMSD-based GROMOS clustering analysis using a cutoff of 1.75 Å on Cα atoms to cluster structurally similar protein conformations with similar RMSD values together to identify the dominant receptor conformations throughout the MD trajectory. The three most populated clusters were selected as representative structures for subsequent ensemble molecular docking analyses.")
+        st.write("✔️perform RMSD-based GROMOS clustering analysis using a cutoff of 0.8 Å on Cα atoms to cluster structurally similar protein conformations with similar RMSD values together to identify the dominant receptor conformations throughout the MD trajectory. The three most populated clusters were selected as representative structures for subsequent ensemble docking analyses.")
         st.code("""
-        gmx cluster -s protein.tpr -f protein_fit.xtc -method gromos -cutoff 0.175 -o clusters.xpm -g cluster.log -cl cluster_centers.pdb -dist rmsd_dist.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph.
+        gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.05 -o clusters_0.05.xpm -g cluster_0.05.log -cl cluster_centers_0.05.pdb -dist rmsd_dist_0.05.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 2790 clusters
+        gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.08 -o clusters_0.08.xpm -g cluster_0.08.log -cl cluster_centers_0.08.pdb -dist rmsd_dist_0.08.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 17 clusters
+        gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.09 -o clusters_0.09.xpm -g cluster_0.09.log -cl cluster_centers_0.09.pdb -dist rmsd_dist_0.09.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 5 clusters
+        gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.10 -o clusters_0.10.xpm -g cluster_0.10.log -cl cluster_centers_0.10.pdb -dist rmsd_dist_0.10.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 2 clusters
+        gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.20 -o clusters_0.20.xpm -g cluster_0.20.log -cl cluster_centers_0.20.pdb -dist rmsd_dist_0.20.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found only 1 cluster
         """, language="bash")
         st.write("Note: Using representative MD-derived protein conformations helps account for protein flexibility, which improves docking realism")
+        st.write("Note: Clustering analysis was performed using the GROMOS algorithm with an RMSD cutoff of 0.08 nm. A total of 17 conformational clusters were identified from 4001 trajectory frames. The first cluster was highly dominant, containing 3030 structures (~75.7% of the total frames), indicating that the protein predominantly occupied a stable conformational state throughout the simulation. The average RMSD among clustered structures was 0.0847 nm, with an overall RMSD range of 0.040–0.158 nm, suggesting minimal structural deviation and high conformational stability during the MD simulation. Smaller clusters likely represent transient local fluctuations or minor conformational rearrangements rather than major structural transitions.")
+
+        st.write("###")
+
+        st.write("✔️measure the insecticide-likeness properties of the ligands once again via http://pesticides.cau.edu.cn/APPi since those ligands are the variants generated by the previous Gypsum-DL pipeline")
 
         st.write("###")
 
