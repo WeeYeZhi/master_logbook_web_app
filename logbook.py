@@ -67,7 +67,7 @@ with st.container():
 with st.sidebar:
     selected = option_menu(
         menu_title="Methodology",
-        options=["Phase 1: Sequence-Based Analysis", "Phase 2: Transcriptomic and Structural-Based Analysis", "Phase 3: Molecular Docking and Dynamics Simulation", "Additional Notes"],
+        options=["Phase 1: Sequence-Based Analysis", "Phase 2: Transcriptomic and Structural-Based Analysis", "Phase 3: Molecular Docking and Dynamics Simulation", "Submit Transcriptome Assembly to ENA", "Additional Notes"],
     )
 
 #----CONTENT SECTION----
@@ -1334,7 +1334,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.write("###")
 
         st.write("**12. Prepare the list of ligands using Gypsum-DL**")
-        st.write("✔️filter the ligands based on their insecticide-likeness properties via http://pesticides.cau.edu.cn/APPi.")
+        st.write("✔️filter the ligands based on their insecticide-likeness properties by submitting SDF files of ligands to the APPi web server via http://pesticides.cau.edu.cn/APPi.")
         st.write("✔️install the latest version of Gypsum-DL via the Python Package Index (PyPI) website using the following command")
         st.code("""
         conda create -n gypsum-dl
@@ -1413,7 +1413,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         navigate to autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py
         navigate to autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py # just in case if you want to use it to prepare protein in batch later
         /media/raid/Wee/WeeYeZhi/output/autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/bin/pythonsh /media/raid/Wee/WeeYeZhi/output/autodock_mgl_tools_installation/mgltools_x86_64Linux2_1.5.7/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py -h # output the command-line usage. remember to use the MGLTools internal Python interpreter (pythonsh) instead of using the HPC system's python when you run the prepare_ligand4.py python script
-        bash /media/raid/Wee/WeeYeZhi/output/latest_ligand_preparation_results/ligand_batch_preparation_script/batch_preparation_of_ligands.sh # run this bash script to perform batch preparation of ligands by adding polar hydrogens,adding Gasteiger charges, and removing non-polar hydrogens from the ligands
+        bash /media/raid/Wee/WeeYeZhi/output/latest_ligand_preparation_results/ligand_batch_preparation_script/batch_preparation_of_ligands.sh # run this bash script to perform batch preparation of ligands by adding polar hydrogens,adding Gasteiger charges, and removing non-polar hydrogens from the ligands. Remember to run this command in the directory containing a list of Avogadro2 energy-minimised ligands (.mol2) files (you have change your working directory to the directory containing a list of Avogadro2 energy-minimised ligands (.mol2) files first)
         """, language="bash")
         # ----LOAD AUTODOCK4 prepare_ligand4.py SCRIPT----
         # Check if the file exists before reading
@@ -1450,6 +1450,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.markdown("[Visit OpenBabel official Tutorial Page](https://openbabel.org/docs/Command-line_tools/babel.html)")
         st.markdown("[Read how to install OpenBabel in Linux Ubuntu](https://stackoverflow.com/questions/75814835/install-open-babel-in-ubuntu#:~:text=1%20Answer,sudo%20make%20install)")
         st.markdown("[Read how to perform batch preparation of ligands for docking via AutoDock Vina](https://www.researchgate.net/post/Batch_Ligand_Preparation_on_Autodock_Vina)")
+        st.markdown("[Read the command-line usage manual of the prepare_ligand4.py script](https://github.com/lmdu/AutoDockTools_py3/blob/master/AutoDockTools/Utilities24/prepare_ligand4.py)")
         st.markdown("[Visit the official AutoDock website](https://autodock.scripps.edu/)")
         st.markdown("[Read the useful resources of AutoDock4 and AutoDock Vina](https://autodock.scripps.edu/resources/)")
         st.markdown("[Watch YouTube video to learn how to perform batch preparation of ligands](https://www.youtube.com/watch?v=_Blz2DxSAtQ&t=44s)")
@@ -1913,12 +1914,15 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         vmd protein.tpr extreme1.pdb # visualize the protein structure via VMD
         vmd protein.tpr extreme2.pdb
         """, language="bash")
+        st.write("Note: To remove the top axis and right axis of the plot rendered by XMGRACE, you can do the following steps. Go to Plot -> Axis Properties -> Click the 'Tick marks' section -> Edit: X-axis -> Draw on: Normal side (located at the 'Placement' section) -> Click 'Apply'. Do the same thing for Edit: Y-axis. After that, Go to Plot -> Graph appearance -> Frame -> Change the Frame Type to Half Open -> Accept. If you notice the four black small square boxes at the four corners of the plot rendered by XMGRACE, it actually does not matter, because after you print out the plot, the boxes will automatically disappear (you do not need to manually or intentionally remove them)")
+        st.markdown("[Visit XMGRACE User's Guide v0.5](https://www.uoxray.uoregon.edu/local/manuals/grace/grace-5.0.5/doc/UsersGuide.html)")
 
         st.write("###")
 
         st.write("✔️extract the whole topology information and the whole insect transmembrane protein structure trajectory (including loops) during the period where the RMSD values of TM helix bundle reach plateau (stabilize) (since loops fluctuate naturally, loops inflate RMSD artificially, TM core reflects actual receptor stability, but after determining stability, you still keep the whole receptor, including ECLs and ICLs for biologically realistic docking).")
         st.code("""
         gmx trjconv -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -b 600000 -e 1000000 -o stable_600_1000ns.xtc # Select Protein. The last 400ns trajectory is considered stable. In this case, the value for -b and -e are in picosecond (ps).
+        gmx trjconv -s protein.tpr -f protein_fit.xtc -b 600000 -e 1000000 -o whole_protein_stable_600_1000ns.xtc # Select Protein. The last 400ns trajectory is considered stable. In this case, the value for -b and -e are in picosecond (ps).
         """, language="bash")
         st.write("Note: Specifying the tag optionally, -skip 5, to skip frames reduces redundancy, speeds clustering, and usually preserves major conformational states since clustering a full 1000ns trajectory can be computationally heavy")
         st.write("Note: The early unstable frames may create clusters representing relaxation artifacts, non-equilibrated states, unrealistic pocket geometries since you dont want unstable starting conformations, equilibration artifacts, membrane adaptation structures,, and distorted early states. Clustering of stable region gives equilibrated receptor conformations, more reliable binding pockets, more physically meaningful states, and less noise in clustering. Instead of clustering the entire unstable trajectory blindly, this is often preferable for ensemble docking.")
@@ -1928,13 +1932,44 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.write("✔️perform RMSD-based GROMOS clustering analysis using a cutoff of 0.8 Å on Cα atoms to cluster structurally similar protein conformations with similar RMSD values together to identify the dominant receptor conformations throughout the MD trajectory. The three most populated clusters were selected as representative structures for subsequent ensemble docking analyses.")
         st.code("""
         gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.05 -o clusters_0.05.xpm -g cluster_0.05.log -cl cluster_centers_0.05.pdb -dist rmsd_dist_0.05.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 2790 clusters
+        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.175 -o whole_protein_clusters_0.175.xpm -g whole_protein_cluster_0.175.log -cl whole_protein_cluster_centers_0.175.pdb -dist whole_protein_rmsd_dist_0.175.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 1 cluster
+        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.10 -o whole_protein_clusters_0.10.xpm -g whole_protein_cluster_0.10.log -cl whole_protein_cluster_centers_0.10.pdb -dist whole_protein_rmsd_dist_0.10.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 104 clusters
+        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.12 -o whole_protein_clusters_0.12.xpm -g whole_protein_cluster_0.12.log -cl whole_protein_cluster_centers_0.12.pdb -dist whole_protein_rmsd_dist_0.12.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 16 clusters
+        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.13 -o whole_protein_clusters_0.13.xpm -g whole_protein_cluster_0.13.log -cl whole_protein_cluster_centers_0.13.pdb -dist whole_protein_rmsd_dist_0.13.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 7 clusters
         gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.08 -o clusters_0.08.xpm -g cluster_0.08.log -cl cluster_centers_0.08.pdb -dist rmsd_dist_0.08.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 17 clusters
         gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.09 -o clusters_0.09.xpm -g cluster_0.09.log -cl cluster_centers_0.09.pdb -dist rmsd_dist_0.09.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 5 clusters
         gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.10 -o clusters_0.10.xpm -g cluster_0.10.log -cl cluster_centers_0.10.pdb -dist rmsd_dist_0.10.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 2 clusters
         gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.20 -o clusters_0.20.xpm -g cluster_0.20.log -cl cluster_centers_0.20.pdb -dist rmsd_dist_0.20.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found only 1 cluster
+        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -method gromos -cutoff 0.2 -o clusters_0.20.xpm -g cluster_0.20.log -cl cluster_centers_0.20.pdb -dist rmsd_dist_0.20.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 238 clusters
+        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -method gromos -cutoff 0.3 -o clusters_0.30.xpm -g cluster_0.30.log -cl cluster_centers_0.30.pdb -dist rmsd_dist_0.30.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 53 clusters
+        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -method gromos -cutoff 0.4 -o clusters_0.40.xpm -g cluster_0.40.log -cl cluster_centers_0.40.pdb -dist rmsd_dist_0.40.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 17 clusters
+        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -method gromos -cutoff 0.5 -o clusters_0.50.xpm -g cluster_0.50.log -cl cluster_centers_0.50.pdb -dist rmsd_dist_0.50.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 8 clusters
         """, language="bash")
         st.write("Note: Using representative MD-derived protein conformations helps account for protein flexibility, which improves docking realism")
         st.write("Note: Clustering analysis was performed using the GROMOS algorithm with an RMSD cutoff of 0.08 nm. A total of 17 conformational clusters were identified from 4001 trajectory frames. The first cluster was highly dominant, containing 3030 structures (~75.7% of the total frames), indicating that the protein predominantly occupied a stable conformational state throughout the simulation. The average RMSD among clustered structures was 0.0847 nm, with an overall RMSD range of 0.040–0.158 nm, suggesting minimal structural deviation and high conformational stability during the MD simulation. Smaller clusters likely represent transient local fluctuations or minor conformational rearrangements rather than major structural transitions.")
+
+        st.write("###")
+
+        st.write("✔️color and label the TM1-TM7 region of the 7 clusters of the simulated AlphaFold3-predicted CcOctB2R model using UCSF ChimeraX")
+        st.code("""
+        color #1.1-7:31-54 red target c # color the clustered TM1 region (cartoon representation) as red
+        2dlabel create TM1 text "TM1" color red size 15
+        color #1.1-7:66-87 light sea green target c # color the clustered TM2 region (cartoon representation) as orange
+        2dlabel create TM2 text "TM2" color light sea green size 15
+        color #1.1-7:104-125 orange red target c # color the clustered TM3 region (cartoon representation) as yellow
+        2dlabel create TM3 text "TM3" color orange red size 15
+        color #1.1-7:146-167 green target c # color the clustered TM4 region (cartoon representation) as green
+        2dlabel create TM4 text "TM4" color green size 15
+        color #1.1-7:195-215 blue target c # color the clustered TM5 region (cartoon representation) as blue
+        2dlabel create TM5 text "TM5" color blue size 15
+        color #1.1-7:279-298 violet target c # color the clustered TM6 region (cartoon representation) as violet
+        2dlabel create TM6 text "TM6" color violet size 15
+        color #1.1-7:311-334 indigo target c # color the clustered TM7 region (cartoon representation) as indigo
+        2dlabel create TM7 text "TM7" color indigo size 15
+        color #1.1-7:188,194 lime target c # color the two predicted ligand-binding residues, 188 and 194 (cartoon representation) as gray
+        2dlabel create ECL text "ECL" color lime size 15
+        2dlabel delete # delete all the labels at once
+        """, language="bash")
 
         st.write("###")
 
@@ -1990,6 +2025,63 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.markdown("[Try logmd here](https://colab.research.google.com/drive/12adhXXF1MQIzh_vEwKX9r_iF6jV-CNHE#scrollTo=N2_uubn_2qGM)")
         st.markdown("[Try logmd here](https://rcsb.ai/logmd/3d090180)")
 
+# Submit Transcriptome Assembly to ENA
+
+if selected == "Submit Transcriptome Assembly to ENA":
+    with st.container():
+        st.write("---")
+        st.header("Time to submit CPB transcriptome assembly to the European Nucleotide Archive (ENA) 🤖")
+
+        st.write("###")
+
+        st.write("1. Run the Webin-CLI program using Docker")
+        st.write("✔️pull the Webin-CLI Docker image from DockerHub")
+        st.code("""
+        docker pull enasequence/webin-cli # you are pulling the latest enasequence/webin-cli docker image from DockerHub
+        """, language="bash")
+        st.write("✔️obtain the digest ID of the Webin-CLI docker image")
+        st.code("""
+        docker image inspect --format '{{.RepoDigests}}' enasequence/webin-cli:latest # you will obtain enasequence/webin-cli@sha256:62fbfba3aaa3172d51beb99a102427d6d31ed7598deb167e2aaa18521e8924d3 where other scientists can run the command, docker pull trinityrnaseq/transdecoder@sha256:80fa372fe94bc0ac4440fea7905c47e05187d13b1e837f8dca72c0ca49ab1bb4 to use the same docker transdecoder image with the same software environment
+        """, language="bash")
+        st.write("✔️check whether the Webin-CLI docker image has been successfully pulled")
+        st.code("""
+        docker images
+        """, language="bash")
+        st.write("✔️output the command-line usage manual of the Webin-CLI Docker Image")
+        st.code("""
+        docker run --rm enasequence/webin-cli -help
+        docker run --rm enasequence/webin-cli -version
+        java -jar /media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/webin-cli-9.0.3.jar -help
+        java -jar /media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/webin-cli-9.0.3.jar -version
+        """, language="bash")
+        st.write("✔️install aspera-cli to allow faster file transfer instead of FTP and export the filepath of the aspera-cli executable to the environment variable")
+        st.code("""
+        conda create -n ruby -c conda-forge ruby
+        conda activate ruby
+        ruby --version
+        gem install aspera-cli # install the IBM Ruby CLI
+        ascli --version
+        ascli config transferd install
+        """, language="bash")
+        st.write("validate both the manifest file and the CPB transcriptome assembly fasta file to ENA using the Webin-CLI submission service")
+        st.code("""
+        java -jar /media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/webin-cli-9.0.3.jar -validate -centerName='Universiti Kebangsaan Malaysia' -context=transcriptome -inputDir=/media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/input -manifest=/media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/input/manifest.txt -outputDir=/media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/output -passwordFile=/media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/input/password.txt -userName=Webin-53180
+        """, language="bash")
+        st.write("submit both the manifest file and the CPB transcriptome assembly fasta file to ENA using the Webin-CLI submission service")
+        st.code("""
+        java -jar /media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/webin-cli-9.0.3.jar -submit -centerName='Universiti Kebangsaan Malaysia' -context=transcriptome -inputDir=/media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/input -manifest=/media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/input/manifest.txt -outputDir=/media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/output -passwordFile=/media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/input/password.txt -userName=Webin-53180
+        """, language="bash")
+        st.write("validate both the manifest file and the CPB transcriptome assembly fasta file to ENA using the Webin-CLI submission service")
+        st.code("""
+        docker run --rm --user 1000:1000 -v /media/raid/Wee/WeeYeZhi/output:/data enasequence/webin-cli -validate -centerName='Universiti Kebangsaan Malaysia' -context=transcriptome -inputDir=/data/ENA_transcriptome_submission/input -manifest=/data/ENA_transcriptome_submission/input/manifest.txt -outputDir=/data/ENA_transcriptome_submission/output -passwordFile=/data/ENA_transcriptome_submission/input/password.txt -userName=Webin-53180
+        """, language="bash")
+        st.write("submit both the manifest file and the CPB transcriptome assembly fasta file to ENA using the Webin-CLI submission service")
+        st.code("""
+        docker run --rm --user 1000:1000 -v /media/raid/Wee/WeeYeZhi/output:/data enasequence/webin-cli -submit -centerName='Universiti Kebangsaan Malaysia' -context=transcriptome -inputDir=/data/ENA_transcriptome_submission/input -manifest=/data/ENA_transcriptome_submission/input/manifest.txt -outputDir=/data/ENA_transcriptome_submission/output -passwordFile=/data/ENA_transcriptome_submission/input/password.txt -userName=Webin-53180
+        """, language="bash")
+        st.markdown("[Obtain the latest version of Webin-CLI from GitHub](https://github.com/enasequence/webin-cli/releases/tag/)")
+        st.markdown("[Visit the Webin-CLI Docker Image in the DockerHub](https://hub.docker.com/r/enasequence/webin-cli)")
+        st.markdown("[Visit the latest version of Aspera-CLI Official GitHub Page](https://github.com/IBM/aspera-cli/releases/tag/v4.26.1)")
 # Additional Note
 
 if selected == "Additional Notes":
