@@ -27,6 +27,7 @@ trimmomatic_file = current_dir / "assets" / "trimmomatic.sh"
 trinity_samples_sequenced_by_LKM = current_dir / "assets" / "trinity_samples_sequenced_by_LKM.txt"
 trinity_samples_sequenced_by_INBIOSIS = current_dir / "assets" / "trinity_samples_sequenced_by_INBIOSIS.txt"
 trinity_samples_sequenced_by_LKM_and_INBIOSIS = current_dir / "assets" / "trinity_samples_sequenced_by_LKM_and_INBIOSIS.txt"
+trinity_samples_sequenced_by_LKM_and_INBIOSIS_except_pupa = current_dir / "assets" / "trinity_samples_sequenced_by_LKM_and_INBIOSIS_except_pupa.txt"
 transrate_file = current_dir / "assets" / "transrate.sh"
 swissprot_fasta_file = current_dir / "assets" / "uniprot_sprot.fasta.gz"
 pymol_movie_script = current_dir / "assets" / "movie01_script.pml"
@@ -284,6 +285,10 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("""
         nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_samples_sequenced_by_LKM_and_INBIOSIS.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly > /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_CPB_transcriptome_assembly/trinity_output.log 2>&1 & 
         """, language="bash")
+        st.write("✔️run Trinity to perform comprehensive transcriptome assembly to assemble all the 9 raw transcriptomic Illumina paired end reads (sequenced by LKM and INBIOSIS) except the pupal sample")
+        st.code("""
+        nohup Trinity --seqType fq --max_memory 450G --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS_except_pupa/trinity_samples_sequenced_by_LKM_and_INBIOSIS_except_pupa.txt --CPU 16 --normalize_by_read_set --SS_lib_type RF --full_cleanup --output /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS_except_pupa > /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS_except_pupa/trinity_output.log 2>&1 & 
+        """, language="bash")
         # ----LOAD TRINITY SAMPLE FILE sequenced BY LKM----
         # Check if the file exists before reading
         if trinity_samples_sequenced_by_LKM.exists():
@@ -329,6 +334,21 @@ if selected == "Phase 1: Sequence-Based Analysis":
             )
         else:
             st.error(f"{trinity_samples_sequenced_by_LKM_and_INBIOSIS.name} does not exist.")
+        # ----LOAD TRINITY SAMPLE FILE sequenced BY LKM & INBIOSIS except pupa----
+        # Check if the file exists before reading
+        if trinity_samples_sequenced_by_LKM_and_INBIOSIS_except_pupa.exists():
+            with open(trinity_samples_sequenced_by_LKM_and_INBIOSIS_except_pupa, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download Trinity Sample File Sequenced by LKM & INBIOSIS except pupa",
+                data=script_byte,
+                file_name=trinity_samples_sequenced_by_LKM_and_INBIOSIS_except_pupa.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{trinity_samples_sequenced_by_LKM_and_INBIOSIS_except_pupa.name} does not exist.")
         st.markdown("[Visit Trinity Conda Installation Page](https://anaconda.org/bioconda/trinity)")
         st.markdown("[Visit Trinity GitHub Installation Page](https://github.com/trinityrnaseq/trinityrnaseq/wiki/Installing-Trinity)")
         st.markdown("[Visit Trinity GitHub Wikipedia Page](https://github.com/trinityrnaseq/trinityrnaseq/wiki)")
@@ -405,6 +425,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("✔️run cd-hit-est to cluster highly similar nucleotide sequences of the Trinity assembly together (avoids inflating transcript counts and improves annotation accuracy.)")
         st.code("""
         nohup cd-hit-est -i /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_assembly_done_by_LKM_and_INBIOSIS.Trinity.fasta -o /media/raid/Wee/WeeYeZhi/output/cd_hit_est_results/cd_hit_est_after_trimmomatic -c 0.95 -n 5 -T 4 > cd_hit_est_after_trimmomatic_output.log 2>&1 & # specify fewer number of threads (use -T 4 in this case) if possible to avoid encountering OutofMemory error
+        nohup cd-hit-est -i /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS_except_pupa/trinity_assembly_done_by_LKM_and_INBIOSIS_except_pupa.Trinity.fasta -o /media/raid/Wee/WeeYeZhi/output/cd_hit_est_results/cd_hit_est_after_trimmomatic -c 0.95 -n 5 -T 4 > cd_hit_est_after_trimmomatic_output.log 2>&1 & # specify fewer number of threads (use -T 4 in this case) if possible to avoid encountering OutofMemory error
         """, language="bash")
         st.markdown("[Visit CD-HIT Conda Installation Page](https://anaconda.org/bioconda/cd-hit)")
         st.markdown("[Visit CD-HIT GitHub User Manual Page](https://github.com/weizhongli/cdhit/blob/master/doc/cdhit-user-guide.pdf)")
@@ -1850,18 +1871,9 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("✔️create an index group for TM helices only, followed by extracting the topology information and MD simulation trajectory of TM helices only. Expect to observe lower RMSD values since loops no longer dominate the motion, termini no longer inflate RMSD, and only the GPCR core is measured")
-        st.code("""
-        gmx make_ndx -f step6.6.gro -o tm_helices.ndx # create TM index. Type, r 31-54 | r 66-87 | r 104-125 | r 146-167 | r 195-215 | r 279-298 | r 311-334, and press "Enter", followed by typing, name 17 TM_helices, to rename the newly created index group as TM_helices and position the newly created index group as 17. Type "q" to quit
-        gmx convert-tpr -s protein.tpr -n tm_helices.ndx -o tm_helices.tpr # Select 17 (TM_helices) to extract TM-only topology
-        gmx trjconv -s protein.tpr -f protein_fit.xtc -n tm_helices.ndx -o tm_helices_fit.xtc # Select 17 (TM_helices) to extract TM-only trajectory
-        """, language="bash")
-
-        st.write("###")
-
         st.write("✔️create an index group for TM helices and two ECL residues (residue 188 & 194) only (since both are ligand binding residues), followed by extracting the topology information and MD simulation trajectory of TM helices and two ECL residues (residue 188 & 194) only. Expect to observe lower RMSD values since loops no longer dominate the motion, termini no longer inflate RMSD, and only the GPCR core is measured")
         st.code("""
-        gmx make_ndx -f step6.6.gro -o tm_helices_ecl.ndx # create TM and ECL index. Type, r 31-54 | r 66-87 | r 104-125 | r 146-167 | r 188 | r 194 | r 195-215 | r 279-298 | r 311-334, and press "Enter", followed by typing, name 17 TM_ecl_helices, to rename the newly created index group as TM_ecl_helices and position the newly created index group as 17. Type "q" to quit
+        gmx make_ndx -f protein.tpr -o tm_helices_ecl.ndx # create TM and ECL index. Type, r 31-54 | r 66-87 | r 104-125 | r 146-167 | r 188 | r 194 | r 195-215 | r 279-298 | r 311-334, and press "Enter", followed by typing, name 17 TM_ecl_helices, to rename the newly created index group as TM_ecl_helices and position the newly created index group as 17. Type "q" to quit
         gmx convert-tpr -s protein.tpr -n tm_helices_ecl.ndx -o tm_helices_ecl.tpr # Select 17 (TM_ecl_helices) to extract TM_ecl-only topology
         gmx trjconv -s protein.tpr -f protein_fit.xtc -n tm_helices_ecl.ndx -o tm_helices_ecl_fit.xtc # Select 17 (TM_ecl_helices) to extract TM_ecl-only trajectory
         """, language="bash")
@@ -1871,60 +1883,49 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.write("✔️analyze the MD simulation of the CPB OctB2R-lipid bilayer complex system using XMGrace, VMD, and GNU Plot. RMSD: Is the protein stable? RMSF: Which residues fluctuate the most? Hbond: Are stabilizing interactions maintained? DSSP: Does secondary structure remain stable? PCA: What are the dominant large-scale motions?")
         st.write("✔️calculate the TM-helices only's and protein's backbone RMSD to investigate how much did the protein structure deviate from the reference structure over time to determine structural stability, equilibration quality, large conformational changes, and simulation convergence. To answer questions like does the insect receptor structure maintain its structure? does the binding pocket collapse? does the transmembrane region stay stable?")
         st.code("""
-        gmx rms -s tm_helices.tpr -f tm_helices_fit.xtc -tu ns -o tm_rmsd.xvg # Select group for least squares fit: Backbone and Select group for RMSD calculation: Backbone
         gmx rms -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -tu ns -o tm_ecl_rmsd.xvg # Select group for least squares fit: Backbone and Select group for RMSD calculation: Backbone
-        gmx rms -s protein.tpr -f protein_fit.xtc -tu ns -o rmsd.xvg # Select group for least squares fit: Backbone and Select group for RMSD calculation: Backbone (Choose backbone because backbone represents the overall protein fold and it is less noisy than the side chains). 
-        xmgrace tm_rmsd.xvg # expect to see lower RMSD values since there are no flexible loops, C-terminus, N-terminus, intracellular loops (ICLs), and extracellular loops (ECLs). Visualize the RMSD plot inside a graphical user interface (GUI) in SCREEN mode, not in REMOTE TERMINAL mode.
+        gmx rms -s protein.tpr -f protein_fit.xtc -tu ns -o whole_protein_rmsd.xvg # Select group for least squares fit: Backbone and Select group for RMSD calculation: Backbone (Choose backbone because backbone represents the overall protein fold and it is less noisy than the side chains). 
         xmgrace tm_ecl_rmsd.xvg # expect to see lower RMSD values since there are no flexible loops, C-terminus, N-terminus, intracellular loops (ICLs), and extracellular loops (ECLs). Visualize the RMSD plot inside a graphical user interface (GUI) in SCREEN mode, not in REMOTE TERMINAL mode.
-        xmgrace rmsd.xvg # expect to see large RMSD values since there are presence of flexible loops, C-terminus, N-terminus, intracellular loops (ICLs), and extracellular loops (ECLs)
+        xmgrace whole_protein_rmsd.xvg # expect to see large RMSD values since there are presence of flexible loops, C-terminus, N-terminus, intracellular loops (ICLs), and extracellular loops (ECLs)
         """, language="bash")
         st.write("✔️calculate the TM-helices only's and protein's C-alpha RMSF to investigate how much each residue fluctuates during the simulation to identify flexible regions, stable regions, loops, terminal flexibility, and potentially functional motions (Normally, loops have high RMSF, termini has high RMSF, and helices/core has low RMSF)")
         st.code("""
-        gmx rmsf -s tm_helices.tpr -f tm_helices_fit.xtc -res -o tm_rmsf.xvg # Select group: C-alpha
-        gmx rmsf -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -res -o tm_ecl_rmsf.xvg # Select group: C-alpha
-        gmx rmsf -s protein.tpr -f protein_fit.xtc -res -o rmsf.xvg # Select group: C-alpha (using C-alpha gives residue-level flexibility, reduces side chain noise, and easier biological interpretation.)
-        xmgrace tm_rmsf.xvg
+        gmx rmsf -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -res -o tm_ecl_rmsf.xvg # Select group: C-alpha (using C-alpha gives residue-level flexibility, reduces side chain noise, and easier biological interpretation.)
+        gmx rmsf -s protein.tpr -f protein_fit.xtc -res -o whole_protein_rmsf.xvg # Select group: C-alpha 
         xmgrace tm_ecl_rmsf.xvg
-        xmgrace rmsf.xvg
+        xmgrace whole_protein_rmsf.xvg
         """, language="bash")
         st.write("✔️investigate the compactness of the protein during the simulation")
         st.code("""
-        gmx gyrate -s tm_helices.tpr -f tm_helices_fit.xtc -tu ns -o tm_rg.xvg # Select Protein
         gmx gyrate -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -tu ns -o tm_ecl_rg.xvg # Select Protein
-        gmx gyrate -s protein.tpr -f protein_fit.xtc -tu ns -o rg.xvg # Select Protein
-        xmgrace tm_rg.xvg
+        gmx gyrate -s protein.tpr -f protein_fit.xtc -tu ns -o whole_protein_rg.xvg # Select Protein
         xmgrace tm_ecl_rg.xvg
-        xmgrace rg.xvg 
+        xmgrace whole_protein_rg.xvg 
         """, language="bash")
         st.write("✔️run sasa analysis to investigate solvent accessibility of protein")
         st.code("""
-        gmx sasa -s tm_helices.tpr -f tm_helices_fit.xtc -tu ns -o tm_sasa.xvg # Select Protein
         gmx sasa -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -tu ns -o tm_ecl_sasa.xvg # Select Protein 
-        gmx sasa -s protein.tpr -f protein_fit.xtc -tu ns -o sasa.xvg # Select Protein 
+        gmx sasa -s protein.tpr -f protein_fit.xtc -tu ns -o whole_protein_sasa.xvg # Select Protein 
         xmgrace tm_sasa.xvg
         xmgrace tm_ecl_sasa.xvg
         xmgrace sasa.xvg
         """, language="bash")
         st.write("✔️count the total number of hydrogen bonds formed (since hydrogen bonds help stabilize secondary structure, ligand binding, protein binding, and membrane protein conformations. Stable hydrogen bond numbers usually indicates stable protein fold and preserved secondary structure)")
         st.code("""
-        gmx hbond -s tm_helices.tpr -f tm_helices_fit.xtc -num tm_hb_bb.xvg -tu ns # Select MainChain+H for both groups
         gmx hbond -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -num tm_ecl_hb_bb.xvg -tu ns # Select MainChain+H for both groups
-        gmx hbond -s protein.tpr -f protein_fit.xtc -num hb_bb.xvg -tu ns #  Select MainChain+H for both groups. Count the total number of backbone hydrogen bonds (intraprotein backbone Hbonds and secondary structure stability). 
-        gmx hbond -s protein.tpr -f protein_fit.xtc -num hb_all.xvg -tu ns # Select Protein for both groups. Count the total number of protein hydrogen bonds. 
-        xmgrace tm_hb_bb.xvg
+        gmx hbond -s protein.tpr -f protein_fit.xtc -num whole_protein_hb_bb.xvg -tu ns #  Select MainChain+H for both groups. You ran this command only for your master study. Count the total number of backbone hydrogen bonds (intraprotein backbone Hbonds and secondary structure stability). 
+        gmx hbond -s protein.tpr -f protein_fit.xtc -num whole_protein_hb_all.xvg -tu ns # Select Protein for both groups. Count the total number of protein hydrogen bonds. 
         xmgrace tm_ecl_hb_bb.xvg
-        xmgrace hb_bb.xvg
-        xmgrace hb_all.xvg
+        xmgrace whole_protein_hb_bb.xvg
+        xmgrace whole_protein_hb_all.xvg
         """, language="bash")
         st.write("✔️investigate the time evolution of secondary structure stability throughout the MD simulation. Calculate the average fluctuation statistics of secondary structure content. This is to investigate whether the helices remain stable, any unfolding process occurs, and any secondary structure transition happens, which is very important for membrane proteins")
         st.code("""
         gmx dssp -h # output the usage manual of the GROMACS-installed DSSP
-        gmx dssp -s tm_helices.tpr -f tm_helices_fit.xtc -tu ns -hmode dssp -o tm_dssp.dat -num tm_dssp_num.xvg # Select Protein. The ss.xpm file refers to the secondary structure map across time and residues. The scount.xvg file refers to the count of helix, sheet, bend, turn, loop etc over time
-        gmx analyze -f tm_dssp_num.xvg # calculate the average and error estimates of the assigned secondary structure elements throughout the trajectory
         gmx dssp -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -tu ns -hmode dssp -o tm_ecl_dssp.dat -num tm_ecl_dssp_num.xvg # Select Protein. The ss.xpm file refers to the secondary structure map across time and residues. The scount.xvg file refers to the count of helix, sheet, bend, turn, loop etc over time
         gmx analyze -f tm_ecl_dssp_num.xvg # calculate the average and error estimates of the assigned secondary structure elements throughout the trajectory
-        gmx dssp -s protein.tpr -f protein_fit.xtc -tu ns -hmode dssp -o dssp.dat -num dssp_num.xvg # Select Protein. The ss.xpm file refers to the secondary structure map across time and residues. The scount.xvg file refers to the count of helix, sheet, bend, turn, loop etc over time
-        gmx analyze -f dssp_num.xvg # calculate the average and error estimates of the assigned secondary structure elements throughout the trajectory
+        gmx dssp -s protein.tpr -f protein_fit.xtc -tu ns -hmode dssp -o whole_protein_dssp.dat -num whole_protein_dssp_num.xvg # Select Protein. The ss.xpm file refers to the secondary structure map across time and residues. The scount.xvg file refers to the count of helix, sheet, bend, turn, loop etc over time
+        gmx analyze -f whole_protein_dssp_num.xvg # calculate the average and error estimates of the assigned secondary structure elements throughout the trajectory
         """, language="bash")
         st.write("✔️compute the covariance matrix and eigenvectors with eigenvalues to investigate how atoms move during the simulation, either they move upwards together (positive covariance) or one moves upward and one moves downward (negative covariance) during the simulation to perform PCA analysis to determine the dominant collective atomic motions. PCA does not prove biological mechanism automatically or prove protein activation directly, instead it only reveals the dominant collective motions")
         st.code("""
@@ -1941,10 +1942,10 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("✔️extract the whole topology information and the whole insect transmembrane protein structure trajectory (including loops) during the period where the RMSD values of TM helix bundle reach plateau (stabilize) (since loops fluctuate naturally, loops inflate RMSD artificially, TM core reflects actual receptor stability, but after determining stability, you still keep the whole receptor, including ECLs and ICLs for biologically realistic docking).")
+        st.write("✔️extract the trajectory of the protein-lipid bilayer complex model and protein-only model (without the lipid bilayer) during the period where the RMSD values of TM helix bundle reach plateau (stabilize) (since loops fluctuate naturally, loops inflate RMSD artificially, TM core reflects actual receptor stability, but after determining stability, you still keep the whole receptor, including ECLs and ICLs for biologically realistic docking).")
         st.code("""
-        gmx trjconv -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -b 600000 -e 1000000 -o stable_600_1000ns.xtc # Select Protein. The last 400ns trajectory is considered stable. In this case, the value for -b and -e are in picosecond (ps).
-        gmx trjconv -s protein.tpr -f protein_fit.xtc -b 600000 -e 1000000 -o whole_protein_stable_600_1000ns.xtc # Select Protein. The last 400ns trajectory is considered stable. In this case, the value for -b and -e are in picosecond (ps).
+        gmx trjconv -s md_100ns.tpr -f md_reimage.xtc -b 900000 -e 1000000 -o whole_protein_lipid_bilayer_900_1000ns.xtc # Select Protein. The last 400ns trajectory is considered stable. In this case, the value for -b and -e are in picosecond (ps).
+        gmx trjconv -s protein.tpr -f protein_fit.xtc -b 900000 -e 1000000 -o whole_protein_only_900_1000ns.xtc # Select Protein. The last 400ns trajectory is considered stable. In this case, the value for -b and -e are in picosecond (ps).
         """, language="bash")
         st.write("Note: Specifying the tag optionally, -skip 5, to skip frames reduces redundancy, speeds clustering, and usually preserves major conformational states since clustering a full 1000ns trajectory can be computationally heavy")
         st.write("Note: The early unstable frames may create clusters representing relaxation artifacts, non-equilibrated states, unrealistic pocket geometries since you dont want unstable starting conformations, equilibration artifacts, membrane adaptation structures,, and distorted early states. Clustering of stable region gives equilibrated receptor conformations, more reliable binding pockets, more physically meaningful states, and less noise in clustering. Instead of clustering the entire unstable trajectory blindly, this is often preferable for ensemble docking.")
@@ -1953,23 +1954,31 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("✔️perform RMSD-based GROMOS clustering analysis using a cutoff of 0.8 Å on Cα atoms to cluster structurally similar protein conformations with similar RMSD values together to identify the dominant receptor conformations throughout the MD trajectory. The three most populated clusters were selected as representative structures for subsequent ensemble docking analyses.")
         st.code("""
-        gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.05 -o clusters_0.05.xpm -g cluster_0.05.log -cl cluster_centers_0.05.pdb -dist rmsd_dist_0.05.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 2790 clusters
-        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.175 -o whole_protein_clusters_0.175.xpm -g whole_protein_cluster_0.175.log -cl whole_protein_cluster_centers_0.175.pdb -dist whole_protein_rmsd_dist_0.175.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 1 cluster
-        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.10 -o whole_protein_clusters_0.10.xpm -g whole_protein_cluster_0.10.log -cl whole_protein_cluster_centers_0.10.pdb -dist whole_protein_rmsd_dist_0.10.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 104 clusters
-        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.12 -o whole_protein_clusters_0.12.xpm -g whole_protein_cluster_0.12.log -cl whole_protein_cluster_centers_0.12.pdb -dist whole_protein_rmsd_dist_0.12.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 16 clusters
-        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.13 -o whole_protein_clusters_0.13.xpm -g whole_protein_cluster_0.13.log -cl whole_protein_cluster_centers_0.13.pdb -dist whole_protein_rmsd_dist_0.13.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 7 clusters
-        gmx cluster -s protein.tpr -f whole_protein_stable_900_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.12 -o whole_protein_clusters_0.12_900_1000ns.xpm -g whole_protein_cluster_0.12_900_1000ns.log -cl whole_protein_cluster_centers_0.12_900_1000ns.pdb -dist whole_protein_rmsd_dist_0.12_900_1000ns.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 7 clusters
-        gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.08 -o clusters_0.08.xpm -g cluster_0.08.log -cl cluster_centers_0.08.pdb -dist rmsd_dist_0.08.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 17 clusters
-        gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.09 -o clusters_0.09.xpm -g cluster_0.09.log -cl cluster_centers_0.09.pdb -dist rmsd_dist_0.09.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 5 clusters
-        gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.10 -o clusters_0.10.xpm -g cluster_0.10.log -cl cluster_centers_0.10.pdb -dist rmsd_dist_0.10.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 2 clusters
-        gmx cluster -s tm_helices_ecl.tpr -f stable_600_1000ns.xtc -method gromos -cutoff 0.20 -o clusters_0.20.xpm -g cluster_0.20.log -cl cluster_centers_0.20.pdb -dist rmsd_dist_0.20.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found only 1 cluster
-        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -method gromos -cutoff 0.2 -o clusters_0.20.xpm -g cluster_0.20.log -cl cluster_centers_0.20.pdb -dist rmsd_dist_0.20.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 238 clusters
-        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -method gromos -cutoff 0.3 -o clusters_0.30.xpm -g cluster_0.30.log -cl cluster_centers_0.30.pdb -dist rmsd_dist_0.30.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 53 clusters
-        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -method gromos -cutoff 0.4 -o clusters_0.40.xpm -g cluster_0.40.log -cl cluster_centers_0.40.pdb -dist rmsd_dist_0.40.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 17 clusters
-        gmx cluster -s protein.tpr -f whole_protein_stable_600_1000ns.xtc -method gromos -cutoff 0.5 -o clusters_0.50.xpm -g cluster_0.50.log -cl cluster_centers_0.50.pdb -dist rmsd_dist_0.50.xvg # Select group for least squares fit: C-alpha and select group for RMSD calculation: C-alpha. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 8 clusters
+        gmx cluster -s protein.tpr -f whole_protein_only_900_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.12 -o whole_protein_clusters_0.12_900_1000ns.xpm -g whole_protein_cluster_0.12_900_1000ns.log -cl whole_protein_cluster_centers_0.12_900_1000ns.pdb -dist whole_protein_rmsd_dist_0.12_900_1000ns.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph.
+        gmx cluster -s protein.tpr -f whole_protein_only_900_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.175 -o whole_protein_clusters_0.175_900_1000ns.xpm -g whole_protein_cluster_0.175_900_1000ns.log -cl whole_protein_cluster_centers_0.175_900_1000ns.pdb -dist whole_protein_rmsd_dist_0.175_900_1000ns.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. 
         """, language="bash")
         st.write("Note: Using representative MD-derived protein conformations helps account for protein flexibility, which improves docking realism")
         st.write("Note: Clustering analysis was performed using the GROMOS algorithm with an RMSD cutoff of 0.08 nm. A total of 17 conformational clusters were identified from 4001 trajectory frames. The first cluster was highly dominant, containing 3030 structures (~75.7% of the total frames), indicating that the protein predominantly occupied a stable conformational state throughout the simulation. The average RMSD among clustered structures was 0.0847 nm, with an overall RMSD range of 0.040–0.158 nm, suggesting minimal structural deviation and high conformational stability during the MD simulation. Smaller clusters likely represent transient local fluctuations or minor conformational rearrangements rather than major structural transitions.")
+
+        st.write("###")
+
+        st.write("✔️convert both the protein topology and the whole protein-lipid bilayer topology files (.tpr) to a .gro files using gmx editconf")
+        st.code("""
+        gmx editconf -f protein.tpr -o protein.gro
+        gmx editconf -f md_100ns.tpr -o md_100ns.gro
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("✔️visualize the trajectory of only the protein model throughout the 900ns-1000ns simulation using both protein.gro and whole_protein_only_900_1000ns.xtc files")
+
+        st.write("###")
+
+        st.write("✔️visualize the trajectory of the whole protein-lipid bilayer model throughout the 900ns-1000ns simulation using both md_100ns.gro and whole_protein_lipid_bilayer_900_1000ns.xtc files")
+
+        st.write("###")
+
+        st.write("✔️visualize the trajectory of the whole protein-lipid bilayer model throughout the whole 1000ns simulation using both md_100ns.gro and md_reimage.xtc files")
 
         st.write("###")
 
