@@ -1,0 +1,304 @@
+---
+title: "Latest Multivariate Statistical Analysis of DEG results between CPB larva and adult"
+author: "Wee Ye Zhi"
+date: "2025-11-17"
+output: html_document
+---
+
+## Package Installation
+
+## Install BiocManager, readxl, tidyverse, RColorBrewer, and ggrepel
+```{r}
+if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+if (!require("readxl", quietly = TRUE)) install.packages("readxl")
+if (!require("tidyverse", quietly = TRUE)) install.packages("tidyverse") 
+if (!require("ggplot2", quietly = TRUE)) install.packages("ggplot2") 
+if (!require("ggrepel", quietly = TRUE)) install.packages("ggrepel") 
+```
+
+## Load all the libraries
+```{r}
+library(readxl) # to read trinotate annotation results and DEG results
+library(tidyverse) # for data manipulation and ggplot2 plotting
+library(ggplot2)
+library(ggrepel) # for non-overlapping text labels in plots
+```
+
+## Import the trinotate functional annotation data and DEG results
+```{r}
+trinotate_df <- read_tsv("C:/Users/USER/Documents/Master_of_Science_in_Systems_Biology_GRA/Experimental_results/DEG_results_with_labelled_sampleID/trinotate_annotation_report.xls")
+DEG_df <- read_tsv("C:/Users/USER/Documents/Master_of_Science_in_Systems_Biology_GRA/Experimental_results/DEG_results_with_labelled_sampleID/Trinity.gene.counts.matrix.larva_vs_adult.DESeq2.DE_results.txt")
+```
+
+##  Set the cutoffs for padj and log2foldchange
+```{r}
+p_cutoff <- 1E-3 # set 0.001 as the cutoff for padj
+lfc_cutoff <- 2 # set 2 as the cutoff for log2foldchange
+```
+
+# Create an additional column called, regulation, inside the DEG_df dataframe and assign values of "NotSig", "Up", and "Down".
+```{r}
+DEG_df <- DEG_df %>% 
+  mutate(regulation = case_when(
+    !is.na(padj) & padj < p_cutoff & log2FoldChange >= lfc_cutoff ~ "Up",
+    !is.na(padj) & padj < p_cutoff & log2FoldChange <= -lfc_cutoff ~ "Down",
+    TRUE ~ "NotSig"
+  )) %>%
+  mutate(regulation = factor(regulation, levels = c("Up", "NotSig", "Down")))
+```
+
+## Merge DEGs with trinotate annotation data by gene_id column
+```{r}
+merged_df <- merge(DEG_df, trinotate_df[, c("gene_id", "EggNM.Preferred_name")], by = "gene_id", all.x = TRUE)
+```
+
+## Filter the merged_df dataframe to only include those significantly differentially expressed genes with known EggNOG names
+```{r}
+filtered_merged_df <- merged_df %>%
+  filter(!is.na(pvalue), !is.na(padj), EggNM.Preferred_name != ".") %>%
+  mutate(EggNM.Preferred_name = make.names(EggNM.Preferred_name, unique = TRUE))
+```
+
+## Label only the top 20 significantly differentially upregulated genes and the top 20 significantly differentially downregulated genes. Filter off those blank cells of the EggNM.Preferred_name column that are represented as ".Filter to genes satisfying the padj and lfc thresholds and having a non-NA EggNM.Preferred_name. Then sort by padj ascending (lowest first) and then by log2FoldChange descending (highest LFC first)
+```{r}
+top_up <- filtered_merged_df %>%
+  filter(regulation == "Up",
+         padj < p_cutoff, abs(log2FoldChange) >= lfc_cutoff) %>%
+  arrange(padj, desc(abs(log2FoldChange))) %>%
+  slice_head(n = 20)
+
+top_down <- filtered_merged_df %>%
+  filter(regulation == "Down",
+         padj < p_cutoff, abs(log2FoldChange) >= lfc_cutoff) %>%
+  arrange(padj, desc(abs(log2FoldChange))) %>%
+  slice_head(n = 20)
+
+label_df <- bind_rows(top_up, top_down)
+```
+
+## Save the list of the top 20 significantly differentially upregulated genes and the top 20 significantly differentially downregulated genes.
+```{r}
+write.csv(top_up, file = "Top_20_significantly_differentially_upregulated_CPB_genes.csv")
+write.csv(top_down, file = "Top_20_significantly_differentially_downregulated_CPB_genes.csv")
+```
+
+## Draw volcano plot (identify significantly differentially upregulated and downregulated CPB genes)
+```{r}
+volcano_plot <- ggplot(DEG_df, aes(x = log2FoldChange, y = -log10(padj), color = regulation)) + 
+  geom_point(alpha = 0.6, size = 2, shape = 16) +
+  scale_color_manual(values = c("Up" = "red", "Down" = "blue", "NotSig" = "grey50")) +
+  geom_vline(xintercept = c(-lfc_cutoff, lfc_cutoff), linetype = "dashed", color = "black", linewidth = 0.4) +
+  geom_hline(yintercept = -log10(p_cutoff), linetype = "dashed", color = "black", linewidth = 0.4) +
+  geom_label_repel(
+    data = label_df,
+    aes(label = EggNM.Preferred_name),
+    size = 3,
+    box.padding = 0.35,
+    point.padding = 0.3,
+    segment.color = "grey50",
+    segment.size = 0.4,
+    min.segment.length = 0,
+    max.overlaps = Inf,
+    show.legend = FALSE
+  ) +
+  labs(
+    title = "Volcano Plot: CPB Larva VS Adult (DEGs)",
+    x = "log2(FoldChange)",
+    y = "-log10(padj)",
+    color = "Regulation"
+  ) +
+  theme_bw(base_size = 14) +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(hjust = 0.5)
+    )
+
+print(volcano_plot)
+```
+## Draw hierarchical clustering heatmap (visualize patterns in gene expression data across the larva and adult samples of CPB)
+
+## Install packages that are required to plot the heatmap
+```{r}
+BiocManager::install(c("DESeq2", "ComplexHeatmap", "circlize"))
+install.packages(c("readr", "dplyr", "tibble", "RColorBrewer", "viridis"))
+```
+
+## Load the libraries
+```{r}
+library(readr)
+library(dplyr)
+library(tibble)
+library(DESeq2)
+library(ComplexHeatmap)
+library(circlize)
+library(RColorBrewer)
+library(viridis)
+library(matrixStats)
+library(grid)
+```
+
+## Specify the path to the gene-level read count dataframe (generated from the previous run_DE_analysis.pl script)
+```{r}
+counts_df <- read_tsv("C:/Users/USER/Documents/Master_of_Science_in_Systems_Biology_GRA/Experimental_results/DEG_results_with_labelled_sampleID/Trinity.gene.counts.matrix.larva_vs_adult.DESeq2.count_matrix.txt")
+```
+
+## Merge the gene-level read count dataframe (generated from the run_DE_analysis.pl script) with the trinotate annotation dataframe by gene_id column
+```{r}
+merged_counts_df <- merge(counts_df, trinotate_df[, c("gene_id", "EggNM.Preferred_name")], by = "gene_id", all.x = TRUE)
+```
+
+## Filter the merged_counts_df dataframe by including only those with known EggNM.Preferred_name
+```{r}
+filtered_merged_counts_df <- merged_counts_df %>%
+  filter(EggNM.Preferred_name != ".")
+```
+
+## Prepare the count_matrix
+
+## Drop the column, "gene_id", from the filtered_merged_counts_df dataframe
+```{r}
+filtered_merged_counts_df <- subset(filtered_merged_counts_df, select = -gene_id)
+```
+
+## Convert the counts dataframe (filtered_merged_counts_df) to a matrix (filtered_merged_counts_mat) with EggNM.Preferred_name as rownames. Since there are duplicated EggNOG names, make the names unique first by appending them with suffixes of 1,2,3... before making them as rownames.
+```{r}
+filtered_merged_counts_mat <- filtered_merged_counts_df %>%
+  mutate(EggNM.Preferred_name = make.names(filtered_merged_counts_df$EggNM.Preferred_name, unique=TRUE)) %>%
+  column_to_rownames("EggNM.Preferred_name") %>%
+  as.matrix()
+```
+
+## Prepare sample metadata (colData)
+```{r}
+sample_conditions <- factor(c(rep("larva", 4), rep("adult", 4)))
+colData <- data.frame(condition = sample_conditions)
+rownames(colData) <- colnames(filtered_merged_counts_mat)
+```
+
+## Construct a DESeqDataSet object from the filtered count matrix (filtered_merged_counts_mat) and sample metadata (colData)
+```{r}
+dds <- DESeqDataSetFromMatrix(countData = filtered_merged_counts_mat, colData = colData, design = ~ condition)
+```
+
+## Apply variance stabilizing transformation (vst) for normalization. In this case, set blind to FALSE to account the transformation process for the two different developmental stages of CPB (larva and adult)
+```{r}
+vsd <- vst(dds, blind = FALSE)
+```
+
+## Draw PCA plot
+
+## Extract the PCA results. Use the plotPCA() function to plot principal component analysis (PCA).
+```{r}
+pca_data <- plotPCA(vsd, intgroup = c("condition"), returnData = TRUE) # the plotPCA() function plots only the top 500 variable genes by default
+pca_data$sample <- rownames(pca_data)  # create an additional column named, sample, inside the pca_data dataframe
+```
+
+## Extract percentage variance for PC1 and PC2
+```{r}
+percentVar <- round(100 * attr(pca_data, "percentVar"))
+```
+
+## Use the ggplot2 and ggrepel packages to draw PCA plot with percentage of variance for P1 and P2. Then, draw a translucent eclipse around the larva group and adult group points.
+```{r}
+ggplot(pca_data, aes(x = PC1, y = PC2, color = condition)) +
+  geom_point(size = 4) +
+  geom_label_repel(aes(label = sample), size = 3, show.legend = FALSE) +
+  stat_ellipse(level = 0.95, aes(fill = condition), geom = "polygon", alpha = 0.2, color = NA) +
+  scale_color_manual(values = c(larva = "blue", adult = "red")) +
+  scale_fill_manual(values = c(larva = "blue", adult = "red")) +
+  theme_minimal() +
+  labs(title = "PCA Plot of CPB Larva VS Adult",
+       x = paste0("PC1: ", percentVar[1], "% variance"),
+       y = paste0("PC2: ", percentVar[2], "% variance")) +
+  theme(legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5))
+```
+
+## Extract the transformed expression matrix
+```{r}
+vsd_mat <- assay(vsd)
+```
+
+## Scale rows of genes for more accurate heatmap visualization (mean=0, sd=1). Scale the expression of each gene across all the samples so that the highly-expressed genes do not dominate the analysis. Bear in mind that the scale() function by default operates on columns, that's why you need to transpose the matrix (switch the rows of genes to columns of genes for scaling purposes before transposing it back)
+```{r}
+vsd_mat_scaled <- t(scale(t(vsd_mat)))
+```
+
+## Define colors for samples' annotation in heatmap
+```{r}
+ann_colors <- list(condition = c(larva = "skyblue", adult = "salmon"))
+```
+
+## Filter the DEG results to keep only those list of significantly differentially upregulated and downregulated CPB genes with unique known EggNOG names
+```{r}
+sig_DEGs <- filtered_merged_df %>%
+  filter(regulation %in% c("Up", "Down")) %>%
+  filter(padj < p_cutoff, abs(log2FoldChange) >= lfc_cutoff)
+```
+
+## Extract EggNM.Preferred_name of significant DEGs
+```{r}
+sig_EggNM_Preferred_name <- sig_DEGs$EggNM.Preferred_name
+```
+
+## Filter the vst assay matrix to include only those significant DEGs with unique known EggNOG names
+```{r}
+vsd_sig_mat <- vsd_mat[sig_EggNM_Preferred_name, ]
+```
+
+## Calculate variance for each significant DEG
+```{r}
+gene_variances <- rowVars(vsd_sig_mat)
+```
+
+## Select the top 50 most variable significant DEGs
+```{r}
+top_n <- 50
+top_var_gene_indices <- order(gene_variances, decreasing = TRUE)[1:top_n]
+top_var_genes <- sig_EggNM_Preferred_name[top_var_gene_indices]
+```
+
+## Filter the vst scaled matrix to include only the top 50 most variable significant DEGs to draw the heatmap
+```{r}
+vsd_mat_scaled_top <- vsd_mat_scaled[top_var_genes, ]
+```
+
+## Plot heatmap by using the ComplexHeatmap package
+```{r}
+clustr_heatmap <- Heatmap(vsd_mat_scaled_top,
+                   name = "Expression Z-score",
+                   col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
+                   cluster_rows = TRUE,
+                   cluster_columns = TRUE,
+                   show_row_names = TRUE,
+                   show_column_names = TRUE,
+                   column_title = "Hierarchical Clustering Heatmap of CPB Larva VS Adult\nTop 50 Most Variable CPB Genes",
+                   column_title_gp = gpar(fontsize = 14, col = "black"),
+                   top_annotation = HeatmapAnnotation(df = colData, col = ann_colors),
+                   heatmap_legend_param = list(title = "Z-score")
+                  )
+
+print(clustr_heatmap)
+```
+
+## Draw MA plot
+```{r}
+ma_plot <- ggplot(DEG_df, aes(x = log10(baseMean + 1), y = log2FoldChange, color = regulation)) +
+  geom_point(alpha = 0.6, size = 1.5, shape = 16) +
+  scale_color_manual(values = c("Down" = "blue", "NotSig" = "grey", "Up" = "red")) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_label_repel(data = label_df, aes(label = EggNM.Preferred_name),
+                  size = 3, box.padding = 0.3, point.padding = 0.2, segment.color = "grey50", max.overlaps = Inf, show.legend = FALSE) +
+  labs(title = "MA Plot: CPB Larva vs Adult",
+       x = "log10(baseMean + 1)",
+       y = "log2FoldChange",
+       color = "Regulation") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+    guides(color = guide_legend(override.aes = list(shape = 16, size = 4)))
+
+print(ma_plot)
+```
+
+
+

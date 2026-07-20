@@ -1,0 +1,9 @@
+STUDY	PRJEB115442
+SAMPLE	SAMEA122934917
+ASSEMBLYNAME	De_novo_Conopomorpha_cramerella_transcriptome_v2
+ASSEMBLY_TYPE	isolate 
+PROGRAM	Trinity v2.15.2
+PLATFORM	ILLUMINA
+DESCRIPTION	De novo transcriptome assembly of Conopomorpha cramerella (TaxID: 538958) generated using Trinity v2.15.2 from nine publicly available Illumina RNA-seq datasets originating from the two projects, PRJNA553611 and PRJNA611085. No new sequencing data were generated in this study. The assembly represents a consolidated transcriptomic resource for this non-model lepidopteran insect.
+RUN_REF	SRR9690969,SRR9690970,SRR9690971,SRR9690972,SRR9690973,SRR9690974,SRR11266554,SRR11266555,SRR11266556
+FASTA	CPB_transcriptome_assembly_v2.fasta.gz
