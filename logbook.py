@@ -2573,7 +2573,7 @@ if selected == "Additional Notes":
 
         st.write("###")
 
-        st.write("**31.Prepare the topology of both protein and ligand via GROMACS**")
+        st.write("31.Prepare the topology of both protein and ligand via GROMACS")
         st.write("prepare the topology of both protein and ligand files separately via gmx pdb2gmx and external tools like CGenFF")
         st.write("✔️split the protein-ligand complex (.pdb) into individual protein (.pdb) and ligand (.pdb) files before preparing their topologies for MD simulation")
         st.code("""
@@ -2621,5 +2621,9 @@ if selected == "Additional Notes":
         st.markdown("[Create a CGenFF account](https://cgenff.com/)")
         st.markdown("[Download the sort_mol2_bonds.pl file](http://www.mdtutorials.com/gmx/complex/Files/sort_mol2_bonds.txt)")
         st.markdown("[Read the tutorial to know how to run MD simulation for protein-ligand complex](http://www.mdtutorials.com/gmx/complex/index.html)")
+
+        st.write("###")
+
+        st.write("32. Remember to refer to the previous literature to check for the crucial protein-ligand interactions to filter your molecular docking results")
 
         st.write("###")
