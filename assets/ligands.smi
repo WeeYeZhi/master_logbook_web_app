@@ -1,0 +1,15 @@
+C1CN(C(=O)N1)C2=CC=C(C=C2)Cl                       						1-(4-chlorophenyl)imidazolidin-2-one
+C1CN(C(=O)N1)C2=CC=C(C=C2)Br                                			1-(4-bromophenyl)imidazolidin-2-one
+CCOC1=CC=C(C=C1)N2CCNC2=O     											1-(4-ethoxyphenyl)imidazolidin-2-one
+CCC1=CC=C(C=C1)N2CCNC2=O      											1-(4-ethylphenyl)imidazolidin-2-one
+C1CN(C(=O)N1)C2=CC=C(C=C2)F            									1-(4-fluorophenyl)imidazolidin-2-one
+COC1=CC=C(C=C1)N2CCNC2=O  												1-(4-methoxyphenyl)imidazolidin-2-one
+CC1=CC=C(C=C1)N2CCNC2=O                              					1-(4-methylphenyl)imidazolidin-2-one
+C1CN(C(=O)N1)C2=CC=CC=C2                  								1-phenylimidazolidin-2-one
+CC1=CC(=C(C=C1)N=CN(C)C=NC2=C(C=C(C=C2)C)C)C                          	amitraz
+CN(C)CCCN1C2=CC=CC=C2SC3=C1C=C(C=C3)Cl                       			chlorpromazine
+CC1=CC(=C(C=C1)NC=NC)C                         							DPMF
+CN1CCN2C(C1)C3=CC=CC=C3CC4=CC=CC=C42									mianserin
+CC1=CC=C(C=C1)N(CC2=NCCN2)C3=CC(=CC=C3)O								phentolamine
+COC(=O)[C@H]1[C@H](CC[C@@H]2[C@@H]1C[C@H]3C4=C(CCN3C2)C5=CC=CC=C5N4)O  	yohimbine
+C1=CC(=CC=C1C(CN)O)O													octopamine

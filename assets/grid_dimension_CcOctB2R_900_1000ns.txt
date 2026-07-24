@@ -1,0 +1,4 @@
+whole_protein_cluster_centers_0_175_900_1000ns
+spacing    0.375
+npts       78 68 78
+center    -0.675  3.513 -8.578

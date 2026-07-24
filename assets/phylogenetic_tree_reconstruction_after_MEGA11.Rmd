@@ -1,0 +1,156 @@
+---
+title: "Reconstruct phylogenetic tree of octopamine receptors after creating and exporting tree (in newick format) in MEGA11"
+author: "Wee Ye Zhi"
+date: "2025-3-17"
+output: html_document
+---
+
+## Package Installation
+
+# 1.  Install BiocManager, ggtree, treeio, ape, ggplot2, stringr, and dplyr packages
+```{r}
+if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+
+BiocManager::install(c("ggtree"))
+
+install.packages(c("ape", "ggplot2", "stringr", "dplyr"))
+```
+
+# ===============
+# Load Libraries
+# ===============
+
+# 2. Load all the libraries
+```{r}
+library(ggtree)
+library(ape)
+library(ggplot2)
+library(stringr)
+library(dplyr)
+```
+
+```{r}
+packageVersion("ggtree")
+packageVersion("ape")
+packageVersion("ggplot2")
+packageVersion("stringr")
+packageVersion("dplyr")
+```
+
+```{r}
+citation("ggtree")
+citation("ape")
+citation("ggplot2")
+citation("stringr")
+citation("dplyr")
+```
+
+# ==========
+# Read Tree
+# ==========
+
+# 3. Import and read the phylogenetic tree (in the form of newick format that is exported from the bootstrap consensus tree) that has been created by MEGA11 previously 
+```{r}
+tree <- read.tree("C:/Users/USER/Documents/Master_of_Science_in_Systems_Biology_GRA/Experimental_results/Latest_phylogenetic_tree_construction_results/original_octopamine_receptor_phylogenetic_tree.nwk")
+```
+
+# ====================
+# Define Target Taxon
+# ====================
+
+# 4. Define the list of taxon names that you wish to restore their greek letters of alpha and beta
+```{r}
+original_taxon_name <- c('BmOctalpha1R(NP_001091748.1)', 'CsOctalpha1R(AEQ33589.1)', 'PxOAMB(XP_048486473.1)', 'TcOctalpha1R(NP_001280520.1)', 'DmOctalpha1R(NP_732541.1)', 'AmOctalpha1R(NP_001011565.1)', 'TcOctalpha2R(XP_015839170.1)', 'AmOctalpha2R(XP_001122075.3)', 'CsOctalpha2R(AIC75370.1)', 'DmOctalpha2R(NP_650754.2)', 'PxTyrOctR(XP_048485348.1)', 'CcTyrOctR(TRINITY_DN219751_c0_g1_i1.p1)', 'PrTyrOctR(AFX62896.1)', 'CsTyrOctR(AFG26689.1)', 'BmTyrOctR(BAD11157.1)', 'BmOctbeta2R(NP_001171666.1)', 'PxOctbeta2R(XP_011568733.1)','CcOctbeta2R(TRINITY_DN22425_c0_g1_i3.p1)', 'PrOctbeta2R(XP_022116353.1)','CsOctbeta2R(AEO89318.1)', 'TcOctbeta2R(NP_001280501.1)', 'DmOctbeta2R(NP_001034049.1)', 'NlOctbeta2R(ASA47149.1)', 'AmOctbeta2R(XP_396348.4)', 'TcOctbeta3R(NP_001280505.1)','DmOctbeta3R(NP_001034043.2)', 'AmOctbeta3R(XP_006557730.1)', 'AmOctbeta4R(CCO13925.1)', 'DmOctbeta1R(NP_651057.1)', 'AmOctbeta1R(XP_397139.3)', 'PrOctbeta1R(XP_022123444.1)', 'CsOctbeta1R(AGV79326.1)', 'BmOctbeta1R(XP_004922133.2)', 'VdOctbeta2R(XP_022664697.1)', 'HsOctbeta1AR(NP_000675.1)', 'HsOctbeta2AR(NP_000015.2)', 'HsOctbeta3AR(NP_000016.1)', 'HsOctalpha1AAR(NP_000671.2)', 'HsOctalpha1BAR(NP_000670.1)', 'HsOctalpha1DAR(NP_000669.1)', 'HsOctalpha2AAR(NP_000672.3)', 'HsOctalpha2CAR(NP_000674.2)', 'HsOctalpha2BAR(NP_000673.2)')
+```
+
+# =======================
+# Restore Greek Letters
+# =======================
+
+# 5. Create a 'restore_greek' function to restore the greek letters of alpha and beta for all the alpha and beta receptor subtypes
+```{r}
+restore_greek <- function(x) {
+  x <- str_replace_all(x, "alpha1R", "α1R")
+  x <- str_replace_all(x, "alpha2R", "α2R")
+  x <- str_replace_all(x, "beta1R", "β1R")
+  x <- str_replace_all(x, "beta2R", "β2R")
+  x <- str_replace_all(x, "beta3R", "β3R")
+  x <- str_replace_all(x, "beta4R", "β4R")
+  x <- str_replace_all(x, "beta1AR", "β1AR")
+  x <- str_replace_all(x, "beta2AR", "β2AR")
+  x <- str_replace_all(x, "beta3AR", "β3AR")
+  x <- str_replace_all(x, "alpha1AAR", "α1AAR")
+  x <- str_replace_all(x, "alpha1BAR", "α1BAR")
+  x <- str_replace_all(x, "alpha1DAR", "α1DAR")
+  x <- str_replace_all(x, "alpha2AAR", "α2AAR")
+  x <- str_replace_all(x, "alpha2CAR", "α2CAR")
+  x <- str_replace_all(x, "alpha2BAR", "α2BAR")
+  return(x)
+}
+
+tree$tip.label <- restore_greek(tree$tip.label)
+
+tree$tip.label <- str_remove_all(tree$tip.label, "['\"]") # explicitly strip any literal single or double quotes from the labels
+
+tree$tip.label <- str_replace_all(tree$tip.label, " ", "_") # restore underscores (converts spaces back to underscores)
+```
+
+# ================================
+# Create tip annotation dataframe
+# ================================
+
+# 6. Extract the bootstrap values and the tip labels (taxon labels)
+
+```{r}
+bootstrap_values <- tree$node.label
+restored_taxon_names <- tree$tip.label
+```
+
+# 7. Double check whether you have successfully recovered all the Greek letters of alpha and beta, and whether you have annotated protein accession IDs correctly
+```{r}
+print(restored_taxon_names)
+```
+
+# ============================================
+# Construct phylogenetic tree for publication
+# ============================================
+
+# 8. Plot tree
+
+```{r}
+p <- ggtree(tree) +
+
+  geom_tiplab(
+    aes(fontface = ifelse(label %in% c(     "CcOctβ2R(TRINITY_DN22425_c0_g1_i3.p1)"), 
+                          "bold", "plain")),
+    color = "black",    
+    size = 3,
+    align = TRUE,
+    linetype = "solid",
+    linesize = 0.3
+  ) +
+
+  geom_text2(
+    aes(
+      subset = !isTip,
+      label = label
+    ),
+    size = 2.5,
+    hjust = -0.1,
+    vjust = -0.2
+  ) +
+
+  theme_tree() +
+
+  coord_cartesian(clip = "off") +
+
+  theme(
+    legend.position = "none",   # ← remove legend
+    plot.margin = margin(10, 150, 10, 10)
+  )
+
+p <- p + hexpand(0.5, direction = 1) # add 50% extra space to the right
+
+print(p)
+```
+
