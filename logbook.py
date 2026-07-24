@@ -2623,7 +2623,3 @@ if selected == "Additional Notes":
         st.markdown("[Read the tutorial to know how to run MD simulation for protein-ligand complex](http://www.mdtutorials.com/gmx/complex/index.html)")
 
         st.write("###")
-
-        st.write("32. Remember to refer to the previous literature to check for the crucial protein-ligand interactions to filter your molecular docking results")
-
-        st.write("###")
