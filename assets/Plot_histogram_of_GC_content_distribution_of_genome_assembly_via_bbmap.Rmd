@@ -1,0 +1,57 @@
+---
+title: "GC_Content_Distribution_Histogram_of_SPAdes_raw_Illumina_only_assembly"
+author: "Wee Ye Zhi"
+date: "2025-05-22"
+output: html_document
+---
+
+## Load and inspect data
+
+```{r} 
+gc_data <- read.table("gc_histogram.txt", header = TRUE)
+```
+
+## Show first few rows to verify the data has been loaded successfully
+
+```{r}
+head(gc_data)
+```
+
+## Plot GC content histogram to plot a graph of number of scaffolds vs GC content
+
+```{r}
+par(mar = c(5, 9, 4, 5))  #  Adjust (mar = c(bottom, left, top, right)).Increase left margin to 6 (default is usually 4)
+barplot(height = gc_data$scaffolds,
+names.arg = round(gc_data$GC * 100, 1),
+xlab = "GC Content (%)",
+ylab = "",
+main = "GC Content Distribution of SPAdes Raw Illumina-only Assembly",
+las = 2, # Rotate x-axis labels for readability
+col = "steelblue",
+border = "black",
+cex.names = 0.7) # Adjust label size for many bars
+mtext("Number of Scaffolds", side = 2, line = 5, cex = 1)
+```
+
+## Save histogram plot
+
+```{r}
+png("GC_content_histogram.png", width=1000, height=600)
+
+par(mar = c(5, 9, 4, 5))  #  Adjust (mar = c(bottom, left, top, right)).Increase left margin to 6 (default is usually 4)
+barplot(height = gc_data$scaffolds,
+names.arg = round(gc_data$GC * 100, 1),
+xlab = "GC Content (%)",
+ylab = "",
+main = "GC Content Distribution of SPAdes Raw Illumina-only Assembly",
+las = 2, # Rotate x-axis labels for readability
+col = "steelblue",
+border = "black",
+cex.names = 0.7) # Adjust label size for many bars
+mtext("Number of Scaffolds", side = 2, line = 5, cex = 1)
+
+dev.off # close the png device and save the plot
+```
+
+
+

@@ -57,6 +57,7 @@ ENA_manifest = current_dir / "assets" / "manifest.txt"
 CPB_transcriptome_assembly = current_dir / "assets" / "CPB_transcriptome_assembly_v2.fasta.gz"
 grid_dimension = current_dir / "assets" / "grid_dimension_CcOctB2R_900_1000ns.txt"
 
+
 # ---- HEADER SECTION ----
 with st.container():
     left_column, right_column = st.columns((1, 1))
@@ -2623,3 +2624,4 @@ if selected == "Additional Notes":
         st.markdown("[Read the tutorial to know how to run MD simulation for protein-ligand complex](http://www.mdtutorials.com/gmx/complex/index.html)")
 
         st.write("###")
+
