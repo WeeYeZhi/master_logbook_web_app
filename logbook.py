@@ -2320,7 +2320,21 @@ if selected == "Submit Transcriptome Assembly to ENA":
 
         st.write("###")
 
-        st.write("**1. Download the manifest text file and the gzipped CPB transcriptome assembly fasta file to be used for validation and submission to the ENA database.**")
+        st.write("**1. Register your study to obtain bioproject accession ID (PRJEB) and study accession ID (ERP), register your sample to obtain biosample accession ID (SAMEA) and ENA sample accession ID (ERS), and submit your third-party transcriptome assembly via Webin-CLI to obtain the ENA assembly accession ID (ERZ) and the master Transcriptome Shotgun Assembly (TSA) sequence accession ID of your assembly**")
+        st.write("""
+        1. Bioproject Accession ID: PRJEB115442 
+        2. Study Accession ID: ERP195643
+        3. Biosample Accession ID: SAMEA122934917
+        4. ENA Sample Accession ID:  ERS30626394
+        5. ENA Assembly Accession ID: ERZ29767477
+        6. Master TSA Sequence Accession ID: HCLG01000000
+        """)
+        st.write("Note: The exact master sequence accession ID for your transcriptome assembly is HCLG01000000 (which you should cite in your manuscript). In the database system, four-letter prefixes starting with 'H' (like HCLG) specifically designate Transcriptome Shotgun Assemblies (TSA) submitted through ENA. The '01' denotes the version of your assembly, and the trailing zeros indicate that this is the master accession record acting as the umbrella for all 206,947 of your individual transcript sequences. When your scheduled release date arrives in March 2027, ENA will not issue new numbers. The system will simply lift the privacy hold, changing the visibility status of your existing records from 'confidential' to 'public'. On that day, HCLG01000000 will become globally searchable and downloadable by other researchers. Your ERZ29767477 number is an internal ENA 'Analysis' accession used for system tracking. While it will not change, it is primarily meant for communicating with the ENA helpdesk, whereas HCLG01000000 is the permanent public ID you should use in your manuscript.")
+        st.write("Note: The transcriptome shotgun assembly project has been deposited in the European Nucleotide Archive (ENA) at EMBL-EBI under the accession HCLG01000000 (BioProject PRJEB115442). The version described in this paper is the first version, HCLG01000000. The data are currently under a privacy embargo and will be made publicly available upon the scheduled release date or upon publication of this manuscript, whichever occurs first.")
+
+        st.write("###")
+
+        st.write("**2. Download the manifest text file and the gzipped CPB transcriptome assembly fasta file to be used for validation and submission to the ENA database.**")
         # ----LOAD MANIFEST FILE OF CPB TRANSCRIPTOME ASSEMBLY----
         # Check if the file exists before reading
         if ENA_manifest.exists():
@@ -2354,7 +2368,7 @@ if selected == "Submit Transcriptome Assembly to ENA":
 
         st.write("###")
 
-        st.write("**2. Run the Webin-CLI program using Java**")
+        st.write("**3. Run the Webin-CLI program using Java**")
         st.write("✔️download the latest release of the Webin-CLI jar file (webin-cli-9.0.3.jar) manually from the official Webin-CLI GitHub page and save the file inside your desired working Webin-CLI installation directory")
         st.code("""
         java -jar /media/raid/Wee/WeeYeZhi/output/ENA_transcriptome_submission/webin-cli-9.0.3.jar -help
@@ -2371,7 +2385,7 @@ if selected == "Submit Transcriptome Assembly to ENA":
 
         st.write("###")
 
-        st.write("**3. Alternatively, run the Webin-CLI program using Docker**")
+        st.write("**4. Alternatively, run the Webin-CLI program using Docker**")
         st.write("✔️pull the Webin-CLI Docker image from DockerHub")
         st.code("""
         docker pull enasequence/webin-cli # you are pulling the latest enasequence/webin-cli docker image from DockerHub
@@ -2402,6 +2416,7 @@ if selected == "Submit Transcriptome Assembly to ENA":
         st.markdown("[Obtain the latest version of Webin-CLI Java from GitHub](https://github.com/enasequence/webin-cli/releases/tag/)")
         st.markdown("[Visit the Webin-CLI Docker Image in the DockerHub](https://hub.docker.com/r/enasequence/webin-cli)")
         st.markdown("[Visit the latest version of Aspera-CLI Official GitHub Page](https://github.com/IBM/aspera-cli/releases/tag/v4.26.1)")
+        st.markdown("[Login to your Webin Submission Portal to check your submission progress and status to obtain all the important accession IDs here](https://www.ebi.ac.uk/ena/submit/webin/login)")
         st.write("Note: Avoid using your institution's computer to validate and submit assembly files as it has firewall issues which interrupts the assembly file upload process to the ENA database via the FTP server later (due to possible internet reconnection issue by peers), where the complete file upload process will always fail later. Instead, try using your own home laptop, home wifi or your own mobile hotspot network to make the assembly submission process to bypass the firewall issue. Bear in mind that genome and transcriptome assemblies can only be submitted using the Webin-CLI submission interface. Remember to gzip your transcriptome assembly fasta file first before making submission. You have to run the validate command first to validate the content of the files, followed by running the submit command to submit the Webin-CLI-validated files to the ENA database.")
 
 # Additional Note
