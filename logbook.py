@@ -56,7 +56,7 @@ alphafold2_jupyternotebook = current_dir / "assets" / "AlphaFold2.ipynb"
 ENA_manifest = current_dir / "assets" / "manifest.txt"
 CPB_transcriptome_assembly = current_dir / "assets" / "CPB_transcriptome_assembly_v2.fasta.gz"
 grid_dimension = current_dir / "assets" / "grid_dimension_CcOctB2R_900_1000ns.txt"
-
+gmxMMPBSA_configuration = current_dir / "assets" / "mmpbsa.in"
 
 # ---- HEADER SECTION ----
 with st.container():
@@ -2186,8 +2186,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         xmgrace tm_ecl_sasa.xvg
         xmgrace sasa.xvg
         """, language="bash")
-        st.write(
-            "✔️count the total number of hydrogen bonds formed (since hydrogen bonds help stabilize secondary structure, ligand binding, protein binding, and membrane protein conformations. Stable hydrogen bond numbers usually indicates stable protein fold and preserved secondary structure)")
+        st.write("✔️count the total number of hydrogen bonds formed (since hydrogen bonds help stabilize secondary structure, ligand binding, protein binding, and membrane protein conformations. Stable hydrogen bond numbers usually indicates stable protein fold and preserved secondary structure)")
         st.code("""
         gmx hbond -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -num tm_ecl_hb_bb.xvg -tu ns # Select MainChain+H for both groups
         gmx hbond -s protein.tpr -f protein_fit.xtc -num whole_protein_hb_bb.xvg -tu ns #  Select MainChain+H for both groups. You ran this command only for your master study. Count the total number of backbone hydrogen bonds (intraprotein backbone Hbonds and secondary structure stability). 
@@ -2199,7 +2198,44 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**25. Predict the 3D structure of the CPBOctB2R_octopamine_complex via AlphaFold3 locally**")
+        st.write("**25. Calculate the binding free energy of the top 5 protein-ligand complexes throughout 500ns simulation via gmx_MMPBSA tool using 500 snapshots**")
+        st.write("✔️create a gmxMMPBSA conda environment and install gmxMMPBSA via conda-forge")
+        st.code("""
+        conda create -n gmxMMPBSA -c conda-forge gmx_mmpbsa
+        conda activate gmxMMPBSA
+        """, language="bash")
+        st.write("✔️verify the installation of gmxMMPBSA")
+        st.code("""
+        which gmx_MMPBSA
+        gmx_MMPBSA -h
+        gmx_MMPBSA -v
+        """, language="bash")
+        st.write("✔️compute the binding free energy of the protein-ligand complex via gmx_MMPBSA tool")
+        st.code("""
+        gmx_MMPBSA -O -i mmpbsa.in -cs complex.tpr -ct complex_traj.xtc -ci index.ndx -cg 3 4 -cp topol.top -o FINAL_RESULTS_MMPBSA.dat -eo FINAL_RESULTS_MMPBSA.csv # modify this command accordingly
+        """, language="bash")
+        # ----LOAD the gmxMMPBSA configuration file----
+        # Check if the file exists before reading
+        if gmxMMPBSA_configuration.exists():
+            with open(gmxMMPBSA_configuration, "rb") as script_file:
+                script_byte = script_file.read()
+
+            # Add download button
+            st.download_button(
+                label="Download the gmxMMPBSA configuration (.in) file",
+                data=script_byte,
+                file_name=gmxMMPBSA_configuration.name,  # Extract just the file name
+                mime="application/x-sh",  # MIME type for shell scripts
+            )
+        else:
+            st.error(f"{gmxMMPBSA_configuration.name} does not exist.")
+        st.markdown("[Install the official gmxMMPBSA conda package](https://anaconda.org/channels/conda-forge/packages/gmx_mmpbsa/overview)")
+        st.markdown("[Read the official gmxMMPBSA documentation to compute the binding free energy for protein-ligand complex](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/examples/Protein_ligand/ST/)")
+        st.markdown("[Visit the official gmxMMPBSA GitHub page](https://github.com/Valdes-Tresanco-MS/gmx_MMPBSA)")
+
+        st.write("###")
+
+        st.write("**26. Predict the 3D structure of the CPBOctB2R_octopamine_complex via AlphaFold3 locally**")
         st.code("""
         docker run --user 0:0 -d --name alphafold3_prediction_of_CPBOctB2R_octopamine_complex -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/CPBOctB2R_octopamine_complex/CPBOctB2R_octopamine_complex.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/CPBOctB2R_octopamine_complex
         """, language="bash")
@@ -2624,4 +2660,6 @@ if selected == "Additional Notes":
         st.markdown("[Read the tutorial to know how to run MD simulation for protein-ligand complex](http://www.mdtutorials.com/gmx/complex/index.html)")
 
         st.write("###")
+
+        st.write("32. Read literature carefully")
 
