@@ -459,40 +459,45 @@ if selected == "Phase 1: Sequence-Based Analysis":
         conda install conda-forge::curl # install curl to download the scripts later
         """, language="bash")
         st.write("✔️remove adapter & vector contamination via NCBI FCS-Adaptor")
-        st.write("-screen the transcriptome assembly to obtain a list of detected adapter and vector sequences")
+        st.write("screen the transcriptome assembly to obtain a list of detected adapter and vector sequences")
         st.code("""
         curl -LO https://github.com/ncbi/fcs/raw/main/dist/run_fcsadaptor.sh # download the run_fcsadaptor.sh script
         chmod 755 run_fcsadaptor.sh # change the permission of the downloaded script so that you can read, write and execute the script
         nohup bash run_fcsadaptor.sh --fasta-input /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta --output-dir /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/run_fcsadaptor_results --euk > /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/run_fcsadaptor_results/run_fcsadaptor_output.log 2>&1 & # run the run_fcsadaptor.sh script to screen the transcriptome assembly
+        nohup bash /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/run_fcsadaptor_results/run_fcsadaptor.sh --fasta-input /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity_without_pupa.fasta --output-dir /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/run_fcsadaptor_without_pupa_results --euk > /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/run_fcsadaptor_without_pupa_results/run_fcsadaptor_output.log 2>&1 & # run the run_fcsadaptor.sh script to screen the transcriptome assembly
         """, language="bash")
-        st.write("-clean the transcriptome assembly using the list of the detected adapter and vector sequences")
+        st.write("clean the transcriptome assembly using the list of the detected adapter and vector sequences")
         st.code("""
         curl -LO https://github.com/ncbi/fcs/raw/main/dist/fcs.py # download the fcs.py python script 
-        cat /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta | nohup python3 ./fcs.py clean genome --action-report /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/run_fcsadaptor_results/fcs_adaptor_report.txt --output /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/clean.fasta --contam-fasta-out /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/contam.fasta > fcspy_output.log 2>&1 & # run the fcs.py script to clean the transcriptome
+        cat /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta | nohup python3 /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/fcs.py clean genome --action-report /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/run_fcsadaptor_results/fcs_adaptor_report.txt --output /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/clean.fasta --contam-fasta-out /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/contam.fasta > fcspy_output.log 2>&1 & # run the fcs.py script to clean the transcriptome
+        cat /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity_without_pupa.fasta | nohup python3 /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/fcs.py clean genome --action-report /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/run_fcsadaptor_without_pupa_results/fcs_adaptor_report.txt --output /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_without_pupa_results/clean.fasta --contam-fasta-out /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_without_pupa_results/contam.fasta > fcspy_without_pupa_output.log 2>&1 & # run the fcs.py script to clean the transcriptome
         """, language="bash")
         st.write("✔️remove foreign biological contamination via NCBI FCS-GX")
-        st.write("-download the NCBI FCS-GX database")
+        st.write("download the NCBI FCS-GX database")
         st.code("""
         conda activate curl && curl -LO https://github.com/ncbi/fcs/raw/main/dist/fcs.py # activate the curl conda environment first before downloading the fcs.py runner script
         SOURCE_DB_MANIFEST="https://ncbi-fcs-gx.s3.amazonaws.com/gxdb/latest/all.manifest" # set the environment variable for SOURCE_DB_MANIFEST 
         LOCAL_DB="/media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/database" # set the environment variable for LOCAL_DB
-        python3 fcs.py db get --mft "$SOURCE_DB_MANIFEST" --dir "$LOCAL_DB/gxdb" # download the NCBI FCS-GX database
+        python3 /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/fcs.py db get --mft "$SOURCE_DB_MANIFEST" --dir "$LOCAL_DB/gxdb" # download the NCBI FCS-GX database
         ls -lh "$LOCAL_DB/gxdb" # verify the download
         """, language="bash")
-        st.write("-screen the transcriptome assembly to obtain a list of detected foreign biological contaminants")
+        st.write("screen the transcriptome assembly to obtain a list of detected foreign biological contaminants")
         st.code("""
         GXDB_LOC="/media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/database" # set environment variable for GXDB_LOC
-        nohup python3 ./fcs.py screen genome --fasta /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/clean.fasta --out-dir /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/screen_genome_results --gx-db "$GXDB_LOC/gxdb" --tax-id 538958 > /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/screen_genome_results/screen_genome_output.log 2>&1 & # screen the transcriptome assembly to detect foreign biological contaminant sequences
+        nohup python3 /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/fcs.py screen genome --fasta /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/clean.fasta --out-dir /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/screen_genome_results --gx-db "$GXDB_LOC/gxdb" --tax-id 538958 > /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/screen_genome_results/screen_genome_output.log 2>&1 & # screen the transcriptome assembly to detect foreign biological contaminant sequences
+        nohup python3 /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/fcs.py screen genome --fasta /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_without_pupa_results/clean.fasta --out-dir /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/screen_genome_without_pupa_results --gx-db "$GXDB_LOC/gxdb" --tax-id 538958 > /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/screen_genome_without_pupa_results/screen_genome_without_pupa_output.log 2>&1 & # screen the transcriptome assembly to detect foreign biological contaminant sequences
         """, language="bash")
-        st.write("-clean the transcriptome assembly to remove foreign biological contaminants")
+        st.write("clean the transcriptome assembly to remove foreign biological contaminants")
         st.code("""
         cat /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/clean.fasta | nohup python3 ./fcs.py clean genome --action-report /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/screen_genome_results/clean.538958.fcs_gx_report.txt --output /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/clean.fasta --contam-fasta-out /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/contam.fasta > /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/clean_genome_output.log 2>&1 & # clean the transcriptome assembly to remove foreign biological contaminants
+        cat /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_without_pupa_results/clean.fasta | nohup python3 /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_adaptor_results/fcspy_results/fcs.py clean genome --action-report /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/screen_genome_without_pupa_results/clean.538958.fcs_gx_report.txt --output /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_without_pupa_results/clean.fasta --contam-fasta-out /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_without_pupa_results/contam.fasta > /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_without_pupa_results/clean_genome_output.log 2>&1 & # clean the transcriptome assembly to remove foreign biological contaminants
         """, language="bash")
-        st.write("✔️remove the tilde suffix from the assembly fasta file after running NCBI FCS-adaptor and NCBI FCS-GX")
+        st.write("remove the tilde suffix from the assembly fasta file after running NCBI FCS-adaptor and NCBI FCS-GX")
         st.code("""
         sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/clean.fasta > /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_results/modified_clean.fasta
+        sed -E 's/([^[:space:]]*)~[^[:space:]]*/\1/' /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_without_pupa_results/clean.fasta > /media/raid/Wee/WeeYeZhi/output/ncbi_fcs_results/ncbi_fcs_gx_results/clean_genome_without_pupa_results/modified_clean.fasta
         """, language="bash")
-        st.write("✔️remove the suffix from the assembly fasta file to keep only the transcript ID")
+        st.write("remove the suffix from the assembly fasta file to keep only the transcript ID")
         st.code("""
         sed 's/ .*$//' modified_clean.fasta > latest_modified_clean.fasta
         mv latest_modified_clean.fasta modified_clean.fasta
@@ -500,7 +505,44 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**11. Evaluate the BUSCO completeness score of the CPB transcriptome assembly for 4 times (before deduplication, after deduplication, after NCBI FCS & after filtering bad contigs via Transrate)**")
+        st.write("**11. Try to submit your transcriptome assembly to the NCBI TSA database to check for the presence of duplicated sequence IDs and assign a sequence suffix for each of the duplicated sequence ID**")
+        st.markdown("[Login to your NCBI portal first](https://www.ncbi.nlm.nih.gov/myncbi/)")
+        st.markdown("[After successful logging into the NCBI, navigate to your NCBI submission portal](https://submit.ncbi.nlm.nih.gov/subs/)")
+        st.markdown("[Try to submit your transcriptome assembly to the NCBI TSA database to check for the presence of duplicated sequence IDs](https://submit.ncbi.nlm.nih.gov/about/tsa/)")
+
+        st.write("###")
+
+        st.write("**12. Perform reference-free quality assessment of de novo CPB transcriptome assembly for 2 times via TransRate (after NCBI-FCS & after removing bad contigs via TransRate)**")
+        st.write("✔️install transrate via docker container")
+        st.code("""
+        docker pull genevia/transrate:v1.0.3_orp # pull the transrate docker image from the DockerHub registry
+        docker images # verify that the transrate docker image has been successfully pulled
+        id -u && id -g # check the current user ID and group ID
+        """, language="bash")
+        st.write("✔️run transrate to evaluate the CPB transcriptome assembly (after NCBI-FCS) via Docker")
+        st.code("""
+        docker run --user 1000:1000 -d --name orp_transrate_after_NCBI_FCS -v /media/raid/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS" 
+        docker run --user 1000:1000 -d --name orp_transrate_after_NCBI_FCS_without_pupa -v /media/raid/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean_without_pupa.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_without_pupa_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa" 
+        """, language="bash")
+        st.write("✔️run transrate to evaluate the CPB transcriptome assembly (after filtering & removing bad contigs via Transrate) via Docker")
+        st.code("""
+        docker run --user 1000:1000 -d --name orp_transrate_after_NCBI_FCS_transrate_filtering -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering" 
+        docker run --user 1000:1000 -d --name orp_transrate_after_NCBI_FCS_transrate_filtering_without_pupa -v /media/raid/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/transrate_without_pupa_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa/modified_clean_without_pupa/good.modified_clean_without_pupa.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_without_pupa_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa" 
+        """, language="bash")
+        st.write("✔️show the log file content of the transrate docker that is running in the background")
+        st.code("""
+        docker logs orp_transrate_after_NCBI_FCS # show the log file content of the run by using the designated name of the docker container after deduplication & NCBI-FCS
+        docker logs orp_transrate_after_NCBI_FCS_transrate_filtering # show the log file content of the run by using the designated name of the docker container after deduplication & NCBI-FCS & removing bad contigs via Transrate      
+        docker ps -a # list all the current actively running and stopped docker containers. Those that exited with code 0 is the successful run
+        """, language="bash")
+        st.markdown("[Visit TransRate GitHub Page](https://github.com/blahah/transrate)")
+        st.markdown("[Visit TransRate Conda Installation Page](https://anaconda.org/bioconda/transrate)")
+        st.markdown("[Visit TransRate User Manual Page](https://hibberdlab.com/transrate/)")
+        st.markdown("[Visit TransRate Step by Step User Manual Page](https://hibberdlab.com/transrate/getting_started.html)")
+
+        st.write("###")
+
+        st.write("**13. Evaluate the BUSCO completeness score of the CPB transcriptome assembly for 4 times (before deduplication, after deduplication, after NCBI FCS & after filtering bad contigs via Transrate)**")
         st.write("✔️create 'busco' conda environment, activate the environment and install busco via conda")
         st.code("""
         conda create -n busco
@@ -511,7 +553,16 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.code("""
         which busco
         """, language="bash")
-        st.write("✔️determine the lineage file suitable to be used for CPB genome by listing the lineage datasets available in BUSCO first, followed by referring to the NCBI BioProject of CPB (taxonomy) to check its taxonomy")
+        st.write("✔️download the exact BUSCO lepidoptera, insecta, and endopterygota lineage datasets from https://busco-data.ezlab.org/v6/data/lineages/ and unzip them")
+        st.code("""
+        wget https://busco-data.ezlab.org/v6/data/lineages/lepidoptera_odb12.2026-05-22.tar.gz 
+        wget https://busco-data.ezlab.org/v6/data/lineages/insecta_odb12.2026-05-22.tar.gz   
+        wget https://busco-data.ezlab.org/v6/data/lineages/endopterygota_odb12.2026-05-22.tar.gz  
+        tar -xzvf lepidoptera_odb12.2026-05-22.tar.gz 
+        tar -xzvf insecta_odb12.2026-05-22.tar.gz 
+        tar -xzvf endopterygota_odb12.2026-05-22.tar.gz  
+        """, language="bash")
+        st.write("✔️determine the lineage file suitable to be used for CPB transcriptome by listing the lineage datasets available in BUSCO first, followed by referring to the NCBI BioProject of CPB (taxonomy) to check its NCBI taxonomy ID")
         st.code("busco --list-datasets", language="bash")
         st.code("busco --list-datasets | grep -i lepidoptera_odb12", language="bash")
         st.write("✔️run BUSCO to evaluate the completeness of the CPB transcriptome assembly")
@@ -519,11 +570,12 @@ if selected == "Phase 1: Sequence-Based Analysis":
         nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM/trinity_assembly_done_by_LKM.Trinity.fasta -c 16 -l lepidoptera_odb12 -o /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_results_of_transcriptome_assembly_done_by_LKM > /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_results_of_transcriptome_assembly_done_by_LKM/CPB_transcriptome_assembly_busco_done_by_LKM_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly assembled using reads sequenced by LKM
         nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_INBIOSIS/trinity_assembly_done_by_INBIOSIS.Trinity.fasta -c 16 -l lepidoptera_odb12 -o /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_results_of_transcriptome_assembly_done_by_INBIOSIS > /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_results_of_transcriptome_assembly_done_by_INBIOSIS/busco_trinity_assembly_done_by_INBIOSIS_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly assembled using reads sequenced by INBIOSIS
         nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_assembly_done_by_LKM_and_INBIOSIS.Trinity.fasta -c 16 -l lepidoptera_odb12 -o /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_results_of_transcriptome_assembly_done_by_LKM_and_INBIOSIS > /media/raid/Wee/WeeYeZhi/output/Buscoresults/BUSCO_results_of_transcriptome_assembly_done_by_LKM_and_INBIOSIS/CPB_transcriptome_assembly_busco_done_by_LKM_and_INBIOSIS_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly assembled using reads sequenced by both LKM & INBIOSIS
-        nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/get_longest_isoform_per_Trinity_gene_results/longest_isoform_per_gene_after_cdhitest_trinity.fasta -c 16 -l lepidoptera_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after deduplication
-        nohup busco -m transcriptome -i /media/cbr14/Two/Wee/WeeYeZhi/output/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta -c 16 -l lepidoptera_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after NCBI FCS
         nohup busco -m transcriptome -i /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta -c 16 -l lepidoptera_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after removing bad contigs via TransRate (by using lepidoptera_odb12 dataset)
         nohup busco -m transcriptome -i /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta -c 16 -l insecta_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after removing bad contigs via TransRate (by using insecta_odb12 dataset)
         nohup busco -m transcriptome -i /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta -c 16 -l endopterygota_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly after removing bad contigs via TransRate (by using endopterygota_odb12 dataset)
+        nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/transrate_without_pupa_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa/modified_clean_without_pupa/good.modified_clean_without_pupa.fasta -c 16 -l /media/raid/Wee/WeeYeZhi/output/busco_without_pupa_results/lepidoptera_odb12/lepidoptera_odb12 --offline -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly (without pupa) after removing bad contigs via TransRate (by using lepidoptera_odb12.2 dataset)
+        nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/transrate_without_pupa_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa/modified_clean_without_pupa/good.modified_clean_without_pupa.fasta -c 16 -l /media/raid/Wee/WeeYeZhi/output/busco_without_pupa_results/insecta_odb12/insecta_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly (without pupa) after removing bad contigs via TransRate (by using insecta_odb12.2 dataset)
+        nohup busco -m transcriptome -i /media/raid/Wee/WeeYeZhi/output/transrate_without_pupa_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa/modified_clean_without_pupa/good.modified_clean_without_pupa.fasta -c 16 -l /media/raid/Wee/WeeYeZhi/output/busco_without_pupa_results/endopterygota_odb12/endopterygota_odb12 -o CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa > CPB_transcriptome_assembly_busco_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa_output.log 2>&1 & # compute the BUSCO completeness score of the CPB transcriptome assembly (without pupa) after removing bad contigs via TransRate (by using endopterygota_odb12.2 dataset)
         """, language="bash")
         st.write("✔️draw BUSCO plot for comparison using python script (built inside the busco conda package))")
         st.code("""
@@ -563,10 +615,13 @@ if selected == "Phase 1: Sequence-Based Analysis":
             )
         else:
             st.error(f"{generate_busco_plot_Rscript.name} does not exist.")
+        st.markdown("[Download the BUSCO lineage datasets manually using the wget command if there is a recent update to BUSCO](https://busco-data.ezlab.org/v6/data/lineages/)")
+        st.markdown("[Visit the official BUSCO website and look for the line, 'You can also download them manually' and click the word, 'manually' to access the latest version of the BUSCO lineage datasets](https://busco.ezlab.org/)")
+        st.markdown("[Visit Official BUSCO Anaconda Webpage to install BUSCO via bioconda](https://anaconda.org/channels/bioconda/packages/busco/overview)")
 
         st.write("###")
 
-        st.write("**12. Compute the basic statistics of the CPB transcriptome assembly via Trinity**")
+        st.write("**14. Compute the basic statistics of the CPB transcriptome assembly via Trinity**")
         st.write("✔️activate the 'trinity' conda environment")
         st.code("""
         conda activate trinity
@@ -578,39 +633,12 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("✔️run the TrinityStats.pl script")
         st.code("""
         perl /home/cbr14/anaconda3/envs/trinity/bin/TrinityStats.pl /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta > stats_trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.log
+        perl /home/cbr15/anaconda3/envs/trinity/bin/TrinityStats.pl /media/raid/Wee/WeeYeZhi/output/transrate_without_pupa_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa/modified_clean_without_pupa/good.modified_clean_without_pupa.fasta > stats_trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa.log
         """, language="bash")
 
         st.write("###")
 
-        st.write("**13. Perform reference-free quality assessment of de novo CPB transcriptome assembly for 4 times via TransRate (before deduplication, after deduplication, & after NCBI-FCS & after removing bad contigs via TransRate)**")
-        st.write("✔️install transrate via docker container")
-        st.code("""
-        docker pull genevia/transrate:v1.0.3_orp # pull the transrate docker image from the DockerHub registry
-        docker images # verify that the transrate docker image has been successfully pulled
-        id -u && id -g # check the current user ID and group ID
-        """, language="bash")
-        st.write("✔️run transrate to evaluate the CPB transcriptome assembly (after NCBI-FCS) via Docker")
-        st.code("""
-        docker run --user 1000:1000 -d --name orp_transrate_after_NCBI_FCS -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/ncbi_fcs_results/after_tsa_submission_filtering_results/modified_clean.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS" 
-        """, language="bash")
-        st.write("✔️run transrate to evaluate the CPB transcriptome assembly (after filtering & removing bad contigs via Transrate) via Docker")
-        st.code("""
-        docker run --user 1000:1000 -d --name orp_transrate_after_NCBI_FCS_transrate_filtering -v /media/cbr14/Two/Wee/WeeYeZhi/output:/data genevia/transrate:v1.0.3_orp /bin/bash -c "transrate --assembly=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --left=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_1_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_1_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_1_paired.fastq.gz --right=/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266554_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266555_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR11266556_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690969_2_paired.fastq.gz, /data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690970_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690971_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690972_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690973_2_paired.fastq.gz,/data/trimmomatic_results/trimmomatic_raw_RNA_seq_from_NCBI_SRA_results/SRR9690974_2_paired.fastq.gz --threads 16 --output=/data/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering" 
-        """, language="bash")
-        st.write("✔️show the log file content of the transrate docker that is running in the background")
-        st.code("""
-        docker logs orp_transrate_after_NCBI_FCS # show the log file content of the run by using the designated name of the docker container after deduplication & NCBI-FCS
-        docker logs orp_transrate_after_NCBI_FCS_transrate_filtering # show the log file content of the run by using the designated name of the docker container after deduplication & NCBI-FCS & removing bad contigs via Transrate      
-        docker ps -a # list all the current actively running and stopped docker containers. Those that exited with code 0 is the successful run
-        """, language="bash")
-        st.markdown("[Visit TransRate GitHub Page](https://github.com/blahah/transrate)")
-        st.markdown("[Visit TransRate Conda Installation Page](https://anaconda.org/bioconda/transrate)")
-        st.markdown("[Visit TransRate User Manual Page](https://hibberdlab.com/transrate/)")
-        st.markdown("[Visit TransRate Step by Step User Manual Page](https://hibberdlab.com/transrate/getting_started.html)")
-
-        st.write("###")
-
-        st.write("**14. Check the total number of full length coding transcripts**")
+        st.write("**15. Check the total number of full length coding transcripts**")
         st.write("✔️download the UniProt SwissProt database")
         st.code("""
         wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
@@ -639,14 +667,14 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**15. Generate the gene to trans map file for the CPB transcriptome assembly**")
+        st.write("**16. Generate the gene to trans map file for the CPB transcriptome assembly**")
         st.code("""
         perl /home/cbr14/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta > /media/cbr14/Two/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map
         """, language="bash")
 
         st.write("###")
 
-        st.write("**16. Align the trimmed reads back to the CPB transcriptome assembly via Bowtie2 (alignment-based approach**)")
+        st.write("**17. Align the trimmed reads back to the CPB transcriptome assembly via Bowtie2 (alignment-based approach**)")
         st.write("✔️create a bowtie2 conda environment, activate the environment, and install bowtie2 via bioconda")
         st.code("""
         conda create -n bowtie2
@@ -682,7 +710,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("17. Run the transcript quantification step (follow the Trinity GitHub manual)")
+        st.write("18. Run the transcript quantification step (follow the Trinity GitHub manual)")
         st.write("✔️activate the 'trinity' conda environment")
         st.code("""
         conda activate trinity
@@ -694,7 +722,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
 
         st.write("###")
 
-        st.write("**18. Compute the ExN50 statistics of the transcriptome assemblies (before deduplication, after deduplication, after NCBI FCS and after removing bad contigs via TransRate)**")
+        st.write("**19. Compute the ExN50 statistics of the transcriptome assemblies (before deduplication, after deduplication, after NCBI FCS and after removing bad contigs via TransRate)**")
         st.write("✔️compute and obtain the expression matrix after quantifying the abundance of transcripts via RSEM (Trinity_trans.gene.TMM.EXPR.matrix will be used to run DEG analysis later & Trinity_trans.isoform.TMM.EXPR.matrix will be used to compute the EX90N50 value of the CPB transcriptome assembly later")
         st.code("""
         nohup perl /home/cbr14/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method RSEM --gene_trans_map /media/cbr14/Two/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map --out_prefix Trinity_trans --name_sample_by_basedir --quant_files /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/RSEM_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS_transrate.list > /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/abundance_estimates_to_matrix_after_cdhitest_trinity_NCBI_FCS_transrate_output.log 2>&1 &
@@ -2424,6 +2452,7 @@ if selected == "Submit Transcriptome Assembly to ENA":
         st.markdown("[Visit the Webin-CLI Docker Image in the DockerHub](https://hub.docker.com/r/enasequence/webin-cli)")
         st.markdown("[Visit the latest version of Aspera-CLI Official GitHub Page](https://github.com/IBM/aspera-cli/releases/tag/v4.26.1)")
         st.markdown("[Login to your Webin Submission Portal to check your submission progress and status to obtain all the important accession IDs here](https://www.ebi.ac.uk/ena/submit/webin/login)")
+        st.markdown("[Read how to resolve all kinds of possible ENA data submission errors such as invalid file checksum, number of lines is not a multiple of four, invalid file content, and missing files](https://ena-docs.readthedocs.io/en/latest/faq/runs.html)")
         st.write("Note: Avoid using your institution's computer to validate and submit assembly files as it has firewall issues which interrupts the assembly file upload process to the ENA database via the FTP server later (due to possible internet reconnection issue by peers), where the complete file upload process will always fail later. Instead, try using your own home laptop, home wifi or your own mobile hotspot network to make the assembly submission process to bypass the firewall issue. Bear in mind that genome and transcriptome assemblies can only be submitted using the Webin-CLI submission interface. Remember to gzip your transcriptome assembly fasta file first before making submission. You have to run the validate command first to validate the content of the files, followed by running the submit command to submit the Webin-CLI-validated files to the ENA database.")
 
 # Additional Note
