@@ -670,6 +670,7 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("**16. Generate the gene to trans map file for the CPB transcriptome assembly**")
         st.code("""
         perl /home/cbr14/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta > /media/cbr14/Two/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map
+        perl /home/cbr15/anaconda3/envs/trinity/bin/get_Trinity_gene_to_trans_map.pl /media/raid/Wee/WeeYeZhi/output/transrate_without_pupa_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa/modified_clean_without_pupa/good.modified_clean_without_pupa.fasta > /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa/good.modified_clean_without_pupa.fasta.gene_trans_map
         """, language="bash")
 
         st.write("###")
@@ -711,13 +712,17 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("###")
 
         st.write("18. Run the transcript quantification step (follow the Trinity GitHub manual)")
-        st.write("✔️activate the 'trinity' conda environment")
+        st.write("✔️activate the 'trinity' conda environment and install bowtie2, bowtie2-build, samtools, and rsem-calculate-expression via bioconda within the trinity conda environment as the transcript quantification process requires the use of bowtie2, bowtie2-build, samtools and rsem-calculate-expression to work")
         st.code("""
         conda activate trinity
+        conda install bioconda::bowtie2
+        conda install bioconda::samtools
+        conda install bioconda::rsem
         """, language="bash")
         st.write("✔️run the align_and_estimate_abundance.pl script by running alignment-based approach via Bowtie2 and transcript quantification via RSEM")
         st.code("""
         nohup perl /home/cbr14/anaconda3/envs/trinity/bin/align_and_estimate_abundance.pl --transcripts /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta --seqType fq --samples_file /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS/trinity_samples_sequenced_by_LKM_and_INBIOSIS.txt --est_method RSEM --aln_method bowtie2 --gene_trans_map /media/cbr14/Two/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map --prep_reference --SS_lib_type RF --thread_count 16 --output_dir /media/cbr14/Two/Wee/WeeYeZhi/output/align_and_estimate_abundance.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate > trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_output.log 2>&1 &
+        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/align_and_estimate_abundance.pl --transcripts /media/raid/Wee/WeeYeZhi/output/transrate_without_pupa_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa/modified_clean_without_pupa/good.modified_clean_without_pupa.fasta --seqType fq --samples_file /media/raid/Wee/WeeYeZhi/output/trinity_results/trinity_assembly_done_by_LKM_and_INBIOSIS_except_pupa/trinity_samples_sequenced_by_LKM_and_INBIOSIS_except_pupa.txt --est_method RSEM --aln_method bowtie2 --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa/good.modified_clean_without_pupa.fasta.gene_trans_map --prep_reference --SS_lib_type RF --thread_count 16 --output_dir /media/raid/Wee/WeeYeZhi/output/align_and_estimate_abundance.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa > trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa_output.log 2>&1 &
         """, language="bash")
 
         st.write("###")
@@ -726,10 +731,12 @@ if selected == "Phase 1: Sequence-Based Analysis":
         st.write("✔️compute and obtain the expression matrix after quantifying the abundance of transcripts via RSEM (Trinity_trans.gene.TMM.EXPR.matrix will be used to run DEG analysis later & Trinity_trans.isoform.TMM.EXPR.matrix will be used to compute the EX90N50 value of the CPB transcriptome assembly later")
         st.code("""
         nohup perl /home/cbr14/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method RSEM --gene_trans_map /media/cbr14/Two/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/good.modified_clean.fasta.gene_trans_map --out_prefix Trinity_trans --name_sample_by_basedir --quant_files /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/RSEM_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS_transrate.list > /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/abundance_estimates_to_matrix_after_cdhitest_trinity_NCBI_FCS_transrate_output.log 2>&1 &
+        nohup perl /home/cbr15/anaconda3/envs/trinity/bin/abundance_estimates_to_matrix.pl --est_method RSEM --gene_trans_map /media/raid/Wee/WeeYeZhi/output/get_Trinity_gene_to_trans_map_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa/good.modified_clean_without_pupa.fasta.gene_trans_map --out_prefix Trinity_trans --name_sample_by_basedir --quant_files /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa/RSEM_transcript_quantification_files_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa.list > /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa/abundance_estimates_to_matrix_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa_output.log 2>&1 &
         """, language="bash")
         st.write("✔️compute the ExN50 statistics of the CPB transcriptome assembly at gene level (instead of transcript level) to remove bias")
         st.code("""
         perl /home/cbr14/anaconda3/envs/trinity/bin/contig_ExN50_statistic.pl /media/cbr14/Two/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering/Trinity_trans.isoform.TMM.EXPR.matrix /media/cbr14/Two/Wee/WeeYeZhi/output/transrate_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS/modified_clean/good.modified_clean.fasta gene | tee ExN50_after_cdhitest_trinity_NCBI_FCS_transrate_filtering.gene.stats 
+        perl /home/cbr15/anaconda3/envs/trinity/bin/contig_ExN50_statistic.pl /media/raid/Wee/WeeYeZhi/output/trinity_abundance_estimates_to_matrix.pl_results/trinity_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa/Trinity_trans.isoform.TMM.EXPR.matrix /media/raid/Wee/WeeYeZhi/output/transrate_without_pupa_results/transrate_CPB_transcriptome_assembly_after_cdhitest_trinity_NCBI_FCS_transrate_without_pupa/modified_clean_without_pupa/good.modified_clean_without_pupa.fasta gene | tee ExN50_after_cdhitest_trinity_NCBI_FCS_transrate_filtering_without_pupa.gene.stats 
         """, language="bash")
         st.write("✔️install the ggplot2 conda package within the trinity conda environment via conda-forge")
         st.code("""
@@ -2130,6 +2137,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         nohup gmx mdrun -deffnm em -nb gpu > em_mdrun.log 2>&1 & # run the calculation for non-bonded atomic interactions, PME electrostatic interactions, bonded interactions, and coordinate update/integration on GPU to accelerate the overall MD simulation process
         gmx energy -f em.edr -o potential.xvg # execute the energy command to extract the potential energy (as a function of energy minimization step) of the system from the generated binary energy file (.edr). Select 13 (Potential) and 0 (to terminate input). Based on the potential energy plot, you will notice that the potential energy of the system drops dramatically in the first few steps as water molecules rearrange to optimize hydrogen bonding
         """, language="bash")
+        st.write("Note: A representative receptor conformation was extracted from the final 100 ns of the 1000 ns apo molecular dynamics simulation. The docked protein–ligand complex was subsequently embedded in a POPC membrane using CHARMM-GUI Membrane Builder with the same membrane composition, force field, ionic strength, and simulation parameters as the apo system. The rebuilt system was then energy minimized, equilibrated, and subjected to a 500 ns production molecular dynamics simulation.")
 
         st.write("###")
 
