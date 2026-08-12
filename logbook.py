@@ -2230,9 +2230,10 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.code("""
         nohup gmx grompp -f step7_production.mdp -c step6.6.gro -t step6.6.cpt -p topol.top -n index.ndx -o md_500ns.tpr > step7.0_tpr.log 2>&1 & # remember to modify the step7_production.mdp file by changing the values of dt (stepsize) and nsteps (total number of steps) to 500ns first before running this command to generate the portable binary run input file.
         nohup gmx mdrun -s md_500ns.tpr -deffnm md_500ns -nb gpu -pme gpu -bonded gpu -update gpu > step7.0_500ns_mdrun.log 2>&1 & # run the 500 ns production simulation with GPU acceleration
+        nohup gmx mdrun -s md_500ns.tpr -deffnm md_500ns -cpi md_500ns.cpt -nb gpu -pme gpu -bonded gpu -update gpu > step7.0_500ns_mdrun_resume.log 2>&1 & # resume the 500 ns production simulation with GPU acceleration if the process stopped halfway due to connection issues or out of memory issue
         gmx make_ndx -f md_500ns.tpr -o index.ndx # create the index for protein-ligand complex. Type 1 | 13, (1 indicates protein and 13 indicates UNL) and press "Enter", followed by typing, name 18 protein_ligand_complex, to rename the newly created index group as protein_ligand_complex and position the newly created index group as 18. Type "q" to quit
         gmx trjconv -s md_500ns.tpr -f md_500ns.xtc -n index.ndx -o md_reimage.xtc -pbc mol -ur compact -center # Select group for centering: protein_ligand_complex & Select group for output: System. The md_reimage.xtc file is the corrected whole system trajectory. Under periodic boundary conditions, when molecules cross the box boundaries, the protein may look split, the lipid may look split, and the water may appear discontinuous, but physically this is nothing wrong as it is just visualization artifact. Hence, the goal of reimaging is to reconstruct the whole molecule, center the protein, and keep the membrane visually intact
-        gmx trjconv -s md_500ns.tpr -n index.ndx -f md_reimage.xtc -o protein_ligand_complex_fit.xtc -fit rot+trans # Select group for least squares fit: Backbone & Select group for output: protein_ligand_complex. The protein_ligand_complex_fit.xtc becomes the main analysis trajectory file used for analyzing RMSD, RMSF, Hbond, PCA, clustering, and ensemble docking since it has PBC artifacts removed, protein centered, global rotation removed, and global translation removed. Even after reimaging, the protein may still rotate and the whole system may still drift, which interferes with the downstream RMSD analysis. The goal of fitting is to remove global rotation and global translation while preserving the internal conformational motions. Fitting to backbone removes overall drifting, box movement, and rotational artifacts while preserving biologically meaningful motions
+        gmx trjconv -s md_500ns.tpr -n index.ndx -f md_reimage.xtc -o protein_ligand_complex_fit.xtc -fit rot+trans # Select group for least squares fit: protein_ligand_complex & Select group for output: protein_ligand_complex. The protein_ligand_complex_fit.xtc becomes the main analysis trajectory file used for analyzing RMSD, RMSF, Hbond, PCA, clustering, and ensemble docking since it has PBC artifacts removed, protein centered, global rotation removed, and global translation removed. Even after reimaging, the protein may still rotate and the whole system may still drift, which interferes with the downstream RMSD analysis. The goal of fitting is to remove global rotation and global translation while preserving the internal conformational motions. Fitting to backbone removes overall drifting, box movement, and rotational artifacts while preserving biologically meaningful motions
         gmx convert-tpr -s md_500ns.tpr -n index.ndx -o protein_ligand_complex.tpr # Select for group to be written out: protein_ligand_complex to extract protein-and-ligand-only atoms, protein-and-ligand-only topology information, protein-and-ligand-only coordinates, and the protein-and-ligand-only-groups. The protein_ligand_complex.tpr file can be used for subsequent visualization and analysis
         watch -n 1 nvidia-smi # monitor the GPU usage (monitor GPU utilization, VRAM usage, temperature, and power draw)
         """, language="bash")
@@ -2325,9 +2326,33 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.code("""
         gmx_MMPBSA_test -f /media/raid/Wee/WeeYeZhi/output/gmxMMPBSA_results/test_run -n 16
         """, language="bash")
+        st.write("✔️calculate the mctrdz value (membrane center in the Z direction) for each protein-ligand complex")
+        st.code("""
+        gmx trjconv -s md_500ns.tpr -f md_reimage.xtc -dump 450000 -o whole_system_frame_450ns.pdb # extract the whole system conformation at 450ns
+        select membrane, resn POPC
+        pseudoatom prot_center, polymer.protein
+        pseudoatom memb_center, membrane
+        iterate_state 1, prot_center, print(x, y, z) # get 47.169307708740234 45.97426223754883 63.58333969116211
+        iterate_state 1, memb_center, print(x, y, z) # get 47.586944580078125 48.78681182861328 56.380348205566406
+        mctrdz= 56.380348205566406 (Membrane centered Z-coordinate) - 63.58333969116211 (Protein centered Z-coordinate) = -7.203 (The negative value makes sense and physically means that the center of your lipid bilayer sits roughly 7.2 Å below the geometric center of your overall protein)
+        """, language="bash")
+        st.write("✔️calculate the mthick value (membrane thickness in angstrom unit) for each protein-ligand complex")
+        st.code("""
+        select upper_P, resn POPC and name P and z > 56.380
+        select lower_P, resn POPC and name P and z < 56.380
+        pseudoatom upper_center, upper_P
+        pseudoatom lower_center, lower_P
+        iterate_state 1, upper_center, print(x, y, z) # get 47.66769790649414 48.73799133300781 75.75056457519531
+        iterate_state 1, lower_center, print(x, y, z) # get 46.85185623168945 48.81730270385742 36.8427619934082
+        mthick = 75.75056457519531 - 36.8427619934082 = 38.908 
+        """, language="bash")
+        st.write("✔️prepare the input gmxMMPBSA configuration file automatically and modify the parameters accordingly to suit your analysis")
+        st.code("""
+        gmx_MMPBSA --create_input pb # modify the sys_name and gmx_path variables located in the # General namelist variables section. Use startframe=4000, endframe=5000, and interval=2. Modify the parameters to suit the gmxMMPBSA calculation for membrane proteins
+        """, language="bash")
         st.write("✔️compute the binding free energy of the protein-ligand complex via gmx_MMPBSA tool")
         st.code("""
-        gmx_MMPBSA -O -i mmpbsa.in -cs complex.tpr -ct complex_traj.xtc -ci index.ndx -cg 3 4 -cp topol.top -o FINAL_RESULTS_MMPBSA.dat -eo FINAL_RESULTS_MMPBSA.csv # modify this command accordingly
+        gmx_MMPBSA -O -i mmpbsa.in -cs complex.tpr -ct complex_traj.xtc -ci index.ndx -cg 3 4 -cp topol.top -o FINAL_RESULTS_MMPBSA.dat -eo FINAL_RESULTS_MMPBSA.csv --clean # modify this command accordingly
         """, language="bash")
         # ----LOAD the gmxMMPBSA configuration file----
         # Check if the file exists before reading
@@ -2346,7 +2371,18 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
             st.error(f"{gmxMMPBSA_configuration.name} does not exist.")
         st.markdown("[Install the official gmxMMPBSA conda package](https://anaconda.org/channels/conda-forge/packages/gmx_mmpbsa/overview)")
         st.markdown("[Read the official gmxMMPBSA documentation to compute the binding free energy for protein-ligand complex](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/examples/Protein_ligand/ST/)")
+        st.markdown("[Center and fit the protein-ligand complex while trying to remove the PBC effects, rotational, and translational effects](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/gmx_MMPBSA_running/)")
+        st.markdown("[Read the command-line usage manual of gmxMMPBSA](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/gmx_MMPBSA_command-line/)")
+        st.markdown("[Read how to generate the input files required to run gmxMMPBSA](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/input_file)")
+        st.markdown("[Read how to interpret the output files after running gmxMMPBSA](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/output/)")
+        st.markdown("[Read how to run gmxMMPBSA calculation for membrane proteins](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/examples/Protein_membrane/)")
         st.markdown("[Visit the official gmxMMPBSA GitHub page](https://github.com/Valdes-Tresanco-MS/gmx_MMPBSA)")
+        st.markdown("[How to calculate the frames and interval for analysis](https://www.researchgate.net/post/MMPBSA_analysis-How_to_calculate_the_frames_and_interval_for_analysis)")
+        st.markdown("[The total energy tends to be positive for membrane proteins](https://gromacs.bioexcel.eu/t/membrane-protein-for-gmx-mmpbsa/12642)")
+        st.markdown("[How to calculate the mctrdz parameter while trying to run gmxMMPBSA for membrane proteins](https://github.com/Valdes-Tresanco-MS/gmx_MMPBSA/discussions/436)")
+        st.markdown("[How to calculate the mctrdz and mthick parameters while trying to run gmxMMPBSA for membrane proteins](https://groups.google.com/g/gmx_mmpbsa/c/ZknS5rwLO2I)")
+        st.markdown("[Try to read this gmxMMPBSA calculation issue](https://github.com/Valdes-Tresanco-MS/gmx_MMPBSA/issues/624)")
+        st.write("Note: The binding free energies of the protein-ligand complexes were estimated using the MM-PBSA method, utilizing an implicit membrane model to account for the lipid bilayer environment. Calculations were performed over a stable 100 ns window (from 400 ns to 500 ns) of the production trajectory, analyzing 500 snapshots extracted at an interval of 0.2 ns to ensure robust conformational sampling.")
 
         st.write("###")
 
@@ -2533,6 +2569,7 @@ if selected == "Submit Transcriptome Assembly to ENA":
         st.markdown("[Visit the latest version of Aspera-CLI Official GitHub Page](https://github.com/IBM/aspera-cli/releases/tag/v4.26.1)")
         st.markdown("[Login to your Webin Submission Portal to check your submission progress and status to obtain all the important accession IDs here](https://www.ebi.ac.uk/ena/submit/webin/login)")
         st.markdown("[Read how to resolve all kinds of possible ENA data submission errors such as invalid file checksum, number of lines is not a multiple of four, invalid file content, and missing files](https://ena-docs.readthedocs.io/en/latest/faq/runs.html)")
+        st.markdown("[Contact ENA helpdesk to send them an email of your query. They are responsive where they are going to reply your email soon within two weeks](https://www.ebi.ac.uk/ena/browser/support)")
         st.write("Note: Avoid using your institution's computer to validate and submit assembly files as it has firewall issues which interrupts the assembly file upload process to the ENA database via the FTP server later (due to possible internet reconnection issue by peers), where the complete file upload process will always fail later. Instead, try using your own home laptop, home wifi or your own mobile hotspot network to make the assembly submission process to bypass the firewall issue. Bear in mind that genome and transcriptome assemblies can only be submitted using the Webin-CLI submission interface. Remember to gzip your transcriptome assembly fasta file first before making submission. You have to run the validate command first to validate the content of the files, followed by running the submit command to submit the Webin-CLI-validated files to the ENA database.")
 
 # Additional Note
