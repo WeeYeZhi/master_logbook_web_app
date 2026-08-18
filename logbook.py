@@ -1601,11 +1601,11 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         open BmOctB2R\\em_BmOctB2R_model.pdb # this will become your #4 structure
         open CsOctB2R\\em_CsOctB2R_model.pdb # this will become your #5 structure
         matchmaker #2-5 to #1 # superimpose all the #2, #3, #4, and #5 structures with the CPB octopamine beta 2 receptor (reference structure #1)
-        select #1/A:105,109,110,113,188,194,198,199,202,290,293,294,297,313,317,321; show sel target ab # select the ligand binding residues of CPB OctB2R and show them in atom and bond (stick) representation
-        select #2/A:100,104,105,108,183,189,193,194,197,282,285,286,289,306,310,314; show sel target ab # select the ligand binding residues of PxOctB2R and show them in atom and bond (stick) representation
-        select #3/A:104,108,109,112,185,191,195,196,199,286,289,290,293,309,313,317; show sel target ab # select the ligand binding residues of PrOctB2R and show them in atom and bond (stick) representation
-        select #4/A:111,115,116,119,192,198,202,203,206,293,296,297,300,316,320,324; show sel target ab # select the ligand binding residues of BmOctB2R and show them in atom and bond (stick) representation
-        select #5/A:113,117,118,121,194,200,204,205,208,295,298,299,302,318,322,326; show sel target ab # select the ligand binding residues of CsOctB2R and show them in atom and bond (stick) representation
+        select #1/A:105,106,109,110,113,188,190,194,195,198,199,202,290,293,294,297,313,317,321; show sel target ab # select the ligand binding residues of CPB OctB2R and show them in atom and bond (stick) representation
+        select #2/A:100,101,104,105,108,183,185,189,190,193,194,197,282,285,286,289,306,310,314; show sel target ab # select the ligand binding residues of PxOctB2R and show them in atom and bond (stick) representation
+        select #3/A:104,105,108,109,112,185,187,191,192,195,196,199,286,289,290,293,309,313,317; show sel target ab # select the ligand binding residues of PrOctB2R and show them in atom and bond (stick) representation
+        select #4/A:111,112,115,116,119,192,194,198,199,202,203,206,293,296,297,300,316,320,324; show sel target ab # select the ligand binding residues of BmOctB2R and show them in atom and bond (stick) representation
+        select #5/A:113,114,117,118,121,194,196,200,201,204,205,208,295,298,299,302,318,322,326; show sel target ab # select the ligand binding residues of CsOctB2R and show them in atom and bond (stick) representation
         select #1/A; cartoon hide sel # hide the cartoon representation of structure #1
         select #2/A; cartoon hide sel # hide the cartoon representation of structure #2
         select #3/A; cartoon hide sel # hide the cartoon representation of structure #3
@@ -1614,16 +1614,16 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         delete H # delete all the hydrogen atoms attached the residues to simplify the ligand binding site representation otherwise the superposed ligand binding site is going to look very crowded and complex
         select #1/A:105 | #2/A:100 | #3/A:104 | #4/A:111 | #5/A:113; 2dlabel create gpcr328 text "3.28x28" # collectively label the residues across 5 insect octopamine beta 2 receptors as 3.28x28
         2dlabel change gpcr328 size 12 # change the size of the label to 12. After changing the size of the label, you can change the 'right mouse' setting in UCSF ChimeraX GUI Interface to use the right click function to move and arrange the label around
+        select #1/A:106 | #2/A:101 | #3/A:105 | #4/A:112 | #5/A:114; 2dlabel create gpcr329 text "3.29x29" # collectively label the residues across 5 insect octopamine beta 2 receptors as 3.29x29
+        2dlabel change gpcr329 size 12 # change the size of the label to 12. After changing the size of the label, you can change the 'right mouse' setting in UCSF ChimeraX GUI Interface to use the right click function to move and arrange the label around
         select #1/A:109 | #2/A:104 | #3/A:108 | #4/A:115 | #5/A:117; 2dlabel create gpcr332 text "3.32x32"
         2dlabel change gpcr332 size 12
         select #1/A:110 | #2/A:105 | #3/A:109 | #4/A:116 | #5/A:118; 2dlabel create gpcr333 text "3.33x33"
         2dlabel change gpcr333 size 12
         select #1/A:113 | #2/A:108 | #3/A:112 | #4/A:119 | #5/A:121; 2dlabel create gpcr336 text "3.36x36"
         2dlabel change gpcr336 size 12
-        select #1/A:188 | #2/A:183 | #3/A:185 | #4/A:192 | #5/A:194; 2dlabel create gpcr4552 text "45.52x52"
-        2dlabel change gpcr4552 size 12
-        select #1/A:194 | #2/A:189 | #3/A:191 | #4/A:198 | #5/A:200; 2dlabel create gpcr539 text "5.38x39"
-        2dlabel change gpcr539 size 12
+        select #1/A:195 | #2/A:190 | #3/A:192 | #4/A:199 | #5/A:201; 2dlabel create gpcr540 text "5.39x40"
+        2dlabel change gpcr540 size 12
         select #1/A:198 | #2/A:193 | #3/A:195 | #4/A:202 | #5/A:204; 2dlabel create gpcr543 text "5.42x43"
         2dlabel change gpcr543 size 12
         select #1/A:199 | #2/A:194 | #3/A:196 | #4/A:203 | #5/A:205; 2dlabel create gpcr544 text "5.43x44"
@@ -1644,11 +1644,11 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         2dlabel change gpcr738 size 12
         select #1/A:321 | #2/A:314 | #3/A:317 | #4/A:324 | #5/A:326; 2dlabel create gpcr742 text "7.43x42"
         2dlabel change gpcr742 size 12
-        name site1 #1/A:105,109,110,113,188,194,198,199,202,290,293,294,297,313,317,321 # name the ligand binding site of CPB OctB2R as site1
-        name site2 #2/A:100,104,105,108,183,189,193,194,197,282,285,286,289,306,310,314 # name the ligand binding site of PxOctB2R as site2
-        name site3 #3/A:104,108,109,112,185,191,195,196,199,286,289,290,293,309,313,317 # name the ligand binding site of PrOctB2R as site3
-        name site4 #4/A:111,115,116,119,192,198,202,203,206,293,296,297,300,316,320,324 # name the ligand binding site of BmOctB2R as site4
-        name site5 #5/A:113,117,118,121,194,200,204,205,208,295,298,299,302,318,322,326 # name the ligand binding site of CsOctB2R as site5
+        name site1 #1/A:105,106,109,110,113,188,190,194,195,198,199,202,290,293,294,297,313,317,321 # name the ligand binding site of CPB OctB2R as site1
+        name site2 #2/A:100,101,104,105,108,183,185,189,190,193,194,197,282,285,286,289,306,310,314 # name the ligand binding site of PxOctB2R as site2
+        name site3 #3/A:104,105,108,109,112,185,187,191,192,195,196,199,286,289,290,293,309,313,317 # name the ligand binding site of PrOctB2R as site3
+        name site4 #4/A:111,112,115,116,119,192,194,198,199,202,203,206,293,296,297,300,316,320,324 # name the ligand binding site of BmOctB2R as site4
+        name site5 #5/A:113,114,117,118,121,194,196,200,201,204,205,208,295,298,299,302,318,322,326 # name the ligand binding site of CsOctB2R as site5
         matchmaker site2 to site1 # perform pairwise structural superposition between the ligand binding residues of CPB OctB2R and other insect species OctB2R (superpose only on the ligand binding site itself, not on the whole structure itself)
         matchmaker site3 to site1
         matchmaker site4 to site1
@@ -1704,7 +1704,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**18. install GalaxyRefine and run it locally to refine the structure of the AlphaFold3-predicted, SwissModel-predicted, and GPCR-I-TASSER-predicted CPB octopamine beta 2 receptor respectively. After finished running GalaxyRefine, view the results in UCSF ChimeraX and extract the first structure (delete the other 4 structures) for downstream protein structure evaluation.**")
+        st.write("**18. install GalaxyRefine and run it locally to refine the structure of the AlphaFold2-predicted, AlphaFold3-predicted, SwissModel-predicted, and GPCR-I-TASSER-predicted CPB octopamine beta 2 receptor respectively. After finished running GalaxyRefine, view the results in UCSF ChimeraX and extract the first structure (delete the other 4 structures) for downstream protein structure evaluation.**")
         st.code("""
         navigate to /media/raid/Wee/WeeYeZhi/output/galaxyrefine_installation
         fill up the galaxyweb software request form at https://galaxy.seoklab.org/request_softwares.html to request for the GalaxyRefine software installation files & download the software installation files inside the installation directory, /media/raid/Wee/WeeYeZhi/output/galaxyrefine_installation
@@ -1718,7 +1718,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output/CPB_octopamine_beta2_receptor/CPB_OctB2R/five_top_ranked_AlphaFold3_model/CPB_OctB2R_seed-1_sample-2_model.pdb -t GalaxyRefine_CPBOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/galaxyrefine_CPBOctB2R_results.log 2>&1 & # refine the AlphaFold3-predicted CPB octopamine beta 2 receptor
         nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/swissmodel_prediction_results/swissmodel_predicted_CPB_octopamine_beta2_receptor.pdb -t GalaxyRefine_SwissModel_Predicted_CPBOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/galaxyrefine_swissmodel_predicted_CPBOctB2R_results.log 2>&1 & # refine the SwissModel-predicted CPB octopamine beta 2 receptor
         nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/gpcritasser_prediction_results/gpcritasser_predicted_CPB_octopamine_beta2_receptor.pdb -t GalaxyRefine_GPCRITASSER_Predicted_CPBOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/galaxyrefine_GPCRITASSER_predicted_CPBOctB2R_results.log 2>&1 & # refine the GPCRItasser-predicted CPB octopamine beta 2 receptor
-        nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/alphafold2_prediction_results/AlphaFold2_predicted_CcOctB2R_2c236_relaxed_rank_001_alphafold2_ptm_model_3_seed_000.pdb -t GalaxyRefine_AlphaFold2_Predicted_CPBOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/galaxyrefine_AlphaFold2_predicted_CPBOctB2R_results.log 2>&1 & # refine the AlphaFold2-predicted CPB octopamine beta 2 receptor
+        nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/alphafold2_prediction_results/Latest_AlphaFold2_predicted_CcOctB2R_2c236_relaxed_rank_001_alphafold2_ptm_model_3_seed_003.pdb -t GalaxyRefine_AlphaFold2_Predicted_CPBOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/GalaxyRefine_AlphaFold2_Predicted_CPBOctB2R/galaxyrefine_AlphaFold2_predicted_CPBOctB2R_results.log 2>&1 & # refine the AlphaFold2-predicted CPB octopamine beta 2 receptor
         nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/AF-G3M4F8-F1-model_v6.pdb -t GalaxyRefine_CsOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/GalaxyRefine_CsOctB2R/galaxyrefine_CsOctB2R_results.log 2>&1 & # refine the Chilo suppressalis octopamine beta 2 receptor
         nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/Bm_OctB2R_seed-1_sample-2_model.pdb -t GalaxyRefine_BmOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/GalaxyRefine_BmOctB2R/galaxyrefine_BmOctB2R_results.log 2>&1 & # refine the Bombyx mori octopamine beta 2 receptor
         nohup $GALAXY_HOME/bin/GalaxyRefine -p /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/Pr_OctB2R_seed-1_sample-3_model.pdb -t GalaxyRefine_PrOctB2R -s 16 -o 5 > /media/raid/Wee/WeeYeZhi/output/galaxyrefine_results/GalaxyRefine_PrOctB2R/galaxyrefine_PrOctB2R_results.log 2>&1 & # refine the Pieris rapae octopamine beta 2 receptor
@@ -1907,7 +1907,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.write("✔️analyze the MD simulation of the CPB OctB2R-lipid bilayer complex system using XMGrace, VMD, and GNU Plot. RMSD: Is the protein stable? RMSF: Which residues fluctuate the most? Hbond: Are stabilizing interactions maintained? DSSP: Does secondary structure remain stable? PCA: What are the dominant large-scale motions?")
         st.write("✔️calculate the TM-helices only's and protein's backbone RMSD to investigate how much did the protein structure deviate from the reference structure over time to determine structural stability, equilibration quality, large conformational changes, and simulation convergence. To answer questions like does the insect receptor structure maintain its structure? does the binding pocket collapse? does the transmembrane region stay stable?")
         st.code("""
-        gmx rms -s protein.tpr -f protein_fit.xtc -n index.ndx -tu ns -o tm_ecl_backbone_rmsd.xvg # Select group for least squares fit: TM_ecl_helices_backbone and Select group for RMSD calculation: TM_ecl_helices_backbone
+        gmx rms -s protein.tpr -f protein_fit.xtc -n index.ndx -tu ns -o tm_helices_rmsd_protein.xvg # Select group for least squares fit: TM_ecl_helices_backbone and Select group for RMSD calculation: TM_ecl_helices_backbone
         gmx rms -s protein.tpr -f protein_fit.xtc  -n index.ndx -tu ns -o whole_protein_backbone_rmsd.xvg # Select group for least squares fit: Backbone and Select group for RMSD calculation: Backbone (Choose backbone because backbone represents the overall protein fold and it is less noisy than the side chains). 
         xmgrace tm_ecl_rmsd.xvg # expect to see lower RMSD values since there are no flexible loops, C-terminus, N-terminus, intracellular loops (ICLs), and extracellular loops (ECLs). Visualize the RMSD plot inside a graphical user interface (GUI) in SCREEN mode, not in REMOTE TERMINAL mode.
         xmgrace whole_protein_rmsd.xvg # expect to see large RMSD values since there are presence of flexible loops, C-terminus, N-terminus, intracellular loops (ICLs), and extracellular loops (ECLs)
@@ -1961,7 +1961,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         vmd protein.tpr extreme1.pdb # visualize the protein structure via VMD
         vmd protein.tpr extreme2.pdb
         """, language="bash")
-        st.write("Note: To remove the top axis and right axis of the plot rendered by XMGRACE, you can do the following steps. Go to Plot -> Axis Properties -> Click the 'Tick marks' section -> Edit: X-axis -> Draw on: Normal side (located at the 'Placement' section) -> Click 'Apply'. Do the same thing for Edit: Y-axis. After that, Go to Plot -> Graph appearance -> Frame -> Change the Frame Type to Half Open -> Accept. If you notice the four black small square boxes at the four corners of the plot rendered by XMGRACE, it actually does not matter, because after you print out the plot, the boxes will automatically disappear (you do not need to manually or intentionally remove them)")
+        st.write("Note: To remove the top axis and right axis of the plot rendered by XMGRACE, you can do the following steps. Go to Plot -> Axis Properties -> Click the 'Tick marks' section -> Edit: X-axis -> Draw on: Normal side (located at the 'Placement' section) -> Click 'Apply'. Do the same thing for Edit: Y-axis. After that, Go to Plot -> Graph appearance -> Frame -> Change the Frame Type to Half Open -> Accept. If you notice the four black small square boxes at the four corners of the plot rendered by XMGRACE, it actually does not matter, because after you print out the plot, the boxes will automatically disappear (you do not need to manually or intentionally remove them). To add a legend to your plot, click Plot -> Graph appearance -> Tick the box for Display legend, before clicking Plot -> Set appearance -> Add a legend title in the String of Legend section. To remove the frame of the legend box, click Plot -> Graph appearance -> Leg.box -> Choose None for Frame line -> Choose None for Frame fill. Try to increase the max limit of the yaxis and xaxis tick marks by clicking Plot -> Axis properties -> Edit Y-axis -> Increase the value of Stop (max y-axis tick mark limit) to view the whole plot in place if xmgrace only shows part of the truncated plot")
         st.markdown("[Visit XMGRACE User's Guide v0.5](https://www.uoxray.uoregon.edu/local/manuals/grace/grace-5.0.5/doc/UsersGuide.html)")
 
         st.write("###")
@@ -1976,9 +1976,8 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("✔️perform RMSD-based GROMOS clustering analysis using a cutoff of 0.8 Å on Cα atoms to cluster structurally similar protein conformations with similar RMSD values together to identify the dominant receptor conformations throughout the MD trajectory. The three most populated clusters were selected as representative structures for subsequent ensemble docking analyses.")
+        st.write("✔️perform RMSD-based GROMOS clustering analysis using a cutoff of 0.175 Å to cluster structurally similar protein conformations with similar RMSD values together to identify the dominant receptor conformations throughout the MD trajectory. The three most populated clusters were selected as representative structures for subsequent ensemble docking analyses.")
         st.code("""
-        gmx cluster -s protein.tpr -f whole_protein_only_900_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.12 -o whole_protein_clusters_0.12_900_1000ns.xpm -g whole_protein_cluster_0.12_900_1000ns.log -cl whole_protein_cluster_centers_0.12_900_1000ns.pdb -dist whole_protein_rmsd_dist_0.12_900_1000ns.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 4 clusters.
         gmx cluster -s protein.tpr -f whole_protein_only_900_1000ns.xtc -n tm_helices_ecl.ndx -method gromos -cutoff 0.175 -o whole_protein_clusters_0.175_900_1000ns.xpm -g whole_protein_cluster_0.175_900_1000ns.log -cl whole_protein_cluster_centers_0.175_900_1000ns.pdb -dist whole_protein_rmsd_dist_0.175_900_1000ns.xvg # Select group for least squares fit: TM_ecl_helices and select group for RMSD calculation: TM_ecl_helices. Select Protein for output. The cutoff value is in the unit of nm and 1 nm = 10 angstrom. In this instance, the clusters.xpm file contains the cluster assignment map; cluster.log file contains the cluster statistics; cluster_centers.pdb file contains the representative structures; and the rmsd_dist.xvg file plots the RMSD distribution graph. Found 1 cluster only.
         """, language="bash")
         st.write("Note: Using representative MD-derived protein conformations helps account for protein flexibility, which improves docking realism")
@@ -2298,6 +2297,10 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         xmgrace tm_ecl_hb_bb.xvg
         xmgrace whole_protein_hb_bb.xvg
         xmgrace whole_protein_hb_all.xvg
+        """, language="bash")
+        st.write("✔️plot the combined backbone RMSD plot for all the 15 protein-ligand complexes after finished running 500ns MD simulation")
+        st.code("""
+        xmgrace tm_helices_rmsd_36324.xvg tm_helices_rmsd_255273.xvg tm_helices_rmsd_26752.xvg tm_helices_rmsd_2726.xvg tm_helices_rmsd_4581.xvg # navigate to the working directory, /media/raid/Wee/WeeYeZhi/output/charmmgui_results/combined_RMSD_plot before you run this command
         """, language="bash")
 
         st.write("###")
