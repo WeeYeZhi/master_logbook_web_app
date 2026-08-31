@@ -1961,7 +1961,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         vmd protein.tpr extreme1.pdb # visualize the protein structure via VMD
         vmd protein.tpr extreme2.pdb
         """, language="bash")
-        st.write("Note: To remove the top axis and right axis of the plot rendered by XMGRACE, you can do the following steps. Go to Plot -> Axis Properties -> Click the 'Tick marks' section -> Edit: X-axis -> Draw on: Normal side (located at the 'Placement' section) -> Click 'Apply'. Do the same thing for Edit: Y-axis. After that, Go to Plot -> Graph appearance -> Frame -> Change the Frame Type to Half Open -> Accept. If you notice the four black small square boxes at the four corners of the plot rendered by XMGRACE, it actually does not matter, because after you print out the plot, the boxes will automatically disappear (you do not need to manually or intentionally remove them). To add a legend to your plot, click Plot -> Graph appearance -> Tick the box for Display legend, before clicking Plot -> Set appearance -> Add a legend title in the String of Legend section. To remove the frame of the legend box, click Plot -> Graph appearance -> Leg.box -> Choose None for Frame line -> Choose None for Frame fill. Try to increase the max limit of the yaxis and xaxis tick marks by clicking Plot -> Axis properties -> Edit Y-axis -> Increase the value of Stop (max y-axis tick mark limit) to view the whole plot in place if xmgrace only shows part of the truncated plot")
+        st.write("Note: To remove the top axis and right axis of the plot rendered by XMGRACE, you can do the following steps. Go to Plot -> Axis Properties -> Click the 'Tick marks' section -> Edit: X-axis -> Draw on: Normal side (located at the 'Placement' section) -> Click 'Apply'. Do the same thing for Edit: Y-axis. After that, Go to Plot -> Graph appearance -> Frame -> Change the Frame Type to Half Open -> Accept. If you notice the four black small square boxes at the four corners of the plot rendered by XMGRACE, it actually does not matter, because after you print out the plot, the boxes will automatically disappear (you do not need to manually or intentionally remove them). To add a legend to your plot, click Plot -> Graph appearance -> Tick the box for Display legend, before clicking Plot -> Set appearance -> Add a legend title in the String of Legend section. To remove the frame of the legend box, click Plot -> Graph appearance -> Leg.box -> Choose None for Frame line -> Choose None for Frame fill. Click Plot -> Graph appearance -> Leg.box-> Increase the value of Y in the Location section, and click Plot -> Axis Properties -> Y-axis -> Increase the value of Y, to view the whole plot in place if xmgrace only shows part of the truncated plot")
         st.markdown("[Visit XMGRACE User's Guide v0.5](https://www.uoxray.uoregon.edu/local/manuals/grace/grace-5.0.5/doc/UsersGuide.html)")
 
         st.write("###")
@@ -2173,6 +2173,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         nohup ./vina_1.2.7_linux_x86_64 --receptor /media/raid/Wee/WeeYeZhi/output/molecular_docking_with_2RH1_results/2RH1_structure/2RH1.pdbqt --ligand /media/raid/Wee/WeeYeZhi/output/latest_ligand_preparation_results/autodock_mgltools_results/Conformer3D_COMPOUND_CID_76145148.pdbqt --scoring vinardo --center_x -29.978 --center_y 10.080 --center_z 8.144 --size_x 26.76 --size_y 22.52 --size_z 25.30 --spacing 0.375 --seed 12345 --out /media/raid/Wee/WeeYeZhi/output/molecular_docking_with_2RH1_results/autodock_vina_results/Conformer3D_COMPOUND_CID_76145148/Conformer3D_COMPOUND_CID_76145148_2RH1.pdbqt --cpu 16 --exhaustiveness 64 --energy_range 5 --num_modes 15 > /media/raid/Wee/WeeYeZhi/output/molecular_docking_with_2RH1_results/autodock_vina_results/Conformer3D_COMPOUND_CID_76145148/Conformer3D_COMPOUND_CID_76145148_2RH1.log 2>&1 &
         ./vina_split_1.2.7_linux_x86_64 --input /media/raid/Wee/WeeYeZhi/output/molecular_docking_with_2RH1_results/autodock_vina_results/Conformer3D_COMPOUND_CID_76145148/Conformer3D_COMPOUND_CID_76145148_2RH1.pdbqt 
         """, language="bash")
+        st.write("Note: While visualising the 2D protein-ligand interactions via Biovia Discovery Studio, click Ligand Interactions -> Show 2D Diagram -> Right click on the generated 2D Diagram -> Click Display Style -> Click Interaction section -> Untick Mixed Pi/Alkyl Hydrophobic -> Click Apply (same goes to Click Interaction section -> Untick Alkyl Hydrophobic -> Click Apply), to identify and count the total number of Pi-Alkyl interactions and Alkyl interactions. This will allow you to easily distinguish between Pi-Alkyl interactions and Alkyl interactions.")
 
         st.write("###")
 
@@ -2257,7 +2258,6 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         gmx editconf -f protein_ligand_complex.tpr -o protein_ligand_complex.gro
         """, language="bash")
 
-
         st.write("###")
 
         st.write("✔️analyze the MD simulation of the CPB OctB2R-ligand-lipid bilayer complex system using XMGrace, VMD, and GNU Plot. RMSD: Is the protein stable? RMSF: Which residues fluctuate the most? Hbond: Are stabilizing interactions maintained? DSSP: Does secondary structure remain stable? PCA: What are the dominant large-scale motions?")
@@ -2267,49 +2267,35 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         gmx rms -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -n index.ndx -tu ns -o ligand_rmsd.xvg # Select group for least squares fit: TM-helices-backbone and Select group for RMSD calculation: AMZ (ligand)
         xmgrace tm_helices_ligand_rmsd.xvg # expect to see lower RMSD values since there are no flexible loops, C-terminus, N-terminus, intracellular loops (ICLs), and extracellular loops (ECLs). Visualize the RMSD plot inside a graphical user interface (GUI) in SCREEN mode, not in REMOTE TERMINAL mode.
         """, language="bash")
-        st.write("✔️calculate the TM-helices only's and protein's C-alpha RMSF to investigate how much each residue fluctuates during the simulation to identify flexible regions, stable regions, loops, terminal flexibility, and potentially functional motions (Normally, loops have high RMSF, termini has high RMSF, and helices/core has low RMSF)")
+        st.write("✔️calculate the protein's C-alpha RMSF to investigate how much each residue fluctuates during the simulation to identify flexible regions, stable regions, loops, terminal flexibility, and potentially functional motions (Normally, loops have high RMSF, termini has high RMSF, and helices/core has low RMSF)")
         st.code("""
-        gmx rmsf -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -res -o tm_ecl_rmsf.xvg # Select group: C-alpha (using C-alpha gives residue-level flexibility, reduces side chain noise, and easier biological interpretation.)
-        gmx rmsf -s protein.tpr -f protein_fit.xtc -res -o whole_protein_rmsf.xvg # Select group: C-alpha 
-        xmgrace tm_ecl_rmsf.xvg
+        gmx rmsf -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -res -o whole_protein_rmsf.xvg # Select group: C-alpha 
         xmgrace whole_protein_rmsf.xvg
         """, language="bash")
         st.write("✔️investigate the compactness of the protein during the simulation")
         st.code("""
-        gmx gyrate -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -tu ns -o tm_ecl_rg.xvg # Select Protein
-        gmx gyrate -s protein.tpr -f protein_fit.xtc -tu ns -o whole_protein_rg.xvg # Select Protein
-        xmgrace tm_ecl_rg.xvg
-        xmgrace whole_protein_rg.xvg 
+        gmx gyrate -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -n index.ndx -tu ns -o tm_helices_rg.xvg # Select TM-helices-backbone
+        xmgrace tm_helices_rg.xvg
         """, language="bash")
         st.write("✔️run sasa analysis to investigate solvent accessibility of protein")
         st.code("""
-        gmx sasa -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -tu ns -o tm_ecl_sasa.xvg # Select Protein 
-        gmx sasa -s protein.tpr -f protein_fit.xtc -tu ns -o whole_protein_sasa.xvg # Select Protein 
-        xmgrace tm_sasa.xvg
-        xmgrace tm_ecl_sasa.xvg
-        xmgrace sasa.xvg
+        gmx sasa -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -tu ns -o whole_protein_sasa.xvg # Select Protein 
+        xmgrace whole_protein_sasa.xvg
         """, language="bash")
         st.write("✔️count the total number of hydrogen bonds formed (since hydrogen bonds help stabilize secondary structure, ligand binding, protein binding, and membrane protein conformations. Stable hydrogen bond numbers usually indicates stable protein fold and preserved secondary structure)")
         st.code("""
-        gmx hbond -s tm_helices_ecl.tpr -f tm_helices_ecl_fit.xtc -num tm_ecl_hb_bb.xvg -tu ns # Select MainChain+H for both groups
-        gmx hbond -s protein.tpr -f protein_fit.xtc -num whole_protein_hb_bb.xvg -tu ns #  Select MainChain+H for both groups. You ran this command only for your master study. Count the total number of backbone hydrogen bonds (intraprotein backbone Hbonds and secondary structure stability). 
-        gmx hbond -s protein.tpr -f protein_fit.xtc -num whole_protein_hb_all.xvg -tu ns # Select Protein for both groups. Count the total number of protein hydrogen bonds. 
-        xmgrace tm_ecl_hb_bb.xvg
-        xmgrace whole_protein_hb_bb.xvg
-        xmgrace whole_protein_hb_all.xvg
+        gmx hbond -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -num intermolecular_hbonds.xvg -tu ns # Select Protein (1) for Group 1 and select ligand (13) for Group 2
         """, language="bash")
         st.write("✔️plot the combined backbone RMSD plot for all the 15 protein-ligand complexes after finished running 500ns MD simulation")
         st.code("""
         xmgrace tm_helices_rmsd_36324.xvg tm_helices_rmsd_255273.xvg tm_helices_rmsd_26752.xvg tm_helices_rmsd_2726.xvg tm_helices_rmsd_4581.xvg # navigate to the working directory, /media/raid/Wee/WeeYeZhi/output/charmmgui_results/combined_RMSD_plot before you run this command
         """, language="bash")
-
-        st.write("###")
-
-        st.write("convert both the protein-ligand complex topology and the whole protein-ligand-lipid bilayer complex topology files (.tpr) to a .gro files using gmx editconf")
+        st.write("✔️extract the protein-ligand-complex conformation at 0ns and 500ns respectively to investigate their 2D protein-ligand interactions via BIOVIA Discovery Studio to check whether the key ligand-interacting residues persist throughout the 500ns simulation")
         st.code("""
-        gmx editconf -f protein.tpr -o protein.gro # visualize the trajectory of only the protein model throughout the 900ns-1000ns simulation using both protein.gro and whole_protein_only_900_1000ns.xtc files
-        gmx editconf -f md_100ns.tpr -o md_100ns.gro
-        """,  language="bash")
+        gmx trjconv -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -n index.ndx -dump 0 -o protein_ligand_complex_0ns.pdb && awk '/UNL/ && !flag {print "TER"; flag=1} {if ($0 ~ /UNL/) {sub(/^ATOM  /, "HETATM"); sub(/UNL[ \t]+[0-9]+/, "UNL     1")}; print}' protein_ligand_complex_0ns.pdb > tmp.pdb && mv tmp.pdb protein_ligand_complex_0ns.pdb
+        gmx trjconv -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -n index.ndx -dump 500000 -o protein_ligand_complex_500ns.pdb && awk '/UNL/ && !flag {print "TER"; flag=1} {if ($0 ~ /UNL/) {sub(/^ATOM  /, "HETATM"); sub(/UNL[ \t]+[0-9]+/, "UNL     1")}; print}' protein_ligand_complex_500ns.pdb > tmp.pdb && mv tmp.pdb protein_ligand_complex_500ns.pdb
+        """, language="bash")
+        st.write("Note: While trying to visualize the 2D protein-ligand interaction via BIOVIA Discovery Studio, you can remove the HETATM record flagged as 'LP1' because these were lone pairs (LP) added by GROMACS for simulation purposes only, otherwise you wont be able to visualize the 2D protein-ligand interaction.")
 
         st.write("###")
 
@@ -2331,14 +2317,20 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         """, language="bash")
         st.write("✔️calculate the mctrdz value (membrane center in the Z direction) for each protein-ligand complex")
         st.code("""
-        gmx trjconv -s md_500ns.tpr -f md_reimage.xtc -dump 450000 -o whole_system_frame_450ns.pdb # extract the whole system conformation at 450ns
+        gmx trjconv -s md_500ns.tpr -f md_reimage.xtc -dump 500000 -o whole_system_frame_500ns.pdb # extract the whole system conformation at 500ns
         select membrane, resn POPC
         pseudoatom prot_center, polymer.protein
         pseudoatom memb_center, membrane
         iterate_state 1, prot_center, print(x, y, z) # get 47.169307708740234 45.97426223754883 63.58333969116211
         iterate_state 1, memb_center, print(x, y, z) # get 47.586944580078125 48.78681182861328 56.380348205566406
-        mctrdz= 56.380348205566406 (Membrane centered Z-coordinate) - 63.58333969116211 (Protein centered Z-coordinate) = -7.203 (The negative value makes sense and physically means that the center of your lipid bilayer sits roughly 7.2 Å below the geometric center of your overall protein)
+        offset distance of the membrane with respect to the protein = 56.380348205566406 (Membrane centered Z-coordinate) - 63.58333969116211 (Protein centered Z-coordinate) = -7.203 (The negative value makes sense and physically means that the center of your lipid bilayer sits roughly 7.2 Å below the geometric center of your overall protein)
+        gmx trjconv -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -dump 500000 -o fit_frame_500ns.pdb # choose system (0) as the system here actually indicates the whole protein-ligand complex
+        open fit_frame_500ns.pdb
+        pseudoatom prot_fit_center, polymer.protein
+        iterate_state 1, prot_fit_center, print(z)
+        mctrdz (Absolute Z-coordinate of the membrane) = Absolute Z-coordinate of the protein (derived from print (z)) - previously calculated offset distance (7.203) 
         """, language="bash")
+        st.write("Note: mctrdz strictly dictates the absolute position (absolute Z-coordinate) of the membrane on the PB grid. It only functions as an offset if the protein is sitting perfectly at zero (Z=0).")
         st.write("✔️calculate the mthick value (membrane thickness in angstrom unit) for each protein-ligand complex")
         st.code("""
         select upper_P, resn POPC and name P and z > 56.380
@@ -2347,7 +2339,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         pseudoatom lower_center, lower_P
         iterate_state 1, upper_center, print(x, y, z) # get 47.66769790649414 48.73799133300781 75.75056457519531
         iterate_state 1, lower_center, print(x, y, z) # get 46.85185623168945 48.81730270385742 36.8427619934082
-        mthick = 75.75056457519531 - 36.8427619934082 = 38.908 
+        mthick = 75.75056457519531 - 36.8427619934082 = 38.908 (you decided to set mthick=40 (default) for every single protein-ligand complex)
         """, language="bash")
         st.write("✔️prepare the input gmxMMPBSA configuration file automatically and modify the parameters accordingly to suit your analysis")
         st.code("""
@@ -2355,7 +2347,20 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         """, language="bash")
         st.write("✔️compute the binding free energy of the protein-ligand complex via gmx_MMPBSA tool")
         st.code("""
-        gmx_MMPBSA -O -i mmpbsa.in -cs complex.tpr -ct complex_traj.xtc -ci index.ndx -cg 3 4 -cp topol.top -o FINAL_RESULTS_MMPBSA.dat -eo FINAL_RESULTS_MMPBSA.csv --clean # modify this command accordingly
+        sudo apt update
+        sudo apt install tmux
+        tmux new -s mmpbsa_4184_job # create a new tmux session
+        source ~/.bashrc 
+        conda activate gmxMMPBSA # activate the gmxMMPBSA conda environment inside the newly created tmux session
+        nohup mpirun -np 16 gmx_MMPBSA -O -i mmpbsa.in -cs protein_ligand_complex.tpr -ct protein_ligand_complex_fit.xtc -ci index.ndx -cg 1 13 -cp topol.top -o FINAL_RESULTS_MMPBSA.dat -eo FINAL_RESULTS_MMPBSA.csv -do FINAL_DECOMP_MMPBSA.dat -deo FINAL_DECOMP_MMPBSA.csv -nogui > gmxMMPBSA.log 2>&1 & # modify this command accordingly
+        press Ctrl+B, let go of the keyboard, then press D # detach from the tmux session
+        tmux attach -t mmpbsa_4184_job # reattach to the specific tmux session
+        tmux kill-session -t mmpbsa_4184_job # kill the specific tmux session
+        tmux ls # list down all the tmux sessions that you've created previously
+        """, language="bash")
+        st.write("✔️clean and delete your gmxMMPBSA run files if your run failed")
+        st.code("""
+        gmx_MMPBSA --clean
         """, language="bash")
         # ----LOAD the gmxMMPBSA configuration file----
         # Check if the file exists before reading
@@ -2379,6 +2384,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.markdown("[Read how to generate the input files required to run gmxMMPBSA](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/input_file)")
         st.markdown("[Read how to interpret the output files after running gmxMMPBSA](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/output/)")
         st.markdown("[Read how to run gmxMMPBSA calculation for membrane proteins](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/examples/Protein_membrane/)")
+        st.markdown("[Read how to run gmxMMPBSA binding free energy calculation together with amino acid residue decomposition analysis](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/examples/Decomposition_analysis/?h=decomp#alternatives-for-per-residue-energy-contribution-visualization)")
         st.markdown("[Visit the official gmxMMPBSA GitHub page](https://github.com/Valdes-Tresanco-MS/gmx_MMPBSA)")
         st.markdown("[How to calculate the frames and interval for analysis](https://www.researchgate.net/post/MMPBSA_analysis-How_to_calculate_the_frames_and_interval_for_analysis)")
         st.markdown("[The total energy tends to be positive for membrane proteins](https://gromacs.bioexcel.eu/t/membrane-protein-for-gmx-mmpbsa/12642)")
