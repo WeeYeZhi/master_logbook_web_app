@@ -1524,18 +1524,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**14. Filter the list of ligands based on ZINC22 filters, 3D compounds, molecular weight <= 450Da, logP<=5, only clean compound, only in stock purchase, ref and mid pH, and default charge value**")
-        st.code("""
-        curl -X GET https://cartblanche22.docking.org/smiles.txt -F smiles=@/media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/ZINC22_filter_results/one_ligand_smiles.txt -F dist=0 -F adist=0 -o /media/raid/Wee/WeeYeZhi/output/ligand_preparation_results/ZINC22_filter_results/ZINC22_filter_results.json
-        curl -X GET https://cartblanche22.docking.org/search/saveResult/22059c83-86db-4f0b-89af-b4acb89afb65.txt -o zinc_results.txt
-        curl -L "https://cartblanche.docking.org/search/saveResult/916a2d21-1286-49de-9d7d-29100dfc1f8c.txt" -o zinc_results.txt
-        """, language="bash")
-        st.markdown("[Visit ZINC22 SMILES string search database](https://cartblanche22.docking.org/search/smiles)")
-        st.markdown("[Read how to search the ZINC22 database by ZINCIDs, SMILES string, supplier code IDs, and download molecules in bulk using the curl command](https://wiki.docking.org/index.php/Zinc22:Searching)")
-
-        st.write("###")
-
-        st.write("**15. Run TMHMM to predict the transmembrane domains of the inactivate state of the human B2-adrenergic GPCR sequence with PDB ID 2RH1**")
+        st.write("**14. Run TMHMM to predict the transmembrane domains of the inactivate state of the human B2-adrenergic GPCR sequence with PDB ID 2RH1**")
         st.code("""
         cd /media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin # navigate into this working directory before you run tmhmm
         export PATH="/media/raid/Wee/WeeYeZhi/output/trinotate_results/tmhmm_installation/tmhmm-2.0c/bin:$PATH" # note that the export of the PATH environment variable to the tmhmm executable file is just temporary and will only take effect for the current terminal session
@@ -1545,7 +1534,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**16. Perform structural superimposition between the human B2-adrenergic receptor (2RH1) and the AlphaFold3-predicted CPB octopamine receptor (seed1sample2) using UCSF ChimeraX**")
+        st.write("**15. Perform structural superimposition between the human B2-adrenergic receptor (2RH1) and the AlphaFold3-predicted CPB octopamine receptor (seed1sample2) using UCSF ChimeraX**")
         st.write("✔️install gpcrmining python package via pip and obtain the class A GPCR human beta 2 adrenergic receptor sequence to get the mapping between the GPCR generic residues and UniProt numbering system residues")
         st.code("""
         conda create -n gpcrmining
@@ -1664,7 +1653,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**17. Perform pairwise sequence alignment between the CPB octopamine beta 2 receptor and 2RH1 via MUSCLE to identify whether the conserved motifs and seven transmembrane helices are conserved and aligned well to each other (to convince reviewer why you use 2RH1 (a type of ADRB2_HUMAN receptor) as the template when it comes to predicting the ligand binding site of CcOctB2R). Perform structural superimposition between the CPB octopamine beta 2 receptor and 2RH1 via UCSF ChimeraX to compute the refined RMSD value**")
+        st.write("**16. Perform pairwise sequence alignment between the CPB octopamine beta 2 receptor and 2RH1 via MUSCLE to identify whether the conserved motifs and seven transmembrane helices are conserved and aligned well to each other (to convince reviewer why you use 2RH1 (a type of ADRB2_HUMAN receptor) as the template when it comes to predicting the ligand binding site of CcOctB2R). Perform structural superimposition between the CPB octopamine beta 2 receptor and 2RH1 via UCSF ChimeraX to compute the refined RMSD value**")
         st.write("✔️concatenate the CPB octopamine beta 2 receptor FASTA sequence with the 2RH1 FASTA sequence")
         st.code("""
         cat CPB_OctB2R_TRINITY_DN22425_c0_g1_i3_p1.fasta rcsb_pdb_2RH1.fasta > combined_CCOctB2R_and_2RH1_sequence.fasta # navigate to the working directory, /media/raid/Wee/WeeYeZhi/output/ligand_binding_site_identification_results/MSA_between_CPB_octopamine_beta2_receptor_and_2RH1_template before you run this command
@@ -1704,7 +1693,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**18. install GalaxyRefine and run it locally to refine the structure of the AlphaFold2-predicted, AlphaFold3-predicted, SwissModel-predicted, and GPCR-I-TASSER-predicted CPB octopamine beta 2 receptor respectively. After finished running GalaxyRefine, view the results in UCSF ChimeraX and extract the first structure (delete the other 4 structures) for downstream protein structure evaluation.**")
+        st.write("**17. install GalaxyRefine and run it locally to refine the structure of the AlphaFold2-predicted, AlphaFold3-predicted, SwissModel-predicted, and GPCR-I-TASSER-predicted CPB octopamine beta 2 receptor respectively. After finished running GalaxyRefine, view the results in UCSF ChimeraX and extract the first structure (delete the other 4 structures) for downstream protein structure evaluation.**")
         st.code("""
         navigate to /media/raid/Wee/WeeYeZhi/output/galaxyrefine_installation
         fill up the galaxyweb software request form at https://galaxy.seoklab.org/request_softwares.html to request for the GalaxyRefine software installation files & download the software installation files inside the installation directory, /media/raid/Wee/WeeYeZhi/output/galaxyrefine_installation
@@ -1742,7 +1731,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**19. run Yasara energy minimization of the Galaxy-refined AlphaFold3-predicted, SwissModel-predicted, and GPCR-I-TASSER-predicted CPB octopamine beta 2 receptor respectively via YASARA webserver and download Yasara View to view and save the YASARA-energy minimized CPB octopamine beta 2 receptor model in .PDB format**")
+        st.write("**18. run Yasara energy minimization of the Galaxy-refined AlphaFold3-predicted, SwissModel-predicted, and GPCR-I-TASSER-predicted CPB octopamine beta 2 receptor respectively via YASARA webserver and download Yasara View to view and save the YASARA-energy minimized CPB octopamine beta 2 receptor model in .PDB format**")
         st.markdown("[Visit YASARA energy minimization webserver](https://www.yasara.org/minimizationserver.htm)")
         st.markdown("[Visit YASARA tutorial](https://ceberndsen.github.io/YASARA-guide/file-types-and-how-to-work-with-them-in-yasara.html)")
         st.markdown("[Visit YASARA View webpage to download YASARA View](https://www.yasara.org/viewdl.htm)")
@@ -1750,7 +1739,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**20. perform 3D protein structure evaluation to evaluate the 3D structure of the CPB octopamine beta 2 receptor predicted by AlphaFold3, Swiss Model, and GPCR-I-TASSER respectively via SAVESserver, ProSA2003, MolProbity, and QMEANBrane**")
+        st.write("**19. perform 3D protein structure evaluation to evaluate the 3D structure of the CPB octopamine beta 2 receptor predicted by AlphaFold3, Swiss Model, and GPCR-I-TASSER respectively via SAVESserver, ProSA2003, MolProbity, and QMEANBrane**")
         st.write("✔️install ProSa2003 (since the ProSA-Web server is closed temporarily due to attack by hackers)")
         st.code("""
         install ProSa2003 via Window # choose the ProSa2003 (Win XP/2000)
@@ -1811,7 +1800,29 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**21. Run GROMACS**")
+        st.write("**20. predict the electrostatic potential of CcOctB2R via PDB2PQR and pyDELPHI web server**")
+        st.write("✔️convert the PDB file of the refined, energy-minimised AlphaFold3-predicted CcOctB2R to PQR format")
+        st.code("""
+        conda install conda-forge::pdb2pqr
+        pdb2pqr30 --help
+        pdb2pqr30 --version
+        pdb2pqr30 --ff=CHARMM --titration-state-method=propka --with-ph=7.0 /media/raid/Wee/WeeYeZhi/output/yasara_energy_minimization_results/alphafold3_prediction/energy_minimized_alphafold3_predicted_CPB_octopamine_beta2_receptor.pdb /media/raid/Wee/WeeYeZhi/output/pdb2pqr_results/energy_minimized_alphafold3_predicted_CPB_octopamine_beta2_receptor.pqr
+        """, language="bash")
+        st.markdown("[Visit Anaconda Installation Page of PDB2PQR](https://anaconda.org/channels/conda-forge/packages/pdb2pqr/overview)")
+        st.markdown("[Visit the Official GitHub Page of PDB2PQR](https://github.com/Electrostatics/pdb2pqr)")
+        st.markdown("[Read the documentation page of PDB2PQR](https://www.poissonboltzmann.org/)")
+        st.markdown("[Visit the official pyDelPhi web server](https://compbio.clemson.edu/delphi-server/)")
+        st.markdown("[Visit the pyDelPhi web server result](https://compbio.clemson.edu/delphi-server/results?task_id=fd6cca981673490a6a2005fb814d3d0b)")
+
+        st.write("###")
+
+        st.write("**21. generate the secondary structure model (topology) of CcOctB2R using the Protter tool v1.0**")
+        st.markdown("[Visit the secondary structure of CcOctB2R that you've drawn using Protter](https://protter.ethz.ch/#seq=MDELLNATSSPADGGGDNSTAPWSQDVVYQLRTAVLLLIVVMAVLGNLLVIVSVMRHRKLRVITNYFVVSLAFADILVAMVVMPFNFSVQFYDRWVFSEVICDLWNSSDVYFTSTSILHLCCISVDRYYAIVKPLKYPIKMTKKMAFIMLAATWLSPVTISYAPIFMGWYTTKAHQEYRVLHPDSCEFKVNKPYAVISSSISFWIPCTIMIFTYLAIFKEANRQEKALHVRHGNAMLMHRHSRDVASDKNGALHINSNTPTKDRNILKMKREHKAARTLGIIMGAFILCWLPFFLFYLSTSLCDECKYPEVLTVIMFWTGYFNSALNPIIYAYFNRDFRNAFKNTLACAFCSFCKRSASDLDAMERLERRGSGQLRVPIASRRASDLASL&nterm=phobius.nterm&tm=31-54,66-87,104-125,146-167,195-215,279-298,311-334&mc=lightsalmon&lc=blue&tml=none&n:N-linked%20glycosylation%20site,bc:forestgreen=6,18,106&n:PKA%20phosphorylation%20site,bc:red=385&n:Palmitoylation%20site,bc:cyan=348,351&n:DRY%20motif,bc:yellow=126,127,128&n:CWxP%20motif,bc:blue=289,290,291,292&n:NPxxY%20motif,bc:purple=327,328,329,330,331&format=svg)")
+        st.markdown("[Visit the official Protter webpage](https://protter.ethz.ch/start/)")
+
+        st.write("###")
+
+        st.write("**22. run GROMACS**")
         st.write("✔️check whether the NVIDIA GPU driver is set up and properly configured")
         st.code("""
         gmx mdrun -version # check whether GROMACS build was compiled with GPU support by checking the line, GPU support:
@@ -1843,7 +1854,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**22. run MD simulation of the CPB OctB2R-lipid bilayer complex via GROMACS for 100 ns first, followed by extending the MD simulation to 500 ns and to 1000 ns**")
+        st.write("**23. run MD simulation of the CPB OctB2R-lipid bilayer complex via GROMACS for 100 ns first, followed by extending the MD simulation to 500 ns and to 1000 ns**")
         st.write("✔️invoke the grompp and mdrun programme to run energy minimization of the receptor-lipid bilayer complex system to lower the overall potential energy of the system by removing overlapping atoms, steric clashes, suboptimal hydrogen bonding, and bad contacts")
         st.code("""
         nohup gmx grompp -f step6.0_minimization.mdp -c step5_input.gro -r step5_input.gro -p topol.top -o em.tpr > em_tpr.log 2>&1 & # navigate to the working directory, /media/raid/Wee/WeeYeZhi/output/charmmgui_results/charmm-gui-7882792398/gromacs, before you run the command
@@ -2041,7 +2052,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**23. set grid box using AutoDock MGL Tools, followed by installing and running AutoDock Vina on Linux to dock the 15 ligands to the only one CPBOctB2R cluster**")
+        st.write("**24. set grid box using AutoDock MGL Tools, followed by installing and running AutoDock Vina on Linux to dock the 15 ligands to the only one CPBOctB2R cluster**")
         st.write("✔️determine the CPU architecture of your computer, followed by downloading both the vina_1.2.7_linux_x86_64 and vina_split_1.2.7_linux_x86_64 release packages and making both the packages executable")
         st.code("""
         uname -m # output the CPU architecture of your computer. In my case, it returned x86_64, which indicates 64-bit.
@@ -2121,7 +2132,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**24. set grid box using AutoDock MGL Tools, followed by installing and running AutoDock Vina on Linux to dock the same set of 15 ligands to the inactive 2RH1**")
+        st.write("**25. set grid box using AutoDock MGL Tools, followed by installing and running AutoDock Vina on Linux to dock the same set of 15 ligands to the inactive 2RH1**")
         st.write("✔️determine the CPU architecture of your computer, followed by downloading both the vina_1.2.7_linux_x86_64 and vina_split_1.2.7_linux_x86_64 release packages and making both the packages executable")
         st.code("""
         uname -m # output the CPU architecture of your computer. In my case, it returned x86_64, which indicates 64-bit.
@@ -2177,7 +2188,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**25. run MD simulation of the CPB OctB2R-ligand complex inside the lipid bilayer model via GROMACS for 100 ns first, followed by extending the MD simulation to 500 ns and to 1000 ns**")
+        st.write("**26. run MD simulation of the CPB OctB2R-ligand complex inside the lipid bilayer model via GROMACS for 100 ns first, followed by extending the MD simulation to 500 ns and to 1000 ns**")
         st.write("✔️assign protein as chain A and ligand as chain B, followed by changing the ligand name from UNL to AMZ (three letter code that i set personally for amitraz) via PyMOL after saving the protein-ligand complex (derived from AutoDock Vina result) in PDB format")
         st.code("""
         alter polymer, chain="A"
@@ -2223,6 +2234,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         """, language="bash")
         st.write("Note: Following energy minimization, the insect receptor–lipid bilayer complex system was subjected to a six-step equilibration protocol consisting of initial NVT and subsequent NPT equilibration phases using GROMACS. The first two equilibration stages were performed under the canonical ensemble (NVT) for 125 ps each using a 1 fs integration timestep, whereas the subsequent four stages were conducted under the isothermal–isobaric ensemble (NPT) with semiisotropic pressure coupling. The first NPT stage employed a 1 fs timestep for 125 ps, followed by three additional NPT stages performed with a 2 fs timestep for 500 ps each, resulting in a total equilibration time of 1.875 ns. Temperature was maintained at 300 K using the velocity-rescale thermostat with separate coupling groups defined for the solute, membrane, and solvent components. Pressure equilibration was carried out using the stochastic cell-rescale barostat with semiisotropic coupling at 1 bar and a compressibility of 4.5 × 10⁻⁵ bar⁻¹. Long-range electrostatic interactions were calculated using the Particle Mesh Ewald (PME) method under periodic boundary conditions with a real-space cutoff of 1.2 nm, while van der Waals interactions were treated using a force-switch cutoff scheme between 1.0 and 1.2 nm. Hydrogen-containing bonds were constrained using the LINCS algorithm. During equilibration, positional restraints on protein backbone atoms, protein side chains, lipid molecules, and dihedral angles were gradually reduced across the six equilibration stages to allow progressive relaxation and stabilization of the membrane protein system prior to the production molecular dynamics simulation. The six-stage NVT and NPT equilibration protocol was performed to gradually relax and stabilize the insect receptor–lipid bilayer complex system prior to production molecular dynamics simulation. Initial NVT equilibration allowed the system temperature to stabilize while maintaining a constant volume, whereas subsequent NPT equilibration enabled pressure and system density adjustment under semiisotropic conditions suitable for membrane systems. The gradual reduction of positional and dihedral restraints across the six equilibration stages minimized structural distortion, prevented membrane instability, and allowed progressive adaptation of the protein, lipid bilayer, water molecules, and ions toward thermodynamically stable conditions.")
         st.write("Note: The energy command is executed during the NVT equilibration to monitor temperature of the system whereas the energy command is executed during the NPT equilibration to monitor the pressure, density, box dimension, and potential energy of the system throughout the trajectory")
+        st.write("Note: Whenever there is a virtual site or presence of lone pairs, you need to remove the flag, -update gpu, while running GROMACS to let CPU handle the coordinates update task because GPU cannot update the coordinates of the virtual sites and lone pairs till now, but CPU can handle it")
 
         st.write("###")
 
@@ -2299,7 +2311,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
 
         st.write("###")
 
-        st.write("**26. Calculate the binding free energy of the top 5 protein-ligand complexes throughout 500ns simulation via gmx_MMPBSA tool using 500 snapshots**")
+        st.write("**27. Calculate the binding free energy of the top 5 protein-ligand complexes throughout 500ns simulation via gmx_MMPBSA tool using 500 snapshots**")
         st.write("✔️create a gmxMMPBSA conda environment and install gmxMMPBSA via conda-forge")
         st.code("""
         conda create -n gmxMMPBSA -c conda-forge gmx_mmpbsa
@@ -2355,12 +2367,25 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         nohup mpirun -np 16 gmx_MMPBSA -O -i mmpbsa.in -cs protein_ligand_complex.tpr -ct protein_ligand_complex_fit.xtc -ci index.ndx -cg 1 13 -cp topol.top -o FINAL_RESULTS_MMPBSA.dat -eo FINAL_RESULTS_MMPBSA.csv -do FINAL_DECOMP_MMPBSA.dat -deo FINAL_DECOMP_MMPBSA.csv -nogui > gmxMMPBSA.log 2>&1 & # modify this command accordingly
         press Ctrl+B, let go of the keyboard, then press D # detach from the tmux session
         tmux attach -t mmpbsa_4184_job # reattach to the specific tmux session
+        exit # after you have reattach to the tmux session, you can also type exit to kill the tmux session, no need to run the tmux kill-session command
         tmux kill-session -t mmpbsa_4184_job # kill the specific tmux session
         tmux ls # list down all the tmux sessions that you've created previously
         """, language="bash")
         st.write("✔️clean and delete your gmxMMPBSA run files if your run failed")
         st.code("""
         gmx_MMPBSA --clean
+        """, language="bash")
+        st.write("✔️extract the binding free energy and plot the per-residue decomposition bar graph via gmx_MMPBSA ana (a built-in visualizer tool)")
+        st.code("""
+        gmx_MMPBSA_ana -f COMPACT_MMXSA_RESULTS.mmxsa
+        """, language="bash")
+        st.write("✔️troubleshoot the gmxMMPBSA run by removing lone pairs added by GROMACS during simulation from the index files (.ndx), topology files (.tpr), trajectory files (.xtc), and toppar files (topol.top, forcefield.itp, and ligand.itp to delete any lines matching or referencing with the lone pairs,LP1)")
+        st.code("""
+        gmx make_ndx -f md_500ns.tpr -o index_noLP.ndx # type 13 & ! a LP1* to remove the lone pairs (represented by LP1) from the index files. name the newly created index as name 14 LIG. delete the previous ligand index, UNL by running del UNL. Rename LIG as UNL name 14 UNL. Type 1 | 14 and name 15 protein_ligand_complex_noLP
+        gmx convert-tpr -s md_500ns.tpr -n index_noLP.ndx -o protein_ligand_complex_noLP.tpr # Choose the protein_ligand_complex_noLP group
+        gmx trjconv -s md_500ns.tpr -f md_500ns.xtc -n index_noLP.ndx -o md_reimage_noLP.xtc -pbc mol -ur compact -center
+        gmx trjconv -s md_500ns.tpr -n index_noLP.ndx -f md_reimage_noLP.xtc -o protein_ligand_complex_fit_noLP.xtc -fit rot+trans
+        nohup mpirun -np 16 gmx_MMPBSA -O -i mmpbsa.in -cs protein_ligand_complex_noLP.tpr -ct protein_ligand_complex_fit_noLP.xtc -ci index_noLP.ndx -cg 1 17 -cp topol.top -o FINAL_RESULTS_MMPBSA.dat -eo FINAL_RESULTS_MMPBSA.csv -do FINAL_DECOMP_MMPBSA.dat -deo FINAL_DECOMP_MMPBSA.csv -nogui > gmxMMPBSA.log 2>&1 & # modify this command accordingly. In this case, the new index group for ligand is 17
         """, language="bash")
         # ----LOAD the gmxMMPBSA configuration file----
         # Check if the file exists before reading
@@ -2391,6 +2416,7 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.markdown("[How to calculate the mctrdz parameter while trying to run gmxMMPBSA for membrane proteins](https://github.com/Valdes-Tresanco-MS/gmx_MMPBSA/discussions/436)")
         st.markdown("[How to calculate the mctrdz and mthick parameters while trying to run gmxMMPBSA for membrane proteins](https://groups.google.com/g/gmx_mmpbsa/c/ZknS5rwLO2I)")
         st.markdown("[Try to read this gmxMMPBSA calculation issue](https://github.com/Valdes-Tresanco-MS/gmx_MMPBSA/issues/624)")
+        st.markdown("[Troubleshoot your gmxMMPBSA run if GROMACS added a lone pair (LP) during simulation](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/examples/Protein_ligand_LPH_atoms_CHARMMff/)")
         st.write("Note: The binding free energies of the protein-ligand complexes were estimated using the MM-PBSA method, utilizing an implicit membrane model to account for the lipid bilayer environment. Calculations were performed over a stable 100 ns window (from 400 ns to 500 ns) of the production trajectory, analyzing 500 snapshots extracted at an interval of 0.2 ns to ensure robust conformational sampling.")
 
         st.write("###")
