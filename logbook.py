@@ -1313,12 +1313,13 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
             )
         else:
             st.error(f"{test_alphafold3.name} does not exist.")
-        st.write("✔️prepare the input JSON file for the CPB octopamine beta 2 receptor and other insect octopamine beta 2 receptors (Plutella xylostella, Pieris rapae, Bombyx mori). Run AlphaFold3 to predict the 3D receptor structure (use 5 different random seeds and perform a multi-seed prediction to predict 5 independent AlphaFold3 structures and choose the best AlphaFold3 structure with the highest ranking score for downstream docking or perform an ensemble docking to dock a ligand to five independent AlphaFold3-predicted structures. Compute the RMSD values between the best AlphaFold3-predicted structure with the highest ranking score and other 4 best model seed structures, if their RMSD values are very similar to each other, you can just choose the best AlphaFold3 structure with the highest ranking score for downstream docking. Check whether the key binding residues are aligned and whether the side chains are stable)")
+        st.write("✔️prepare the input JSON file for the CPB octopamine beta 2 receptor and other insect octopamine beta 2 receptors (Plutella xylostella, Pieris rapae, Bombyx mori, Apis mellifera). Run AlphaFold3 to predict the 3D receptor structure (use 5 different random seeds and perform a multi-seed prediction to predict 5 independent AlphaFold3 structures and choose the best AlphaFold3 structure with the highest ranking score for downstream docking or perform an ensemble docking to dock a ligand to five independent AlphaFold3-predicted structures. Compute the RMSD values between the best AlphaFold3-predicted structure with the highest ranking score and other 4 best model seed structures, if their RMSD values are very similar to each other, you can just choose the best AlphaFold3 structure with the highest ranking score for downstream docking. Check whether the key binding residues are aligned and whether the side chains are stable)")
         st.code("""
         docker run --user 0:0 -d --name alphafold3_prediction_of_CPB_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/CPB_octopamine_beta2_receptor/CPB_OctB2R.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/CPB_octopamine_beta2_receptor
         docker run --user 0:0 -d --name alphafold3_prediction_of_Px_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/Px_octopamine_beta2_receptor/Px_OctB2R.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/Px_octopamine_beta2_receptor
         docker run --user 0:0 -d --name alphafold3_prediction_of_Pr_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/Pr_octopamine_beta2_receptor/Pr_OctB2R.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/Pr_octopamine_beta2_receptor
         docker run --user 0:0 -d --name alphafold3_prediction_of_Bm_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/Bm_octopamine_beta2_receptor/Bm_OctB2R.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/Bm_octopamine_beta2_receptor
+        docker run --user 0:0 -d --name alphafold3_prediction_of_Am_octopamine_beta2_receptor -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/Am_octopamine_beta2_receptor/Am_OctB2R.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/Am_octopamine_beta2_receptor
         """, language="bash")
         # ----LOAD THE CPB OCTOPAMINE BETA 2 RECEPTOR JSON FILE----
         # Check if the file exists before reading
@@ -1611,6 +1612,8 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         2dlabel change gpcr333 size 12
         select #1/A:113 | #2/A:108 | #3/A:112 | #4/A:119 | #5/A:121; 2dlabel create gpcr336 text "3.36x36"
         2dlabel change gpcr336 size 12
+        select #1/A:188 | #2/A:183 | #3/A:185 | #4/A:192 | #5/A:194; 2dlabel create gpcr4552 text "45.52x52"
+        2dlabel change gpcr4552 size 12
         select #1/A:195 | #2/A:190 | #3/A:192 | #4/A:199 | #5/A:201; 2dlabel create gpcr540 text "5.39x40"
         2dlabel change gpcr540 size 12
         select #1/A:198 | #2/A:193 | #3/A:195 | #4/A:202 | #5/A:204; 2dlabel create gpcr543 text "5.42x43"
@@ -2119,6 +2122,10 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
             )
         else:
             st.error(f"{grid_dimension.name} does not exist.")
+        st.write("✔️calculate the ligand efficiency (LE), ligand lipophilic efficiency (LLE), fit quality (FQ), and ligand efficiency lipophilic price (LELP) of the ligands")
+        st.code("""
+        grep -E "^(ATOM|HETATM)" ligand.pdbqt | awk '{print $NF}' | grep -vE "^(H|HD)$" | wc -l
+        """, language="bash")
         st.write("✔️Alternatively, you can perform molecular docking via AutoDock Vina in batch mode by running only one command. However, the generated log file does not show the binding affinity values for each ligand clearly, thats why you chose to run one by one instead in the end")
         st.code("""
         nohup ./vina_1.2.7_linux_x86_64 --receptor /media/raid/Wee/WeeYeZhi/output/yasara_energy_minimization_results/alphafold3_prediction/energy_minimized_alphafold3_predicted_CPB_octopamine_beta2_receptor.pdbqt --batch /media/raid/Wee/WeeYeZhi/output/latest_ligand_preparation_results/autodock_mgltools_results --scoring vinardo --center_x 6.263 --center_y -13.193 --center_z 3.302 --size_x 50 --size_y 60 --size_z 50 --spacing 0.375 --dir /media/raid/Wee/WeeYeZhi/output/molecular_docking_results/autodock_vina_results --cpu 16 --seed 12345 --exhaustiveness 32 --energy_range 5 --num_modes 15 > /media/raid/Wee/WeeYeZhi/output/molecular_docking_results/autodock_vina_results/autodock_vina_results.log 2>&1 &
@@ -2298,9 +2305,18 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.code("""
         gmx hbond -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -num intermolecular_hbonds.xvg -tu ns # Select Protein (1) for Group 1 and select ligand (13) for Group 2
         """, language="bash")
+        st.write("✔️calculate the total energy of the 500ns simulation run for all the protein-ligand complexes to check whether energy remains thermodynamically stable")
+        st.code("""
+        gmx energy -f md_500ns.edr -o total_energy_md500ns.xvg # Choose total energy
+        awk '{if ($1 ~ /^[@#]/) {sub(/Time \(ps\)/, "Time (ns)"); sub(/\(kJ\/mol\)/, "Energy (x10.e+6 kJ/mol)"); print $0} else printf "%.6f %f\n", $1/1000, $2/1000000}' total_energy_md500ns.xvg > total_energy_ns_scaled.xvg # convert the time unit from ps to ns by dividing all the time values by 1000 and convert the Yaxis unit from kJ/mol to Energy (x10.e+6 kJ/mol) by dividing all the energy values by 1000000
+        """, language="bash")
         st.write("✔️plot the combined backbone RMSD plot for all the 15 protein-ligand complexes after finished running 500ns MD simulation")
         st.code("""
         xmgrace tm_helices_rmsd_36324.xvg tm_helices_rmsd_255273.xvg tm_helices_rmsd_26752.xvg tm_helices_rmsd_2726.xvg tm_helices_rmsd_4581.xvg # navigate to the working directory, /media/raid/Wee/WeeYeZhi/output/charmmgui_results/combined_RMSD_plot before you run this command
+        """, language="bash")
+        st.write("✔️plot the combined GROMACS energy plot for all the 15 protein-ligand complexes with the flag, -maxpath 10000000, to increase the XMGRACE memory to draw the plot otherwise the OOM error (purging failed) will pop up")
+        st.code("""
+        xmgrace -maxpath 10000000 total_energy_ns_scaled_4184 total_energy_ns_scaled_36324 total_energy_ns_scaled_5775 total_energy_ns_scaled_36326 total_energy_ns_scaled_2726 total_energy_ns_scaled_19606232 total_energy_ns_scaled_577782 total_energy_ns_scaled_8969 total_energy_ns_scaled_76145148 total_energy_ns_scaled_255273 total_energy_ns_scaled_18526103 total_energy_ns_scaled_26451 total_energy_ns_scaled_1480785 total_energy_ns_scaled_26752 total_energy_ns_scaled_4581 
         """, language="bash")
         st.write("✔️extract the protein-ligand-complex conformation at 0ns and 500ns respectively to investigate their 2D protein-ligand interactions via BIOVIA Discovery Studio to check whether the key ligand-interacting residues persist throughout the 500ns simulation")
         st.code("""
@@ -2379,9 +2395,9 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.code("""
         gmx_MMPBSA_ana -f COMPACT_MMXSA_RESULTS.mmxsa
         """, language="bash")
-        st.write("✔️troubleshoot the gmxMMPBSA run by removing lone pairs added by GROMACS during simulation from the index files (.ndx), topology files (.tpr), trajectory files (.xtc), and toppar files (topol.top, forcefield.itp, and ligand.itp to delete any lines matching or referencing with the lone pairs,LP1)")
+        st.write("✔️troubleshoot the gmxMMPBSA run by removing lone pairs added by GROMACS during simulation from the index files (.ndx), topology files (.tpr), trajectory files (.xtc), and toppar files (topol.top, forcefield.itp, and ligand.itp to delete any lines matching or referencing with the lone pairs,LP1, LPH, and virtual sites. If the atom ID number for LPH is 23, any lines matching with the atom ID number of 23 needs to be removed from the .itp files")
         st.code("""
-        gmx make_ndx -f md_500ns.tpr -o index_noLP.ndx # type 13 & ! a LP1* to remove the lone pairs (represented by LP1) from the index files. name the newly created index as name 14 LIG. delete the previous ligand index, UNL by running del UNL. Rename LIG as UNL name 14 UNL. Type 1 | 14 and name 15 protein_ligand_complex_noLP
+        gmx make_ndx -f md_500ns.tpr -o index_noLP.ndx # type 13 & ! a LP1* to remove the lone pairs (represented by LP1) from the index files. name the newly created index as name 18 LIG. delete the previous ligand index, UNL by running del 13 or del UNL. Rename LIG as UNL name 17 UNL. Type 1 | 17 and name 18 protein_ligand_complex_noLP whereby 1 refers to the protein and 17 refers to the newly created UNL group without the lone pair, LP1 atom
         gmx convert-tpr -s md_500ns.tpr -n index_noLP.ndx -o protein_ligand_complex_noLP.tpr # Choose the protein_ligand_complex_noLP group
         gmx trjconv -s md_500ns.tpr -f md_500ns.xtc -n index_noLP.ndx -o md_reimage_noLP.xtc -pbc mol -ur compact -center
         gmx trjconv -s md_500ns.tpr -n index_noLP.ndx -f md_reimage_noLP.xtc -o protein_ligand_complex_fit_noLP.xtc -fit rot+trans
@@ -2418,10 +2434,35 @@ if selected == "Phase 3: Molecular Docking and Dynamics Simulation":
         st.markdown("[Try to read this gmxMMPBSA calculation issue](https://github.com/Valdes-Tresanco-MS/gmx_MMPBSA/issues/624)")
         st.markdown("[Troubleshoot your gmxMMPBSA run if GROMACS added a lone pair (LP) during simulation](https://valdes-tresanco-ms.github.io/gmx_MMPBSA/dev/examples/Protein_ligand_LPH_atoms_CHARMMff/)")
         st.write("Note: The binding free energies of the protein-ligand complexes were estimated using the MM-PBSA method, utilizing an implicit membrane model to account for the lipid bilayer environment. Calculations were performed over a stable 100 ns window (from 400 ns to 500 ns) of the production trajectory, analyzing 500 snapshots extracted at an interval of 0.2 ns to ensure robust conformational sampling.")
+        st.write("Note: Be cautious when you try to increase the value of fillratio while running gmxMMPBSA calculation, because setting high value might cause the tmux program to crash and fail silently without showing any error due to Out of Memory")
 
         st.write("###")
 
-        st.write("**26. Predict the 3D structure of the CPBOctB2R_octopamine_complex via AlphaFold3 locally**")
+        st.write("**28. Measure the interhelical distance between the Arginine residue R127 (3.50) and the Glutamate residue E272 (6.30) using 'gmx distance' across the last well-equilibrated 100ns simulation (400ns-500ns) to check whether the ionic lock is still well-established to investigate whether the receptor is in active or inactive mode**")
+        st.code("""
+        nohup gmx distance -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -b 400 -e 500 -select 'atomname CA and resid 127 plus atomname CA and resid 272' -tu ns -oall ca127_272_distance_last100ns.xvg -oallstat ca127_272_distance_last100ns_statistics.xvg > gmx_distance.log 2>&1 &
+        """, language="bash")
+        st.markdown("[Visit the GROMACS gmx distance command-line usage page](https://manual.gromacs.org/current/onlinehelp/gmx-distance.html)")
+
+        st.write("###")
+
+        st.write("**29. Check whether there is any hydrogen bond formed between the residue D126 (3.49) and I63 (2.38). Check whether the hydrogen bond is fully intact throughout the last 100ns of the 500ns MD simulation by running gmx hbond analysis**")
+        st.code("""
+        gmx make_ndx -f protein_ligand_complex.tpr -o index_hbond.ndx 
+        gmx hbond -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -n index_hbond.ndx -b 400 -e 500 -tu ns -num hbnum_63_126.xvg -dist hbdist_63_126.xvg
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**30. Measure the interresidue distance between the residue R127 (3.50) and A276 (6.34) and between the residue Y214 (5.58) and Y331 (7.53). If the distance between the residue 3.50 and 6.34 decreases and the distance between the residue 5.58 and 7.53 increases, then it indicates that the receptor transitions from the active to inactive state**")
+        st.code("""
+        nohup gmx distance -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -b 0 -e 500 -select 'atomname CA and resid 127 plus atomname CA and resid 276' -tu ns -oall ca127_276_distance_500ns.xvg -oallstat ca127_276_distance_500ns_statistics.xvg > gmx_distance_127_276.log 2>&1 &
+        nohup gmx distance -s protein_ligand_complex.tpr -f protein_ligand_complex_fit.xtc -b 0 -e 500 -select 'atomname CA and resid 214 plus atomname CA and resid 331' -tu ns -oall ca214_331_distance_500ns.xvg -oallstat ca214_331_distance_500ns_statistics.xvg > gmx_distance_214_331.log 2>&1 &
+        """, language="bash")
+
+        st.write("###")
+
+        st.write("**31. Predict the 3D structure of the CPBOctB2R_octopamine_complex via AlphaFold3 locally**")
         st.code("""
         docker run --user 0:0 -d --name alphafold3_prediction_of_CPBOctB2R_octopamine_complex -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/input:/root/af_input -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/output:/root/af_output -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/alphafold3_model_parameters:/root/models -v /media/raid/Wee/WeeYeZhi/output/alphafold3_prediction_results/downloaded_alphafold3_public_databases:/root/public_databases --gpus all alphafold3 python run_alphafold.py --json_path=/root/af_input/CPBOctB2R_octopamine_complex/CPBOctB2R_octopamine_complex.json --model_dir=/root/models --db_dir=/root/public_databases --output_dir=/root/af_output/CPBOctB2R_octopamine_complex
         """, language="bash")
